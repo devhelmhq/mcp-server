@@ -1,0 +1,41 @@
+name: Spec Check
+
+on:
+  repository_dispatch:
+    types: [spec_updated]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  check-compatibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Download latest OpenAPI spec from monorepo
+        run: |
+          gh api repos/devhelmhq/mono/contents/docs/openapi/monitoring-api.yaml \
+            -H "Accept: application/vnd.github.raw+json" \
+            -o docs/openapi/monitoring-api.json
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_DISPATCH_TOKEN }}
+
+      - run: uv sync
+      - run: uv run pytest -v
+
+      - name: Report failure
+        if: failure()
+        run: |
+          gh issue create \
+            --title "API spec change broke MCP server build" \
+            --body "The monorepo pushed a spec update that caused CI failures.\n\nWorkflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

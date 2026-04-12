@@ -1,0 +1,164 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: uv sync
+      - run: uv run pytest -v
+      - run: uv run ruff check src/ tests/
+      - run: uv run python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - run: doctl registry login --expiry-seconds 600
+      - name: Build and push Docker image
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          docker build -f docker/Dockerfile \
+            -t registry.digitalocean.com/devhelm/mcp-server:${VERSION} \
+            -t registry.digitalocean.com/devhelm/mcp-server:latest .
+          docker push registry.digitalocean.com/devhelm/mcp-server:${VERSION}
+          docker push registry.digitalocean.com/devhelm/mcp-server:latest
+
+  notify-monorepo:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Trigger integration tests in monorepo
+        run: |
+          gh api repos/devhelmhq/mono/dispatches \
+            -f event_type=surface_release \
+            -f "client_payload[repo]=${{ github.repository }}" \
+            -f "client_payload[tag]=${{ github.ref_name }}" \
+            -f "client_payload[sha]=${{ github.sha }}"
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_DISPATCH_TOKEN }}
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [build, docker, notify-monorepo]
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: uv sync
+      - run: uv run python -m build
+      - name: Publish to PyPI
+        run: uv run twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      - name: Trigger deploy + verification in monorepo
+        run: |
+          gh api repos/devhelmhq/mono/dispatches \
+            -f event_type=surface_published \
+            -f "client_payload[repo]=${{ github.repository }}" \
+            -f "client_payload[tag]=${{ github.ref_name }}" \
+            -f "client_payload[sha]=${{ github.sha }}"
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_DISPATCH_TOKEN }}
+
+  github-release:
+    runs-on: ubuntu-latest
+    needs: publish
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create GitHub Release
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  post-publish:
+    runs-on: ubuntu-latest
+    needs: [publish, github-release]
+    if: always() && needs.publish.result == 'success'
+    steps:
+      - name: Extract version info
+        id: version
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          if [[ "$MINOR" != "0" || "$MAJOR" != "0" ]] && [[ "$PATCH" == "0" ]]; then
+            echo "is_minor_plus=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_minor_plus=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Linear release ticket
+        if: env.LINEAR_API_KEY != ''
+        run: |
+          curl -s -X POST https://api.linear.app/graphql \
+            -H "Content-Type: application/json" \
+            -H "Authorization: ${{ secrets.LINEAR_API_KEY }}" \
+            -d '{
+              "query": "mutation($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { identifier url } } }",
+              "variables": {
+                "input": {
+                  "teamId": "${{ vars.LINEAR_RELEASES_TEAM_ID }}",
+                  "projectId": "${{ vars.LINEAR_RELEASES_PROJECT_ID }}",
+                  "title": "Released: MCP Server v${{ steps.version.outputs.version }}",
+                  "description": "**Release:** https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}\n**CI run:** https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n**Commit:** ${{ github.sha }}"
+                }
+              }
+            }'
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+
+      - name: Create Linear changelog ticket (minor+ only)
+        if: steps.version.outputs.is_minor_plus == 'true' && env.LINEAR_API_KEY != ''
+        run: |
+          curl -s -X POST https://api.linear.app/graphql \
+            -H "Content-Type: application/json" \
+            -H "Authorization: ${{ secrets.LINEAR_API_KEY }}" \
+            -d '{
+              "query": "mutation($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { identifier url } } }",
+              "variables": {
+                "input": {
+                  "teamId": "${{ vars.LINEAR_CONTENT_TEAM_ID }}",
+                  "title": "Changelog entry: MCP Server v${{ steps.version.outputs.version }}",
+                  "description": "Write changelog entry for https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+                }
+              }
+            }'
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}

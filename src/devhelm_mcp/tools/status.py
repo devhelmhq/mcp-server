@@ -1,0 +1,21 @@
+"""Status tools — dashboard overview."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from devhelm import DevhelmError
+from fastmcp import FastMCP
+
+from devhelm_mcp.client import format_error, get_client, serialize
+
+
+def register(mcp: FastMCP) -> None:
+    @mcp.tool()
+    def get_status_overview(api_token: str) -> Any:
+        """Get the dashboard overview with monitor counts,
+        incident summary, and uptime stats."""
+        try:
+            return serialize(get_client(api_token).status.overview())
+        except DevhelmError as e:
+            return format_error(e)

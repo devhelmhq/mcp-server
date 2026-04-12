@@ -1,0 +1,72 @@
+[project]
+name = "devhelm-mcp-server"
+version = "0.1.0"
+description = "DevHelm MCP server — AI agent access to monitors, incidents, alerting, and more"
+authors = [{ name = "DevHelm", email = "hello@devhelm.io" }]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["devhelm", "mcp", "monitoring", "ai-agent", "model-context-protocol"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+]
+
+dependencies = [
+    "devhelm>=0.1.0",
+    "fastmcp>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://devhelm.io"
+Repository = "https://github.com/devhelmhq/mcp-server"
+Documentation = "https://docs.devhelm.io"
+
+[project.scripts]
+devhelm-mcp = "devhelm_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/devhelm_mcp"]
+
+[tool.ruff]
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = "devhelm.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "fastmcp.*"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "build>=1.0",
+    "mypy>=1.10",
+    "pytest>=8.0",
+    "ruff>=0.8",
+    "twine>=5.0",
+]
