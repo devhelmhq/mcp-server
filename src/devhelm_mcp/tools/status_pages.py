@@ -1,4 +1,4 @@
-"""Status page tools — components, incidents, subscribers, and custom domains."""
+"""Status page management tools for the MCP server."""
 
 from __future__ import annotations
 
