@@ -81,7 +81,7 @@ async def health(request: Request) -> JSONResponse:
     return JSONResponse({"status": "healthy", "service": "devhelm-mcp-server"})
 
 
-def _get_app():
+def _get_app() -> Any:
     """Build the ASGI app with path-based auth routing."""
     from starlette.applications import Starlette
     from starlette.middleware import Middleware
@@ -108,7 +108,11 @@ def _get_app():
         from starlette.requests import Request as StarletteRequest
 
         inner_request = StarletteRequest(scope, request.receive)
-        response = await mcp_app(inner_request.scope, inner_request.receive, None)  # type: ignore[arg-type]
+        response = await mcp_app(  # type: ignore[func-returns-value]
+            inner_request.scope,
+            inner_request.receive,
+            None,  # type: ignore[arg-type]
+        )
         return response  # type: ignore[return-value]
 
     middleware = [
