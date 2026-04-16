@@ -63,15 +63,17 @@ def main() -> None:
     os.environ["DEVHELM_WORKSPACE_ID"] = workspace_id
 
     if not args:
-        sys.stderr.write(json.dumps({"error": "Usage: run_mcp.py <tool_name> [--arg=value ...]"}))
+        err = {"error": "Usage: run_mcp.py <tool_name> [--arg=value ...]"}
+        sys.stderr.write(json.dumps(err))
         sys.exit(2)
 
     tool_name = args.pop(0)
     kwargs = extract_kwargs(args)
     kwargs["api_token"] = token
 
-    from devhelm_mcp.server import mcp  # noqa: E402
     import asyncio
+
+    from devhelm_mcp.server import mcp  # noqa: E402
 
     async def call_tool() -> Any:
         tools = await mcp.list_tools()
@@ -92,15 +94,18 @@ def main() -> None:
     try:
         result = asyncio.run(call_tool())
         if isinstance(result, str) and result.startswith("Error ("):
-            sys.stderr.write(json.dumps({"error": result, "code": "SDK_ERROR", "status": 0}))
+            err_payload = {"error": result, "code": "SDK_ERROR", "status": 0}
+            sys.stderr.write(json.dumps(err_payload))
             sys.exit(1)
         if isinstance(result, dict) and "error" in result and len(result) <= 3:
             sys.stderr.write(json.dumps(result))
             sys.exit(1)
         if result is not None:
-            sys.stdout.write(json.dumps(result) if not isinstance(result, str) else result)
+            out = json.dumps(result) if not isinstance(result, str) else result
+            sys.stdout.write(out)
     except Exception as err:
-        sys.stderr.write(json.dumps({"error": str(err), "code": "UNKNOWN", "status": 0}))
+        err_payload = {"error": str(err), "code": "UNKNOWN", "status": 0}
+        sys.stderr.write(json.dumps(err_payload))
         sys.exit(1)
 
 

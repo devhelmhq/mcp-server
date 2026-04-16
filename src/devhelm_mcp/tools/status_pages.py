@@ -10,6 +10,11 @@ from fastmcp import FastMCP
 from devhelm_mcp.client import format_error, get_client, serialize
 
 
+def _sp(api_token: str) -> Any:
+    """Return status_pages resource (typed as Any until SDK is released)."""
+    return get_client(api_token).status_pages  # type: ignore[attr-defined]
+
+
 def register(mcp: FastMCP) -> None:
     # ── Page CRUD ─────────────────────────────────────────────────────────
 
@@ -17,7 +22,7 @@ def register(mcp: FastMCP) -> None:
     def list_status_pages(api_token: str) -> Any:
         """List all status pages in the workspace."""
         try:
-            return serialize(get_client(api_token).status_pages.list())
+            return serialize(_sp(api_token).list())
         except DevhelmError as e:
             return format_error(e)
 
@@ -25,7 +30,7 @@ def register(mcp: FastMCP) -> None:
     def get_status_page(api_token: str, page_id: str) -> Any:
         """Get a status page by ID, including branding and overall status."""
         try:
-            return serialize(get_client(api_token).status_pages.get(page_id))
+            return serialize(_sp(api_token).get(page_id))
         except DevhelmError as e:
             return format_error(e)
 
@@ -38,7 +43,7 @@ def register(mcp: FastMCP) -> None:
         visibility (PUBLIC/PASSWORD), enabled, incidentMode (MANUAL/REVIEW/AUTOMATIC).
         """
         try:
-            return serialize(get_client(api_token).status_pages.create(body))
+            return serialize(_sp(api_token).create(body))
         except DevhelmError as e:
             return format_error(e)
 
@@ -49,7 +54,7 @@ def register(mcp: FastMCP) -> None:
         """Update a status page's name, slug, branding, visibility, or incident mode."""
         try:
             return serialize(
-                get_client(api_token).status_pages.update(page_id, body)
+                _sp(api_token).update(page_id, body)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -58,7 +63,7 @@ def register(mcp: FastMCP) -> None:
     def delete_status_page(api_token: str, page_id: str) -> str:
         """Delete a status page permanently."""
         try:
-            get_client(api_token).status_pages.delete(page_id)
+            _sp(api_token).delete(page_id)
             return "Status page deleted successfully."
         except DevhelmError as e:
             return format_error(e)
@@ -70,7 +75,7 @@ def register(mcp: FastMCP) -> None:
         """List all components on a status page."""
         try:
             return serialize(
-                get_client(api_token).status_pages.components.list(page_id)
+                _sp(api_token).components.list(page_id)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -86,7 +91,7 @@ def register(mcp: FastMCP) -> None:
         """
         try:
             return serialize(
-                get_client(api_token).status_pages.components.create(page_id, body)
+                _sp(api_token).components.create(page_id, body)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -98,7 +103,7 @@ def register(mcp: FastMCP) -> None:
         """Update a status page component's name, group, or status."""
         try:
             return serialize(
-                get_client(api_token).status_pages.components.update(
+                _sp(api_token).components.update(
                     page_id, component_id, body
                 )
             )
@@ -111,7 +116,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Remove a component from a status page."""
         try:
-            get_client(api_token).status_pages.components.delete(
+            _sp(api_token).components.delete(
                 page_id, component_id
             )
             return "Component deleted successfully."
@@ -125,7 +130,7 @@ def register(mcp: FastMCP) -> None:
         """List component groups on a status page (with nested components)."""
         try:
             return serialize(
-                get_client(api_token).status_pages.groups.list(page_id)
+                _sp(api_token).groups.list(page_id)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -140,7 +145,7 @@ def register(mcp: FastMCP) -> None:
         """
         try:
             return serialize(
-                get_client(api_token).status_pages.groups.create(page_id, body)
+                _sp(api_token).groups.create(page_id, body)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -152,7 +157,7 @@ def register(mcp: FastMCP) -> None:
         """Update a component group's name or display order."""
         try:
             return serialize(
-                get_client(api_token).status_pages.groups.update(
+                _sp(api_token).groups.update(
                     page_id, group_id, body
                 )
             )
@@ -165,7 +170,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Delete a component group from a status page."""
         try:
-            get_client(api_token).status_pages.groups.delete(page_id, group_id)
+            _sp(api_token).groups.delete(page_id, group_id)
             return "Component group deleted successfully."
         except DevhelmError as e:
             return format_error(e)
@@ -178,7 +183,7 @@ def register(mcp: FastMCP) -> None:
     ) -> Any:
         """List incidents on a status page (paginated)."""
         try:
-            result = get_client(api_token).status_pages.incidents.list(
+            result = _sp(api_token).incidents.list(
                 page_id, page=page, size=size
             )
             return serialize(
@@ -194,7 +199,7 @@ def register(mcp: FastMCP) -> None:
         """Get a status page incident with its full timeline of updates."""
         try:
             return serialize(
-                get_client(api_token).status_pages.incidents.get(
+                _sp(api_token).incidents.get(
                     page_id, incident_id
                 )
             )
@@ -213,7 +218,7 @@ def register(mcp: FastMCP) -> None:
         """
         try:
             return serialize(
-                get_client(api_token).status_pages.incidents.create(page_id, body)
+                _sp(api_token).incidents.create(page_id, body)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -225,7 +230,7 @@ def register(mcp: FastMCP) -> None:
         """Update a status page incident's title, impact, or status."""
         try:
             return serialize(
-                get_client(api_token).status_pages.incidents.update(
+                _sp(api_token).incidents.update(
                     page_id, incident_id, body
                 )
             )
@@ -244,7 +249,7 @@ def register(mcp: FastMCP) -> None:
         """
         try:
             return serialize(
-                get_client(api_token).status_pages.incidents.post_update(
+                _sp(api_token).incidents.post_update(
                     page_id, incident_id, body
                 )
             )
@@ -262,7 +267,7 @@ def register(mcp: FastMCP) -> None:
         """
         try:
             return serialize(
-                get_client(api_token).status_pages.incidents.publish(
+                _sp(api_token).incidents.publish(
                     page_id, incident_id, body
                 )
             )
@@ -275,7 +280,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Dismiss a draft incident (deletes it without publishing)."""
         try:
-            get_client(api_token).status_pages.incidents.dismiss(
+            _sp(api_token).incidents.dismiss(
                 page_id, incident_id
             )
             return "Draft incident dismissed successfully."
@@ -288,7 +293,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Delete a status page incident permanently."""
         try:
-            get_client(api_token).status_pages.incidents.delete(
+            _sp(api_token).incidents.delete(
                 page_id, incident_id
             )
             return "Status page incident deleted successfully."
@@ -303,7 +308,7 @@ def register(mcp: FastMCP) -> None:
     ) -> Any:
         """List confirmed subscribers on a status page (paginated)."""
         try:
-            result = get_client(api_token).status_pages.subscribers.list(
+            result = _sp(api_token).subscribers.list(
                 page_id, page=page, size=size
             )
             return serialize(
@@ -322,7 +327,7 @@ def register(mcp: FastMCP) -> None:
         """
         try:
             return serialize(
-                get_client(api_token).status_pages.subscribers.add(page_id, body)
+                _sp(api_token).subscribers.add(page_id, body)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -333,7 +338,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Remove a subscriber from a status page."""
         try:
-            get_client(api_token).status_pages.subscribers.remove(
+            _sp(api_token).subscribers.remove(
                 page_id, subscriber_id
             )
             return "Subscriber removed successfully."
@@ -347,7 +352,7 @@ def register(mcp: FastMCP) -> None:
         """List custom domains on a status page."""
         try:
             return serialize(
-                get_client(api_token).status_pages.domains.list(page_id)
+                _sp(api_token).domains.list(page_id)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -364,7 +369,7 @@ def register(mcp: FastMCP) -> None:
         """
         try:
             return serialize(
-                get_client(api_token).status_pages.domains.add(page_id, body)
+                _sp(api_token).domains.add(page_id, body)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -379,7 +384,7 @@ def register(mcp: FastMCP) -> None:
         """
         try:
             return serialize(
-                get_client(api_token).status_pages.domains.verify(
+                _sp(api_token).domains.verify(
                     page_id, domain_id
                 )
             )
@@ -392,7 +397,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Remove a custom domain from a status page."""
         try:
-            get_client(api_token).status_pages.domains.remove(
+            _sp(api_token).domains.remove(
                 page_id, domain_id
             )
             return "Custom domain removed successfully."
