@@ -48,14 +48,10 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def update_status_page(
-        api_token: str, page_id: str, body: dict[str, Any]
-    ) -> Any:
+    def update_status_page(api_token: str, page_id: str, body: dict[str, Any]) -> Any:
         """Update a status page's name, slug, branding, visibility, or incident mode."""
         try:
-            return serialize(
-                _sp(api_token).update(page_id, body)
-            )
+            return serialize(_sp(api_token).update(page_id, body))
         except DevhelmError as e:
             return format_error(e)
 
@@ -74,9 +70,7 @@ def register(mcp: FastMCP) -> None:
     def list_status_page_components(api_token: str, page_id: str) -> Any:
         """List all components on a status page."""
         try:
-            return serialize(
-                _sp(api_token).components.list(page_id)
-            )
+            return serialize(_sp(api_token).components.list(page_id))
         except DevhelmError as e:
             return format_error(e)
 
@@ -90,9 +84,7 @@ def register(mcp: FastMCP) -> None:
         Optional: groupId (nest under a group), monitorId (for MONITOR type).
         """
         try:
-            return serialize(
-                _sp(api_token).components.create(page_id, body)
-            )
+            return serialize(_sp(api_token).components.create(page_id, body))
         except DevhelmError as e:
             return format_error(e)
 
@@ -103,9 +95,7 @@ def register(mcp: FastMCP) -> None:
         """Update a status page component's name, group, or status."""
         try:
             return serialize(
-                _sp(api_token).components.update(
-                    page_id, component_id, body
-                )
+                _sp(api_token).components.update(page_id, component_id, body)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -116,9 +106,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Remove a component from a status page."""
         try:
-            _sp(api_token).components.delete(
-                page_id, component_id
-            )
+            _sp(api_token).components.delete(page_id, component_id)
             return "Component deleted successfully."
         except DevhelmError as e:
             return format_error(e)
@@ -129,9 +117,7 @@ def register(mcp: FastMCP) -> None:
     def list_status_page_groups(api_token: str, page_id: str) -> Any:
         """List component groups on a status page (with nested components)."""
         try:
-            return serialize(
-                _sp(api_token).groups.list(page_id)
-            )
+            return serialize(_sp(api_token).groups.list(page_id))
         except DevhelmError as e:
             return format_error(e)
 
@@ -144,9 +130,7 @@ def register(mcp: FastMCP) -> None:
         Required fields: name.
         """
         try:
-            return serialize(
-                _sp(api_token).groups.create(page_id, body)
-            )
+            return serialize(_sp(api_token).groups.create(page_id, body))
         except DevhelmError as e:
             return format_error(e)
 
@@ -156,18 +140,12 @@ def register(mcp: FastMCP) -> None:
     ) -> Any:
         """Update a component group's name or display order."""
         try:
-            return serialize(
-                _sp(api_token).groups.update(
-                    page_id, group_id, body
-                )
-            )
+            return serialize(_sp(api_token).groups.update(page_id, group_id, body))
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
-    def delete_status_page_group(
-        api_token: str, page_id: str, group_id: str
-    ) -> str:
+    def delete_status_page_group(api_token: str, page_id: str, group_id: str) -> str:
         """Delete a component group from a status page."""
         try:
             _sp(api_token).groups.delete(page_id, group_id)
@@ -183,26 +161,16 @@ def register(mcp: FastMCP) -> None:
     ) -> Any:
         """List incidents on a status page (paginated)."""
         try:
-            result = _sp(api_token).incidents.list(
-                page_id, page=page, size=size
-            )
-            return serialize(
-                {"data": result.data, "hasNext": result.has_next}
-            )
+            result = _sp(api_token).incidents.list(page_id, page=page, size=size)
+            return serialize({"data": result.data, "hasNext": result.has_next})
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
-    def get_status_page_incident(
-        api_token: str, page_id: str, incident_id: str
-    ) -> Any:
+    def get_status_page_incident(api_token: str, page_id: str, incident_id: str) -> Any:
         """Get a status page incident with its full timeline of updates."""
         try:
-            return serialize(
-                _sp(api_token).incidents.get(
-                    page_id, incident_id
-                )
-            )
+            return serialize(_sp(api_token).incidents.get(page_id, incident_id))
         except DevhelmError as e:
             return format_error(e)
 
@@ -217,9 +185,7 @@ def register(mcp: FastMCP) -> None:
         affectedComponents (list of {componentId, status}).
         """
         try:
-            return serialize(
-                _sp(api_token).incidents.create(page_id, body)
-            )
+            return serialize(_sp(api_token).incidents.create(page_id, body))
         except DevhelmError as e:
             return format_error(e)
 
@@ -230,9 +196,7 @@ def register(mcp: FastMCP) -> None:
         """Update a status page incident's title, impact, or status."""
         try:
             return serialize(
-                _sp(api_token).incidents.update(
-                    page_id, incident_id, body
-                )
+                _sp(api_token).incidents.update(page_id, incident_id, body)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -249,16 +213,16 @@ def register(mcp: FastMCP) -> None:
         """
         try:
             return serialize(
-                _sp(api_token).incidents.post_update(
-                    page_id, incident_id, body
-                )
+                _sp(api_token).incidents.post_update(page_id, incident_id, body)
             )
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
     def publish_status_page_incident(
-        api_token: str, page_id: str, incident_id: str,
+        api_token: str,
+        page_id: str,
+        incident_id: str,
         body: dict[str, Any] | None = None,
     ) -> Any:
         """Publish a draft incident (sets it live, notifies subscribers).
@@ -267,9 +231,7 @@ def register(mcp: FastMCP) -> None:
         """
         try:
             return serialize(
-                _sp(api_token).incidents.publish(
-                    page_id, incident_id, body
-                )
+                _sp(api_token).incidents.publish(page_id, incident_id, body)
             )
         except DevhelmError as e:
             return format_error(e)
@@ -280,9 +242,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Dismiss a draft incident (deletes it without publishing)."""
         try:
-            _sp(api_token).incidents.dismiss(
-                page_id, incident_id
-            )
+            _sp(api_token).incidents.dismiss(page_id, incident_id)
             return "Draft incident dismissed successfully."
         except DevhelmError as e:
             return format_error(e)
@@ -293,9 +253,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Delete a status page incident permanently."""
         try:
-            _sp(api_token).incidents.delete(
-                page_id, incident_id
-            )
+            _sp(api_token).incidents.delete(page_id, incident_id)
             return "Status page incident deleted successfully."
         except DevhelmError as e:
             return format_error(e)
@@ -308,12 +266,8 @@ def register(mcp: FastMCP) -> None:
     ) -> Any:
         """List confirmed subscribers on a status page (paginated)."""
         try:
-            result = _sp(api_token).subscribers.list(
-                page_id, page=page, size=size
-            )
-            return serialize(
-                {"data": result.data, "hasNext": result.has_next}
-            )
+            result = _sp(api_token).subscribers.list(page_id, page=page, size=size)
+            return serialize({"data": result.data, "hasNext": result.has_next})
         except DevhelmError as e:
             return format_error(e)
 
@@ -326,9 +280,7 @@ def register(mcp: FastMCP) -> None:
         Required fields: email.
         """
         try:
-            return serialize(
-                _sp(api_token).subscribers.add(page_id, body)
-            )
+            return serialize(_sp(api_token).subscribers.add(page_id, body))
         except DevhelmError as e:
             return format_error(e)
 
@@ -338,9 +290,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Remove a subscriber from a status page."""
         try:
-            _sp(api_token).subscribers.remove(
-                page_id, subscriber_id
-            )
+            _sp(api_token).subscribers.remove(page_id, subscriber_id)
             return "Subscriber removed successfully."
         except DevhelmError as e:
             return format_error(e)
@@ -351,9 +301,7 @@ def register(mcp: FastMCP) -> None:
     def list_status_page_domains(api_token: str, page_id: str) -> Any:
         """List custom domains on a status page."""
         try:
-            return serialize(
-                _sp(api_token).domains.list(page_id)
-            )
+            return serialize(_sp(api_token).domains.list(page_id))
         except DevhelmError as e:
             return format_error(e)
 
@@ -368,38 +316,26 @@ def register(mcp: FastMCP) -> None:
         be configured in your DNS before calling verify.
         """
         try:
-            return serialize(
-                _sp(api_token).domains.add(page_id, body)
-            )
+            return serialize(_sp(api_token).domains.add(page_id, body))
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
-    def verify_status_page_domain(
-        api_token: str, page_id: str, domain_id: str
-    ) -> Any:
+    def verify_status_page_domain(api_token: str, page_id: str, domain_id: str) -> Any:
         """Trigger DNS verification for a custom domain.
 
         Returns the updated domain with current verification status.
         """
         try:
-            return serialize(
-                _sp(api_token).domains.verify(
-                    page_id, domain_id
-                )
-            )
+            return serialize(_sp(api_token).domains.verify(page_id, domain_id))
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
-    def remove_status_page_domain(
-        api_token: str, page_id: str, domain_id: str
-    ) -> str:
+    def remove_status_page_domain(api_token: str, page_id: str, domain_id: str) -> str:
         """Remove a custom domain from a status page."""
         try:
-            _sp(api_token).domains.remove(
-                page_id, domain_id
-            )
+            _sp(api_token).domains.remove(page_id, domain_id)
             return "Custom domain removed successfully."
         except DevhelmError as e:
             return format_error(e)

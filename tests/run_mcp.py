@@ -19,7 +19,7 @@ def extract_flag(args: list[str], name: str) -> str | None:
     prefix = f"--{name}="
     for i, arg in enumerate(args):
         if arg.startswith(prefix):
-            val = arg[len(prefix):]
+            val = arg[len(prefix) :]
             args.pop(i)
             return val
     return None
