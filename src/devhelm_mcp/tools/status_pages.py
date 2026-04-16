@@ -11,8 +11,8 @@ from devhelm_mcp.client import format_error, get_client, serialize
 
 
 def _sp(api_token: str) -> Any:
-    """Return status_pages resource (typed as Any until SDK is released)."""
-    return get_client(api_token).status_pages  # type: ignore[attr-defined]
+    """Return status_pages resource."""
+    return get_client(api_token).status_pages
 
 
 def register(mcp: FastMCP) -> None:
