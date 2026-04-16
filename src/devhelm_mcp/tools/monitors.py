@@ -92,7 +92,7 @@ def register(mcp: FastMCP) -> None:
             page = get_client(api_token).monitors.results(
                 monitor_id, cursor=cursor, limit=limit
             )
-            return serialize({"items": page.items, "next_cursor": page.next_cursor})
+            return serialize({"data": page.data, "next_cursor": page.next_cursor})
         except DevhelmError as e:
             return format_error(e)
 
@@ -105,8 +105,6 @@ def register(mcp: FastMCP) -> None:
             result = get_client(api_token).monitors.versions(
                 monitor_id, page=page, size=size
             )
-            return serialize(
-                {"items": result.items, "page": result.page, "total": result.total}
-            )
+            return serialize({"data": result.data, "hasNext": result.has_next})
         except DevhelmError as e:
             return format_error(e)
