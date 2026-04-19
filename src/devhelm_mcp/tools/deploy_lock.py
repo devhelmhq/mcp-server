@@ -5,9 +5,17 @@ from __future__ import annotations
 from typing import Any
 
 from devhelm import DevhelmError
+from devhelm.types import AcquireDeployLockRequest
 from fastmcp import FastMCP
+from pydantic import ValidationError
 
-from devhelm_mcp.client import format_error, get_client, serialize
+from devhelm_mcp.client import (
+    format_error,
+    format_validation_error,
+    get_client,
+    serialize,
+    validate_body,
+)
 
 
 def register(mcp: FastMCP) -> None:
@@ -18,7 +26,10 @@ def register(mcp: FastMCP) -> None:
         Required fields: reason. Optional: ttlSeconds.
         """
         try:
+            validate_body(body, AcquireDeployLockRequest)
             return serialize(get_client(api_token).deploy_lock.acquire(body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 

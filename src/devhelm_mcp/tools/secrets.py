@@ -5,9 +5,17 @@ from __future__ import annotations
 from typing import Any
 
 from devhelm import DevhelmError
+from devhelm.types import CreateSecretRequest, UpdateSecretRequest
 from fastmcp import FastMCP
+from pydantic import ValidationError
 
-from devhelm_mcp.client import format_error, get_client, serialize
+from devhelm_mcp.client import (
+    format_error,
+    format_validation_error,
+    get_client,
+    serialize,
+    validate_body,
+)
 
 
 def register(mcp: FastMCP) -> None:
@@ -27,7 +35,10 @@ def register(mcp: FastMCP) -> None:
         and can be referenced in monitor auth configs as {{secrets.KEY}}.
         """
         try:
+            validate_body(body, CreateSecretRequest)
             return serialize(get_client(api_token).secrets.create(body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -35,7 +46,10 @@ def register(mcp: FastMCP) -> None:
     def update_secret(api_token: str, key: str, body: dict[str, Any]) -> Any:
         """Update a secret's value by key."""
         try:
+            validate_body(body, UpdateSecretRequest)
             return serialize(get_client(api_token).secrets.update(key, body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 

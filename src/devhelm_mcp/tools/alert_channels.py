@@ -5,9 +5,17 @@ from __future__ import annotations
 from typing import Any
 
 from devhelm import DevhelmError
+from devhelm.types import CreateAlertChannelRequest, UpdateAlertChannelRequest
 from fastmcp import FastMCP
+from pydantic import ValidationError
 
-from devhelm_mcp.client import format_error, get_client, serialize
+from devhelm_mcp.client import (
+    format_error,
+    format_validation_error,
+    get_client,
+    serialize,
+    validate_body,
+)
 
 
 def register(mcp: FastMCP) -> None:
@@ -36,7 +44,10 @@ def register(mcp: FastMCP) -> None:
         TELEGRAM, DISCORD, MSTEAMS.
         """
         try:
+            validate_body(body, CreateAlertChannelRequest)
             return serialize(get_client(api_token).alert_channels.create(body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -46,9 +57,12 @@ def register(mcp: FastMCP) -> None:
     ) -> Any:
         """Update an existing alert channel."""
         try:
+            validate_body(body, UpdateAlertChannelRequest)
             return serialize(
                 get_client(api_token).alert_channels.update(channel_id, body)
             )
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 

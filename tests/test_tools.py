@@ -1,6 +1,7 @@
 """Unit tests for MCP tool registration.
 
-Verifies all tools are registered and have correct metadata.
+Verifies all tools are registered and have correct metadata,
+with deep coverage of status-page tool schemas.
 """
 
 from __future__ import annotations
@@ -139,3 +140,226 @@ class TestToolRegistration:
         assert len(registered_tools) == len(EXPECTED_TOOLS), (
             f"Expected {len(EXPECTED_TOOLS)} tools, got {len(registered_tools)}"
         )
+
+
+STATUS_PAGE_TOOLS = [t for t in EXPECTED_TOOLS if "status_page" in t]
+
+STATUS_PAGE_CRUD = [
+    "list_status_pages",
+    "get_status_page",
+    "create_status_page",
+    "update_status_page",
+    "delete_status_page",
+]
+
+STATUS_PAGE_COMPONENT_TOOLS = [
+    "list_status_page_components",
+    "create_status_page_component",
+    "update_status_page_component",
+    "delete_status_page_component",
+]
+
+STATUS_PAGE_GROUP_TOOLS = [
+    "list_status_page_groups",
+    "create_status_page_group",
+    "update_status_page_group",
+    "delete_status_page_group",
+]
+
+STATUS_PAGE_INCIDENT_TOOLS = [
+    "list_status_page_incidents",
+    "get_status_page_incident",
+    "create_status_page_incident",
+    "update_status_page_incident",
+    "post_status_page_incident_update",
+    "publish_status_page_incident",
+    "dismiss_status_page_incident",
+    "delete_status_page_incident",
+]
+
+STATUS_PAGE_SUBSCRIBER_TOOLS = [
+    "list_status_page_subscribers",
+    "add_status_page_subscriber",
+    "remove_status_page_subscriber",
+]
+
+STATUS_PAGE_DOMAIN_TOOLS = [
+    "list_status_page_domains",
+    "add_status_page_domain",
+    "verify_status_page_domain",
+    "remove_status_page_domain",
+]
+
+
+class TestStatusPageToolCompleteness:
+    """Verify the status page surface covers all sub-resources."""
+
+    def test_crud_tools_present(self, registered_tools) -> None:
+        for name in STATUS_PAGE_CRUD:
+            assert name in registered_tools, f"Missing CRUD tool: {name}"
+
+    def test_component_tools_present(self, registered_tools) -> None:
+        for name in STATUS_PAGE_COMPONENT_TOOLS:
+            assert name in registered_tools, f"Missing component tool: {name}"
+
+    def test_group_tools_present(self, registered_tools) -> None:
+        for name in STATUS_PAGE_GROUP_TOOLS:
+            assert name in registered_tools, f"Missing group tool: {name}"
+
+    def test_incident_tools_present(self, registered_tools) -> None:
+        for name in STATUS_PAGE_INCIDENT_TOOLS:
+            assert name in registered_tools, f"Missing incident tool: {name}"
+
+    def test_subscriber_tools_present(self, registered_tools) -> None:
+        for name in STATUS_PAGE_SUBSCRIBER_TOOLS:
+            assert name in registered_tools, f"Missing subscriber tool: {name}"
+
+    def test_domain_tools_present(self, registered_tools) -> None:
+        for name in STATUS_PAGE_DOMAIN_TOOLS:
+            assert name in registered_tools, f"Missing domain tool: {name}"
+
+    def test_total_status_page_tool_count(self, registered_tools) -> None:
+        expected_count = (
+            len(STATUS_PAGE_CRUD)
+            + len(STATUS_PAGE_COMPONENT_TOOLS)
+            + len(STATUS_PAGE_GROUP_TOOLS)
+            + len(STATUS_PAGE_INCIDENT_TOOLS)
+            + len(STATUS_PAGE_SUBSCRIBER_TOOLS)
+            + len(STATUS_PAGE_DOMAIN_TOOLS)
+        )
+        actual = len(STATUS_PAGE_TOOLS)
+        assert actual == expected_count, (
+            f"Expected {expected_count} status page tools, found {actual}"
+        )
+
+
+class TestStatusPageToolSchemas:
+    """Validate input schemas for status page tools."""
+
+    def _params(self, registered_tools, name: str) -> dict[str, dict]:
+        """Get a tool's input schema properties as {param_name: schema}."""
+        tool = registered_tools[name]
+        return tool.parameters.get("properties", {})
+
+    def _required(self, registered_tools, name: str) -> list[str]:
+        tool = registered_tools[name]
+        return tool.parameters.get("required", [])
+
+    def test_all_tools_require_api_token(self, registered_tools) -> None:
+        for name in STATUS_PAGE_TOOLS:
+            params = self._params(registered_tools, name)
+            assert "api_token" in params, f"{name} missing api_token parameter"
+            required = self._required(registered_tools, name)
+            assert "api_token" in required, f"{name} should require api_token"
+
+    def test_page_id_tools_require_page_id(self, registered_tools) -> None:
+        tools_needing_page_id = (
+            STATUS_PAGE_COMPONENT_TOOLS
+            + STATUS_PAGE_GROUP_TOOLS
+            + STATUS_PAGE_INCIDENT_TOOLS
+            + STATUS_PAGE_SUBSCRIBER_TOOLS
+            + STATUS_PAGE_DOMAIN_TOOLS
+            + ["get_status_page", "update_status_page", "delete_status_page"]
+        )
+        for name in tools_needing_page_id:
+            params = self._params(registered_tools, name)
+            assert "page_id" in params, f"{name} missing page_id parameter"
+
+    def test_crud_create_and_update_have_body(self, registered_tools) -> None:
+        for name in [
+            "create_status_page",
+            "update_status_page",
+            "create_status_page_component",
+            "update_status_page_component",
+            "create_status_page_group",
+            "update_status_page_group",
+            "create_status_page_incident",
+            "update_status_page_incident",
+            "post_status_page_incident_update",
+            "add_status_page_subscriber",
+            "add_status_page_domain",
+        ]:
+            params = self._params(registered_tools, name)
+            assert "body" in params, f"{name} missing body parameter"
+
+    def test_component_id_on_component_mutations(self, registered_tools) -> None:
+        for name in ["update_status_page_component", "delete_status_page_component"]:
+            params = self._params(registered_tools, name)
+            assert "component_id" in params, f"{name} missing component_id"
+
+    def test_group_id_on_group_mutations(self, registered_tools) -> None:
+        for name in ["update_status_page_group", "delete_status_page_group"]:
+            params = self._params(registered_tools, name)
+            assert "group_id" in params, f"{name} missing group_id"
+
+    def test_incident_id_on_incident_operations(self, registered_tools) -> None:
+        for name in [
+            "get_status_page_incident",
+            "update_status_page_incident",
+            "post_status_page_incident_update",
+            "publish_status_page_incident",
+            "dismiss_status_page_incident",
+            "delete_status_page_incident",
+        ]:
+            params = self._params(registered_tools, name)
+            assert "incident_id" in params, f"{name} missing incident_id"
+
+    def test_subscriber_id_on_remove(self, registered_tools) -> None:
+        params = self._params(registered_tools, "remove_status_page_subscriber")
+        assert "subscriber_id" in params
+
+    def test_domain_id_on_verify_and_remove(self, registered_tools) -> None:
+        for name in ["verify_status_page_domain", "remove_status_page_domain"]:
+            params = self._params(registered_tools, name)
+            assert "domain_id" in params, f"{name} missing domain_id"
+
+    def test_list_incidents_has_pagination_params(self, registered_tools) -> None:
+        params = self._params(registered_tools, "list_status_page_incidents")
+        assert "page" in params
+        assert "size" in params
+
+    def test_list_subscribers_has_pagination_params(self, registered_tools) -> None:
+        params = self._params(registered_tools, "list_status_page_subscribers")
+        assert "page" in params
+        assert "size" in params
+
+    def test_publish_body_is_optional(self, registered_tools) -> None:
+        required = self._required(registered_tools, "publish_status_page_incident")
+        assert "body" not in required, "publish body should be optional"
+
+    def test_delete_tools_have_no_body(self, registered_tools) -> None:
+        for name in [
+            "delete_status_page",
+            "delete_status_page_component",
+            "delete_status_page_group",
+            "delete_status_page_incident",
+        ]:
+            params = self._params(registered_tools, name)
+            assert "body" not in params, f"{name} should not accept a body"
+
+
+class TestStatusPageToolDescriptions:
+    """Ensure descriptions are meaningful and non-trivial."""
+
+    def test_descriptions_are_non_empty(self, registered_tools) -> None:
+        for name in STATUS_PAGE_TOOLS:
+            desc = registered_tools[name].description
+            assert desc and len(desc) >= 10, f"{name} description too short: {desc!r}"
+
+    def test_no_duplicate_descriptions(self, registered_tools) -> None:
+        descs = [registered_tools[n].description for n in STATUS_PAGE_TOOLS]
+        assert len(descs) == len(set(descs)), "Duplicate descriptions found"
+
+    def test_list_tools_mention_list(self, registered_tools) -> None:
+        for name in STATUS_PAGE_TOOLS:
+            if name.startswith("list_"):
+                desc = registered_tools[name].description.lower()
+                assert "list" in desc, f"{name} description should mention listing"
+
+    def test_create_tools_mention_create(self, registered_tools) -> None:
+        for name in STATUS_PAGE_TOOLS:
+            if name.startswith("create_") or name.startswith("add_"):
+                desc = registered_tools[name].description.lower()
+                assert "create" in desc or "add" in desc, (
+                    f"{name} description should mention creating/adding"
+                )

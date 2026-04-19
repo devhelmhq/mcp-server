@@ -5,9 +5,29 @@ from __future__ import annotations
 from typing import Any
 
 from devhelm import DevhelmError
+from devhelm.types import (
+    AddCustomDomainRequest,
+    AdminAddSubscriberRequest,
+    CreateStatusPageComponentGroupRequest,
+    CreateStatusPageComponentRequest,
+    CreateStatusPageIncidentRequest,
+    CreateStatusPageIncidentUpdateRequest,
+    CreateStatusPageRequest,
+    UpdateStatusPageComponentGroupRequest,
+    UpdateStatusPageComponentRequest,
+    UpdateStatusPageIncidentRequest,
+    UpdateStatusPageRequest,
+)
 from fastmcp import FastMCP
+from pydantic import ValidationError
 
-from devhelm_mcp.client import format_error, get_client, serialize
+from devhelm_mcp.client import (
+    format_error,
+    format_validation_error,
+    get_client,
+    serialize,
+    validate_body,
+)
 
 
 def _sp(api_token: str) -> Any:
@@ -43,7 +63,10 @@ def register(mcp: FastMCP) -> None:
         visibility (PUBLIC/PASSWORD), enabled, incidentMode (MANUAL/REVIEW/AUTOMATIC).
         """
         try:
+            validate_body(body, CreateStatusPageRequest)
             return serialize(_sp(api_token).create(body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -51,7 +74,10 @@ def register(mcp: FastMCP) -> None:
     def update_status_page(api_token: str, page_id: str, body: dict[str, Any]) -> Any:
         """Update a status page's name, slug, branding, visibility, or incident mode."""
         try:
+            validate_body(body, UpdateStatusPageRequest)
             return serialize(_sp(api_token).update(page_id, body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -84,7 +110,10 @@ def register(mcp: FastMCP) -> None:
         Optional: groupId (nest under a group), monitorId (for MONITOR type).
         """
         try:
+            validate_body(body, CreateStatusPageComponentRequest)
             return serialize(_sp(api_token).components.create(page_id, body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -94,9 +123,12 @@ def register(mcp: FastMCP) -> None:
     ) -> Any:
         """Update a status page component's name, group, or status."""
         try:
+            validate_body(body, UpdateStatusPageComponentRequest)
             return serialize(
                 _sp(api_token).components.update(page_id, component_id, body)
             )
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -130,7 +162,10 @@ def register(mcp: FastMCP) -> None:
         Required fields: name.
         """
         try:
+            validate_body(body, CreateStatusPageComponentGroupRequest)
             return serialize(_sp(api_token).groups.create(page_id, body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -140,7 +175,10 @@ def register(mcp: FastMCP) -> None:
     ) -> Any:
         """Update a component group's name or display order."""
         try:
+            validate_body(body, UpdateStatusPageComponentGroupRequest)
             return serialize(_sp(api_token).groups.update(page_id, group_id, body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -185,7 +223,10 @@ def register(mcp: FastMCP) -> None:
         affectedComponents (list of {componentId, status}).
         """
         try:
+            validate_body(body, CreateStatusPageIncidentRequest)
             return serialize(_sp(api_token).incidents.create(page_id, body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -195,9 +236,12 @@ def register(mcp: FastMCP) -> None:
     ) -> Any:
         """Update a status page incident's title, impact, or status."""
         try:
+            validate_body(body, UpdateStatusPageIncidentRequest)
             return serialize(
                 _sp(api_token).incidents.update(page_id, incident_id, body)
             )
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -212,9 +256,12 @@ def register(mcp: FastMCP) -> None:
         affectedComponents (list of {componentId, status}).
         """
         try:
+            validate_body(body, CreateStatusPageIncidentUpdateRequest)
             return serialize(
                 _sp(api_token).incidents.post_update(page_id, incident_id, body)
             )
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -280,7 +327,10 @@ def register(mcp: FastMCP) -> None:
         Required fields: email.
         """
         try:
+            validate_body(body, AdminAddSubscriberRequest)
             return serialize(_sp(api_token).subscribers.add(page_id, body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -316,7 +366,10 @@ def register(mcp: FastMCP) -> None:
         be configured in your DNS before calling verify.
         """
         try:
+            validate_body(body, AddCustomDomainRequest)
             return serialize(_sp(api_token).domains.add(page_id, body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
