@@ -344,9 +344,7 @@ class TestStatusPageToolDescriptions:
     def test_descriptions_are_non_empty(self, registered_tools) -> None:
         for name in STATUS_PAGE_TOOLS:
             desc = registered_tools[name].description
-            assert desc and len(desc) >= 10, (
-                f"{name} description too short: {desc!r}"
-            )
+            assert desc and len(desc) >= 10, f"{name} description too short: {desc!r}"
 
     def test_no_duplicate_descriptions(self, registered_tools) -> None:
         descs = [registered_tools[n].description for n in STATUS_PAGE_TOOLS]
