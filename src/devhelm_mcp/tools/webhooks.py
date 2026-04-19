@@ -4,10 +4,19 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import ValidationError
+
 from devhelm import DevhelmError
+from devhelm.types import CreateWebhookEndpointRequest, UpdateWebhookEndpointRequest
 from fastmcp import FastMCP
 
-from devhelm_mcp.client import format_error, get_client, serialize
+from devhelm_mcp.client import (
+    format_error,
+    format_validation_error,
+    get_client,
+    serialize,
+    validate_body,
+)
 
 
 def register(mcp: FastMCP) -> None:
@@ -34,7 +43,10 @@ def register(mcp: FastMCP) -> None:
         Required fields: url, events (list of event types to subscribe to).
         """
         try:
+            validate_body(body, CreateWebhookEndpointRequest)
             return serialize(get_client(api_token).webhooks.create(body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -42,7 +54,10 @@ def register(mcp: FastMCP) -> None:
     def update_webhook(api_token: str, webhook_id: str, body: dict[str, Any]) -> Any:
         """Update a webhook endpoint."""
         try:
+            validate_body(body, UpdateWebhookEndpointRequest)
             return serialize(get_client(api_token).webhooks.update(webhook_id, body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 

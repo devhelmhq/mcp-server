@@ -4,10 +4,22 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import ValidationError
+
 from devhelm import DevhelmError
+from devhelm.types import (
+    CreateNotificationPolicyRequest,
+    UpdateNotificationPolicyRequest,
+)
 from fastmcp import FastMCP
 
-from devhelm_mcp.client import format_error, get_client, serialize
+from devhelm_mcp.client import (
+    format_error,
+    format_validation_error,
+    get_client,
+    serialize,
+    validate_body,
+)
 
 
 def register(mcp: FastMCP) -> None:
@@ -34,7 +46,10 @@ def register(mcp: FastMCP) -> None:
         Required fields: name, monitorIds, channelIds, severity.
         """
         try:
+            validate_body(body, CreateNotificationPolicyRequest)
             return serialize(get_client(api_token).notification_policies.create(body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -44,9 +59,12 @@ def register(mcp: FastMCP) -> None:
     ) -> Any:
         """Update a notification policy."""
         try:
+            validate_body(body, UpdateNotificationPolicyRequest)
             return serialize(
                 get_client(api_token).notification_policies.update(policy_id, body)
             )
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 

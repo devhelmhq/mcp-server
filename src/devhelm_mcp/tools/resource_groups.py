@@ -4,10 +4,23 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import ValidationError
+
 from devhelm import DevhelmError
+from devhelm._generated import AddResourceGroupMemberRequest
+from devhelm.types import (
+    CreateResourceGroupRequest,
+    UpdateResourceGroupRequest,
+)
 from fastmcp import FastMCP
 
-from devhelm_mcp.client import format_error, get_client, serialize
+from devhelm_mcp.client import (
+    format_error,
+    format_validation_error,
+    get_client,
+    serialize,
+    validate_body,
+)
 
 
 def register(mcp: FastMCP) -> None:
@@ -34,7 +47,10 @@ def register(mcp: FastMCP) -> None:
         Required fields: name. Optional: description.
         """
         try:
+            validate_body(body, CreateResourceGroupRequest)
             return serialize(get_client(api_token).resource_groups.create(body))
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -44,9 +60,12 @@ def register(mcp: FastMCP) -> None:
     ) -> Any:
         """Update a resource group."""
         try:
+            validate_body(body, UpdateResourceGroupRequest)
             return serialize(
                 get_client(api_token).resource_groups.update(group_id, body)
             )
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -68,9 +87,12 @@ def register(mcp: FastMCP) -> None:
         Required fields: monitorId.
         """
         try:
+            validate_body(body, AddResourceGroupMemberRequest)
             return serialize(
                 get_client(api_token).resource_groups.add_member(group_id, body)
             )
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
