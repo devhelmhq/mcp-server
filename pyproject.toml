@@ -51,14 +51,6 @@ strict = true
 warn_return_any = true
 warn_unused_configs = true
 
-[[tool.mypy.overrides]]
-module = "devhelm.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "fastmcp.*"
-ignore_missing_imports = true
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 

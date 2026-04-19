@@ -713,7 +713,7 @@ class TestPublishStatusPageIncidentValidation:
 
     def test_rejects_non_string_body(self) -> None:
         with pytest.raises(ValidationError):
-            PublishStatusPageIncidentRequest(body=123)  # type: ignore[arg-type]
+            PublishStatusPageIncidentRequest(body=123)  # type: ignore[arg-type,call-arg]
 
 
 # ---------------------------------------------------------------------------
