@@ -9,10 +9,6 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from pydantic import ValidationError
-
-from devhelm_mcp.client import validate_body
-
 from devhelm._generated import AddResourceGroupMemberRequest
 from devhelm.types import (
     AcquireDeployLockRequest,
@@ -46,6 +42,9 @@ from devhelm.types import (
     UpdateTagRequest,
     UpdateWebhookEndpointRequest,
 )
+from pydantic import ValidationError
+
+from devhelm_mcp.client import validate_body
 
 
 def _assert_rejects(body: dict[str, Any], model: type) -> ValidationError:

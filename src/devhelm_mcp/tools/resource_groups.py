@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import ValidationError
-
 from devhelm import DevhelmError
 from devhelm._generated import AddResourceGroupMemberRequest
 from devhelm.types import (
@@ -13,6 +11,7 @@ from devhelm.types import (
     UpdateResourceGroupRequest,
 )
 from fastmcp import FastMCP
+from pydantic import ValidationError
 
 from devhelm_mcp.client import (
     format_error,
