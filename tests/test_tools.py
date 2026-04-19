@@ -89,6 +89,7 @@ EXPECTED_TOOLS = [
     "create_status_page_component",
     "update_status_page_component",
     "delete_status_page_component",
+    "reorder_status_page_components",
     "list_status_page_groups",
     "create_status_page_group",
     "update_status_page_group",
@@ -157,6 +158,7 @@ STATUS_PAGE_COMPONENT_TOOLS = [
     "create_status_page_component",
     "update_status_page_component",
     "delete_status_page_component",
+    "reorder_status_page_components",
 ]
 
 STATUS_PAGE_GROUP_TOOLS = [

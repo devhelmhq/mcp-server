@@ -9,10 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from devhelm._generated import AddResourceGroupMemberRequest
-from devhelm._generated import ResolveIncidentRequest
-
-from devhelm_mcp.tools.status_pages import PublishStatusPageIncidentRequest
+from devhelm._generated import AddResourceGroupMemberRequest, ResolveIncidentRequest
 from devhelm.types import (
     AcquireDeployLockRequest,
     AddCustomDomainRequest,
@@ -48,6 +45,10 @@ from devhelm.types import (
 from pydantic import ValidationError
 
 from devhelm_mcp.client import validate_body
+from devhelm_mcp.tools.status_pages import (
+    PublishStatusPageIncidentRequest,
+    ReorderComponentsRequest,
+)
 
 
 def _assert_rejects(body: dict[str, Any], model: type) -> ValidationError:
@@ -595,6 +596,38 @@ class TestUpdateStatusPageComponentValidation:
     def test_empty_body_rejected(self) -> None:
         err = _assert_rejects({}, UpdateStatusPageComponentRequest)
         assert "name" in _error_fields(err)
+
+
+class TestReorderStatusPageComponentsValidation:
+    def test_empty_body(self) -> None:
+        err = _assert_rejects({}, ReorderComponentsRequest)
+        assert "positions" in _error_fields(err)
+
+    def test_empty_positions_list(self) -> None:
+        err = _assert_rejects({"positions": []}, ReorderComponentsRequest)
+        assert "positions" in _error_fields(err)
+
+    def test_position_missing_component_id(self) -> None:
+        err = _assert_rejects(
+            {"positions": [{"position": 0}]},
+            ReorderComponentsRequest,
+        )
+        assert any(
+            "componentId" in str(loc) for loc in (e["loc"] for e in err.errors())
+        )
+
+    def test_valid_payload(self) -> None:
+        c1 = "00000000-0000-0000-0000-000000000001"
+        c2 = "00000000-0000-0000-0000-000000000002"
+        validate_body(
+            {
+                "positions": [
+                    {"componentId": c1, "position": 0},
+                    {"componentId": c2, "position": 1},
+                ]
+            },
+            ReorderComponentsRequest,
+        )
 
 
 # ---------------------------------------------------------------------------

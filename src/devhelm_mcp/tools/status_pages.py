@@ -47,6 +47,24 @@ class _SpIncidentStatus(StrEnum):
     RESOLVED = "RESOLVED"
 
 
+class _ComponentPosition(BaseModel):
+    """One entry of a reorder positions list."""
+
+    component_id: str = Field(alias="componentId")
+    position: int = Field(ge=0)
+
+
+class ReorderComponentsRequest(BaseModel):
+    """Local model matching the API's ReorderComponentsRequest.
+
+    Defined locally because the published SDK (0.1.2) does not re-export
+    `ReorderComponentsRequest` from `devhelm.types`; remove once the SDK
+    bumps and exposes it publicly.
+    """
+
+    positions: list[_ComponentPosition] = Field(min_length=1)
+
+
 class PublishStatusPageIncidentRequest(BaseModel):
     """Local model matching the API's PublishStatusPageIncidentRequest.
 
@@ -175,6 +193,25 @@ def register(mcp: FastMCP) -> None:
         try:
             _sp(api_token).components.delete(page_id, component_id)
             return "Component deleted successfully."
+        except DevhelmError as e:
+            return format_error(e)
+
+    @mcp.tool()
+    def reorder_status_page_components(
+        api_token: str, page_id: str, body: dict[str, Any]
+    ) -> str:
+        """Reorder components on a status page.
+
+        Required: positions — list of {componentId, position} entries giving
+        every component its new zero-based ordinal. The full set must be
+        provided; partial reorders are rejected by the API.
+        """
+        try:
+            validate_body(body, ReorderComponentsRequest)
+            _sp(api_token).components.reorder(page_id, body)
+            return "Components reordered successfully."
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
