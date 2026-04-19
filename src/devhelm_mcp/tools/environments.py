@@ -10,6 +10,7 @@ from fastmcp import FastMCP
 from pydantic import ValidationError
 
 from devhelm_mcp.client import (
+    ToolResult,
     format_error,
     format_validation_error,
     get_client,
@@ -20,7 +21,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_environments(api_token: str) -> Any:
+    def list_environments(api_token: str) -> ToolResult:
         """List all environments in the workspace."""
         try:
             return serialize(get_client(api_token).environments.list())
@@ -28,7 +29,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_environment(api_token: str, slug: str) -> Any:
+    def get_environment(api_token: str, slug: str) -> ToolResult:
         """Get an environment by slug (e.g. 'production', 'staging')."""
         try:
             return serialize(get_client(api_token).environments.get(slug))
@@ -36,7 +37,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_environment(api_token: str, body: dict[str, Any]) -> Any:
+    def create_environment(api_token: str, body: dict[str, Any]) -> ToolResult:
         """Create an environment.
 
         Required fields: name, slug, color.
@@ -50,7 +51,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def update_environment(api_token: str, slug: str, body: dict[str, Any]) -> Any:
+    def update_environment(api_token: str, slug: str, body: dict[str, Any]) -> ToolResult:
         """Update an environment by slug."""
         try:
             validate_body(body, UpdateEnvironmentRequest)

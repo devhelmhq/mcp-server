@@ -14,6 +14,7 @@ from fastmcp import FastMCP
 from pydantic import ValidationError
 
 from devhelm_mcp.client import (
+    ToolResult,
     format_error,
     format_validation_error,
     get_client,
@@ -24,7 +25,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_resource_groups(api_token: str) -> Any:
+    def list_resource_groups(api_token: str) -> ToolResult:
         """List all resource groups in the workspace."""
         try:
             return serialize(get_client(api_token).resource_groups.list())
@@ -32,7 +33,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_resource_group(api_token: str, group_id: str) -> Any:
+    def get_resource_group(api_token: str, group_id: str) -> ToolResult:
         """Get a resource group by ID."""
         try:
             return serialize(get_client(api_token).resource_groups.get(group_id))
@@ -40,7 +41,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_resource_group(api_token: str, body: dict[str, Any]) -> Any:
+    def create_resource_group(api_token: str, body: dict[str, Any]) -> ToolResult:
         """Create a resource group.
 
         Required fields: name. Optional: description.
@@ -56,7 +57,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def update_resource_group(
         api_token: str, group_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Update a resource group."""
         try:
             validate_body(body, UpdateResourceGroupRequest)
@@ -80,7 +81,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def add_resource_group_member(
         api_token: str, group_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Add a monitor to a resource group.
 
         Required fields: monitorId.

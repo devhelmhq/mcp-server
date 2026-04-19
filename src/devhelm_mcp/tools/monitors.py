@@ -10,6 +10,7 @@ from fastmcp import FastMCP
 from pydantic import ValidationError
 
 from devhelm_mcp.client import (
+    ToolResult,
     format_error,
     format_validation_error,
     get_client,
@@ -20,7 +21,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_monitors(api_token: str) -> Any:
+    def list_monitors(api_token: str) -> ToolResult:
         """List all uptime monitors in the workspace."""
         try:
             return serialize(get_client(api_token).monitors.list())
@@ -28,7 +29,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_monitor(api_token: str, monitor_id: str) -> Any:
+    def get_monitor(api_token: str, monitor_id: str) -> ToolResult:
         """Get a single monitor by ID, including its full configuration."""
         try:
             return serialize(get_client(api_token).monitors.get(monitor_id))
@@ -36,7 +37,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_monitor(api_token: str, body: dict[str, Any]) -> Any:
+    def create_monitor(api_token: str, body: dict[str, Any]) -> ToolResult:
         """Create a new uptime monitor.
 
         Required fields: name, type (HTTP/DNS/TCP/ICMP/MCP/HEARTBEAT),
@@ -51,7 +52,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def update_monitor(api_token: str, monitor_id: str, body: dict[str, Any]) -> Any:
+    def update_monitor(api_token: str, monitor_id: str, body: dict[str, Any]) -> ToolResult:
         """Update an existing monitor's configuration."""
         try:
             validate_body(body, UpdateMonitorRequest)
@@ -71,7 +72,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def pause_monitor(api_token: str, monitor_id: str) -> Any:
+    def pause_monitor(api_token: str, monitor_id: str) -> ToolResult:
         """Pause a monitor (stops checking until resumed)."""
         try:
             return serialize(get_client(api_token).monitors.pause(monitor_id))
@@ -79,7 +80,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def resume_monitor(api_token: str, monitor_id: str) -> Any:
+    def resume_monitor(api_token: str, monitor_id: str) -> ToolResult:
         """Resume a paused monitor."""
         try:
             return serialize(get_client(api_token).monitors.resume(monitor_id))
@@ -87,7 +88,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def test_monitor(api_token: str, monitor_id: str) -> Any:
+    def test_monitor(api_token: str, monitor_id: str) -> ToolResult:
         """Trigger an ad-hoc test run for a monitor and return the result."""
         try:
             return serialize(get_client(api_token).monitors.test(monitor_id))
@@ -100,7 +101,7 @@ def register(mcp: FastMCP) -> None:
         monitor_id: str,
         cursor: str | None = None,
         limit: int | None = None,
-    ) -> Any:
+    ) -> ToolResult:
         """List recent check results for a monitor (cursor-paginated)."""
         try:
             page = get_client(api_token).monitors.results(
@@ -113,7 +114,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def list_monitor_versions(
         api_token: str, monitor_id: str, page: int = 0, size: int = 20
-    ) -> Any:
+    ) -> ToolResult:
         """List version history for a monitor."""
         try:
             result = get_client(api_token).monitors.versions(

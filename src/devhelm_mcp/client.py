@@ -10,6 +10,8 @@ from pydantic import BaseModel, ValidationError
 
 API_BASE_URL = os.getenv("DEVHELM_API_URL", "https://api.devhelm.io")
 
+ToolResult = dict[str, Any] | list[dict[str, Any]] | str
+
 
 def get_client(api_token: str) -> Devhelm:
     """Build a Devhelm SDK client from the user's API token."""
@@ -44,12 +46,12 @@ def format_validation_error(err: ValidationError) -> str:
     return "Validation error:\n" + "\n".join(issues)
 
 
-def serialize(data: Any) -> Any:
+def serialize(data: object) -> dict[str, Any] | list[dict[str, Any]]:
     """Serialize Pydantic models or other objects to JSON-safe dicts."""
     if hasattr(data, "model_dump"):
-        return data.model_dump(mode="json")
+        return data.model_dump(mode="json")  # type: ignore[no-any-return]
     if isinstance(data, list):
-        return [serialize(item) for item in data]
+        return [serialize(item) for item in data]  # type: ignore[misc]
     if isinstance(data, dict):
         return {k: serialize(v) for k, v in data.items()}
-    return data
+    return data  # type: ignore[return-value]

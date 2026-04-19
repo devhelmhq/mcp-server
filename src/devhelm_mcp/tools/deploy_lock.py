@@ -10,6 +10,7 @@ from fastmcp import FastMCP
 from pydantic import ValidationError
 
 from devhelm_mcp.client import (
+    ToolResult,
     format_error,
     format_validation_error,
     get_client,
@@ -20,10 +21,11 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def acquire_deploy_lock(api_token: str, body: dict[str, Any]) -> Any:
+    def acquire_deploy_lock(api_token: str, body: dict[str, Any]) -> ToolResult:
         """Acquire a deploy lock to prevent concurrent deployments.
 
-        Required fields: reason. Optional: ttlSeconds.
+        Required: lockedBy (identity of requester, e.g. hostname or CI job ID).
+        Optional: ttlMinutes (default 30, max 60).
         """
         try:
             validate_body(body, AcquireDeployLockRequest)
@@ -34,7 +36,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_current_deploy_lock(api_token: str) -> Any:
+    def get_current_deploy_lock(api_token: str) -> ToolResult | None:
         """Get the currently active deploy lock, or null if unlocked."""
         try:
             result = get_client(api_token).deploy_lock.current()

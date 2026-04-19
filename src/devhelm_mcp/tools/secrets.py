@@ -10,6 +10,7 @@ from fastmcp import FastMCP
 from pydantic import ValidationError
 
 from devhelm_mcp.client import (
+    ToolResult,
     format_error,
     format_validation_error,
     get_client,
@@ -20,7 +21,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_secrets(api_token: str) -> Any:
+    def list_secrets(api_token: str) -> ToolResult:
         """List all secrets (metadata only, values are never returned)."""
         try:
             return serialize(get_client(api_token).secrets.list())
@@ -28,7 +29,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_secret(api_token: str, body: dict[str, Any]) -> Any:
+    def create_secret(api_token: str, body: dict[str, Any]) -> ToolResult:
         """Create an encrypted secret.
 
         Required fields: key, value. The value is encrypted at rest
@@ -43,7 +44,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def update_secret(api_token: str, key: str, body: dict[str, Any]) -> Any:
+    def update_secret(api_token: str, key: str, body: dict[str, Any]) -> ToolResult:
         """Update a secret's value by key."""
         try:
             validate_body(body, UpdateSecretRequest)

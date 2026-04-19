@@ -10,6 +10,9 @@ from typing import Any
 
 import pytest
 from devhelm._generated import AddResourceGroupMemberRequest
+from devhelm._generated import ResolveIncidentRequest
+
+from devhelm_mcp.tools.status_pages import PublishStatusPageIncidentRequest
 from devhelm.types import (
     AcquireDeployLockRequest,
     AddCustomDomainRequest,
@@ -172,6 +175,16 @@ class TestCreateIncidentValidation:
             {"title": "API outage", "severity": "DOWN"},
             CreateManualIncidentRequest,
         )
+
+
+class TestResolveIncidentRequestValidation:
+    def test_valid_with_body(self) -> None:
+        req = ResolveIncidentRequest(body="Root cause identified and fixed.")
+        assert req.body == "Root cause identified and fixed."
+
+    def test_rejects_non_string_body(self) -> None:
+        with pytest.raises(ValidationError):
+            ResolveIncidentRequest(body=123)  # type: ignore[arg-type]
 
 
 # ---------------------------------------------------------------------------
@@ -650,6 +663,57 @@ class TestUpdateStatusPageIncidentValidation:
 
     def test_invalid_impact(self) -> None:
         _assert_rejects({"impact": "INVALID"}, UpdateStatusPageIncidentRequest)
+
+
+# ---------------------------------------------------------------------------
+# Status Pages — publish incident
+# ---------------------------------------------------------------------------
+
+
+class TestPublishStatusPageIncidentValidation:
+    def test_valid_empty_body_skips_validation(self) -> None:
+        """None body is fine — publish with defaults."""
+        pass
+
+    def test_valid_with_overrides(self) -> None:
+        validate_body(
+            {"title": "Updated Title", "impact": "MAJOR"},
+            PublishStatusPageIncidentRequest,
+        )
+
+    def test_invalid_impact(self) -> None:
+        _assert_rejects(
+            {"impact": "INVALID"},
+            PublishStatusPageIncidentRequest,
+        )
+
+    def test_invalid_status(self) -> None:
+        _assert_rejects(
+            {"status": "INVALID"},
+            PublishStatusPageIncidentRequest,
+        )
+
+    def test_title_too_long(self) -> None:
+        _assert_rejects(
+            {"title": "x" * 501},
+            PublishStatusPageIncidentRequest,
+        )
+
+    def test_valid_all_fields(self) -> None:
+        validate_body(
+            {
+                "title": "Incident Title",
+                "impact": "CRITICAL",
+                "status": "INVESTIGATING",
+                "body": "Initial update",
+                "notifySubscribers": True,
+            },
+            PublishStatusPageIncidentRequest,
+        )
+
+    def test_rejects_non_string_body(self) -> None:
+        with pytest.raises(ValidationError):
+            PublishStatusPageIncidentRequest(body=123)  # type: ignore[arg-type]
 
 
 # ---------------------------------------------------------------------------

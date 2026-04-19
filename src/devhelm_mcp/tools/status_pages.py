@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import Any
 
 from devhelm import DevhelmError
+from devhelm.resources.status_pages import StatusPages
 from devhelm.types import (
     AddCustomDomainRequest,
     AdminAddSubscriberRequest,
@@ -19,9 +21,10 @@ from devhelm.types import (
     UpdateStatusPageRequest,
 )
 from fastmcp import FastMCP
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
 from devhelm_mcp.client import (
+    ToolResult,
     format_error,
     format_validation_error,
     get_client,
@@ -30,7 +33,39 @@ from devhelm_mcp.client import (
 )
 
 
-def _sp(api_token: str) -> Any:
+class _SpIncidentImpact(StrEnum):
+    NONE = "NONE"
+    MINOR = "MINOR"
+    MAJOR = "MAJOR"
+    CRITICAL = "CRITICAL"
+
+
+class _SpIncidentStatus(StrEnum):
+    INVESTIGATING = "INVESTIGATING"
+    IDENTIFIED = "IDENTIFIED"
+    MONITORING = "MONITORING"
+    RESOLVED = "RESOLVED"
+
+
+class PublishStatusPageIncidentRequest(BaseModel):
+    """Local model matching the API's PublishStatusPageIncidentRequest.
+
+    All fields are optional — null keeps the draft value.
+    Defined locally because the published SDK (0.1.2) incorrectly marks
+    these fields as required; remove once SDK is republished.
+    """
+
+    title: str | None = Field(None, max_length=500)
+    impact: _SpIncidentImpact | None = None
+    status: _SpIncidentStatus | None = None
+    body: str | None = None
+    affected_components: list[dict[str, Any]] | None = Field(
+        None, alias="affectedComponents"
+    )
+    notify_subscribers: bool | None = Field(None, alias="notifySubscribers")
+
+
+def _sp(api_token: str) -> StatusPages:
     """Return status_pages resource."""
     return get_client(api_token).status_pages
 
@@ -39,7 +74,7 @@ def register(mcp: FastMCP) -> None:
     # ── Page CRUD ─────────────────────────────────────────────────────────
 
     @mcp.tool()
-    def list_status_pages(api_token: str) -> Any:
+    def list_status_pages(api_token: str) -> ToolResult:
         """List all status pages in the workspace."""
         try:
             return serialize(_sp(api_token).list())
@@ -47,7 +82,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_status_page(api_token: str, page_id: str) -> Any:
+    def get_status_page(api_token: str, page_id: str) -> ToolResult:
         """Get a status page by ID, including branding and overall status."""
         try:
             return serialize(_sp(api_token).get(page_id))
@@ -55,7 +90,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_status_page(api_token: str, body: dict[str, Any]) -> Any:
+    def create_status_page(api_token: str, body: dict[str, Any]) -> ToolResult:
         """Create a new status page.
 
         Required fields: name, slug.
@@ -71,7 +106,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def update_status_page(api_token: str, page_id: str, body: dict[str, Any]) -> Any:
+    def update_status_page(api_token: str, page_id: str, body: dict[str, Any]) -> ToolResult:
         """Update a status page's name, slug, branding, visibility, or incident mode."""
         try:
             validate_body(body, UpdateStatusPageRequest)
@@ -93,7 +128,7 @@ def register(mcp: FastMCP) -> None:
     # ── Components ────────────────────────────────────────────────────────
 
     @mcp.tool()
-    def list_status_page_components(api_token: str, page_id: str) -> Any:
+    def list_status_page_components(api_token: str, page_id: str) -> ToolResult:
         """List all components on a status page."""
         try:
             return serialize(_sp(api_token).components.list(page_id))
@@ -103,7 +138,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def create_status_page_component(
         api_token: str, page_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Add a component to a status page.
 
         Required fields: name, type (STATIC or MONITOR).
@@ -120,7 +155,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def update_status_page_component(
         api_token: str, page_id: str, component_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Update a status page component's name, group, or status."""
         try:
             validate_body(body, UpdateStatusPageComponentRequest)
@@ -146,7 +181,7 @@ def register(mcp: FastMCP) -> None:
     # ── Component Groups ──────────────────────────────────────────────────
 
     @mcp.tool()
-    def list_status_page_groups(api_token: str, page_id: str) -> Any:
+    def list_status_page_groups(api_token: str, page_id: str) -> ToolResult:
         """List component groups on a status page (with nested components)."""
         try:
             return serialize(_sp(api_token).groups.list(page_id))
@@ -156,7 +191,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def create_status_page_group(
         api_token: str, page_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Create a component group on a status page.
 
         Required fields: name.
@@ -172,7 +207,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def update_status_page_group(
         api_token: str, page_id: str, group_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Update a component group's name or display order."""
         try:
             validate_body(body, UpdateStatusPageComponentGroupRequest)
@@ -196,7 +231,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def list_status_page_incidents(
         api_token: str, page_id: str, page: int = 0, size: int = 20
-    ) -> Any:
+    ) -> ToolResult:
         """List incidents on a status page (paginated)."""
         try:
             result = _sp(api_token).incidents.list(page_id, page=page, size=size)
@@ -205,7 +240,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_status_page_incident(api_token: str, page_id: str, incident_id: str) -> Any:
+    def get_status_page_incident(api_token: str, page_id: str, incident_id: str) -> ToolResult:
         """Get a status page incident with its full timeline of updates."""
         try:
             return serialize(_sp(api_token).incidents.get(page_id, incident_id))
@@ -215,7 +250,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def create_status_page_incident(
         api_token: str, page_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Create an incident on a status page.
 
         Required fields: title, impact (NONE/MINOR/MAJOR/CRITICAL).
@@ -233,7 +268,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def update_status_page_incident(
         api_token: str, page_id: str, incident_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Update a status page incident's title, impact, or status."""
         try:
             validate_body(body, UpdateStatusPageIncidentRequest)
@@ -248,7 +283,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def post_status_page_incident_update(
         api_token: str, page_id: str, incident_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Post a timeline update on a status page incident.
 
         Required fields: body (message text), status.
@@ -271,15 +306,20 @@ def register(mcp: FastMCP) -> None:
         page_id: str,
         incident_id: str,
         body: dict[str, Any] | None = None,
-    ) -> Any:
+    ) -> ToolResult:
         """Publish a draft incident (sets it live, notifies subscribers).
 
-        Optional body fields: title, impact, status, body (overrides on publish).
+        Optional body fields: title, impact, status, body (overrides on publish),
+        affectedComponents, notifySubscribers.
         """
         try:
+            if body is not None:
+                validate_body(body, PublishStatusPageIncidentRequest)
             return serialize(
                 _sp(api_token).incidents.publish(page_id, incident_id, body)
             )
+        except ValidationError as e:
+            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -310,7 +350,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def list_status_page_subscribers(
         api_token: str, page_id: str, page: int = 0, size: int = 20
-    ) -> Any:
+    ) -> ToolResult:
         """List confirmed subscribers on a status page (paginated)."""
         try:
             result = _sp(api_token).subscribers.list(page_id, page=page, size=size)
@@ -321,7 +361,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def add_status_page_subscriber(
         api_token: str, page_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Add a subscriber to a status page (admin).
 
         Required fields: email.
@@ -348,7 +388,7 @@ def register(mcp: FastMCP) -> None:
     # ── Custom Domains ────────────────────────────────────────────────────
 
     @mcp.tool()
-    def list_status_page_domains(api_token: str, page_id: str) -> Any:
+    def list_status_page_domains(api_token: str, page_id: str) -> ToolResult:
         """List custom domains on a status page."""
         try:
             return serialize(_sp(api_token).domains.list(page_id))
@@ -358,7 +398,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def add_status_page_domain(
         api_token: str, page_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Add a custom domain to a status page.
 
         Required fields: hostname (e.g. "status.example.com").
@@ -374,7 +414,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def verify_status_page_domain(api_token: str, page_id: str, domain_id: str) -> Any:
+    def verify_status_page_domain(api_token: str, page_id: str, domain_id: str) -> ToolResult:
         """Trigger DNS verification for a custom domain.
 
         Returns the updated domain with current verification status.

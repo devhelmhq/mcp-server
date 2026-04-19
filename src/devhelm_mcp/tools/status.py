@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from devhelm import DevhelmError
 from fastmcp import FastMCP
 
-from devhelm_mcp.client import format_error, get_client, serialize
+from devhelm_mcp.client import ToolResult, format_error, get_client, serialize
 
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def get_status_overview(api_token: str) -> Any:
+    def get_status_overview(api_token: str) -> ToolResult:
         """Get the dashboard overview with monitor counts,
         incident summary, and uptime stats."""
         try:

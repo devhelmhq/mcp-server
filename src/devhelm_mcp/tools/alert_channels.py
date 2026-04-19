@@ -10,6 +10,7 @@ from fastmcp import FastMCP
 from pydantic import ValidationError
 
 from devhelm_mcp.client import (
+    ToolResult,
     format_error,
     format_validation_error,
     get_client,
@@ -20,7 +21,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_alert_channels(api_token: str) -> Any:
+    def list_alert_channels(api_token: str) -> ToolResult:
         """List all alert channels configured in the workspace."""
         try:
             return serialize(get_client(api_token).alert_channels.list())
@@ -28,7 +29,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_alert_channel(api_token: str, channel_id: str) -> Any:
+    def get_alert_channel(api_token: str, channel_id: str) -> ToolResult:
         """Get an alert channel by ID."""
         try:
             return serialize(get_client(api_token).alert_channels.get(channel_id))
@@ -36,7 +37,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_alert_channel(api_token: str, body: dict[str, Any]) -> Any:
+    def create_alert_channel(api_token: str, body: dict[str, Any]) -> ToolResult:
         """Create a new alert channel.
 
         Required: name, type, config (type-specific).
@@ -54,7 +55,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def update_alert_channel(
         api_token: str, channel_id: str, body: dict[str, Any]
-    ) -> Any:
+    ) -> ToolResult:
         """Update an existing alert channel."""
         try:
             validate_body(body, UpdateAlertChannelRequest)
@@ -76,7 +77,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def test_alert_channel(api_token: str, channel_id: str) -> Any:
+    def test_alert_channel(api_token: str, channel_id: str) -> ToolResult:
         """Send a test notification to an alert channel to verify it works."""
         try:
             return serialize(get_client(api_token).alert_channels.test(channel_id))

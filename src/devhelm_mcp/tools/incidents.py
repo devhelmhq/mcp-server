@@ -10,6 +10,7 @@ from fastmcp import FastMCP
 from pydantic import ValidationError
 
 from devhelm_mcp.client import (
+    ToolResult,
     format_error,
     format_validation_error,
     get_client,
@@ -20,7 +21,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_incidents(api_token: str) -> Any:
+    def list_incidents(api_token: str) -> ToolResult:
         """List all incidents in the workspace."""
         try:
             return serialize(get_client(api_token).incidents.list())
@@ -28,7 +29,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_incident(api_token: str, incident_id: str) -> Any:
+    def get_incident(api_token: str, incident_id: str) -> ToolResult:
         """Get a single incident by ID with full details."""
         try:
             return serialize(get_client(api_token).incidents.get(incident_id))
@@ -36,11 +37,11 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_incident(api_token: str, body: dict[str, Any]) -> Any:
+    def create_incident(api_token: str, body: dict[str, Any]) -> ToolResult:
         """Create a manual incident.
 
-        Required fields: monitorId, severity (CRITICAL/HIGH/MEDIUM/LOW).
-        Optional: message.
+        Required fields: title, severity (DOWN/DEGRADED/MAINTENANCE).
+        Optional: monitorId (UUID), body (detailed description).
         """
         try:
             validate_body(body, CreateManualIncidentRequest)
@@ -53,7 +54,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def resolve_incident(
         api_token: str, incident_id: str, message: str | None = None
-    ) -> Any:
+    ) -> ToolResult:
         """Resolve an active incident, optionally with a resolution message."""
         try:
             return serialize(
