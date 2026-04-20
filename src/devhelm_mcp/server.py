@@ -10,11 +10,14 @@ Both resolve the token to a Devhelm SDK client per-request.
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import TYPE_CHECKING
 
 from fastmcp import FastMCP
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+
+if TYPE_CHECKING:
+    from starlette.applications import Starlette
 
 from devhelm_mcp.tools import (
     alert_channels,
@@ -70,7 +73,7 @@ async def health(request: Request) -> JSONResponse:
     return JSONResponse({"status": "healthy", "service": "devhelm-mcp-server"})
 
 
-def _get_app() -> Any:
+def _get_app() -> "Starlette":
     """Build the ASGI app with path-based auth routing."""
     from starlette.applications import Starlette
     from starlette.middleware import Middleware

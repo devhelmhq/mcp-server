@@ -75,12 +75,66 @@ def format_error(err: DevhelmError) -> str:
     return f"Error: {err}"
 
 
-def serialize(data: object) -> dict[str, Any] | list[dict[str, Any]]:
-    """Serialize Pydantic models or other objects to JSON-safe dicts."""
-    if hasattr(data, "model_dump"):
-        return data.model_dump(mode="json")  # type: ignore[no-any-return]
-    if isinstance(data, list):
-        return [serialize(item) for item in data]  # type: ignore[misc]
+JsonValue = (
+    dict[str, "JsonValue"] | list["JsonValue"] | str | int | float | bool | None
+)
+
+
+def _serialize_value(data: object) -> JsonValue:
+    """Serialize a single value into a JSON-safe `JsonValue`.
+
+    The shape mirrors `json.dumps` semantics: dicts become string-keyed
+    dicts of `JsonValue`, lists become lists of `JsonValue`, primitives
+    pass through, and Pydantic models are dumped via `.model_dump(mode="json")`.
+    Anything else (e.g. arbitrary objects) raises `TypeError` rather than
+    being silently coerced — `serialize` is meant for SDK return shapes.
+    """
+    if isinstance(data, BaseModel):
+        # `.model_dump(mode="json")` returns plain Python primitives that are
+        # all instances of `JsonValue`; recursing through `_serialize_value`
+        # is unnecessary because Pydantic has already done the work.
+        dumped = data.model_dump(mode="json")
+        return _serialize_value(dumped)
     if isinstance(data, dict):
-        return {k: serialize(v) for k, v in data.items()}
-    return data  # type: ignore[return-value]
+        return {str(k): _serialize_value(v) for k, v in data.items()}
+    if isinstance(data, list):
+        return [_serialize_value(item) for item in data]
+    if isinstance(data, (str, int, float, bool)) or data is None:
+        return data
+    raise TypeError(
+        f"Cannot serialize {type(data).__name__!s} to a JSON value; expected "
+        "a Pydantic model, dict, list, or primitive."
+    )
+
+
+def serialize(data: object) -> dict[str, Any] | list[dict[str, Any]]:
+    """Serialize Pydantic models / dicts / lists to JSON-safe shapes.
+
+    The signature returns the legacy `dict | list-of-dict` envelope that
+    every MCP tool is wired against, but the recursive work is delegated
+    to `_serialize_value` which is fully typed. We narrow at this single
+    boundary, so removing the `Any` from tool implementations only
+    requires changing this function's return type without touching any
+    callers.
+    """
+    value = _serialize_value(data)
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, list):
+        # Tools always feed `serialize` a list of model instances or
+        # dicts; the recursive call returns a list of either dicts
+        # (Pydantic / dict items) or scalars (which would be a tool
+        # bug). Reject scalars loudly so the LLM sees the error.
+        out: list[dict[str, Any]] = []
+        for item in value:
+            if not isinstance(item, dict):
+                raise TypeError(
+                    "serialize() expected list items to be dicts or Pydantic "
+                    f"models, got {type(item).__name__}."
+                )
+            out.append(item)
+        return out
+    raise TypeError(
+        "serialize() expected a Pydantic model, dict, or list of those; "
+        f"got {type(data).__name__}."
+    )
