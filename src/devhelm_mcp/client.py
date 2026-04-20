@@ -6,7 +6,7 @@ import os
 from typing import Any
 
 from devhelm import Devhelm, DevhelmError
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 API_BASE_URL = os.getenv("DEVHELM_API_URL", "https://api.devhelm.io")
 
@@ -18,15 +18,17 @@ def get_client(api_token: str) -> Devhelm:
     return Devhelm(token=api_token, base_url=API_BASE_URL)
 
 
-def validate_body(data: dict[str, Any], model: type[BaseModel]) -> dict[str, Any]:
-    """Validate a raw dict through a Pydantic model and return the validated dict.
+def as_payload(model: BaseModel) -> dict[str, Any]:
+    """Convert a typed request model into the dict payload the SDK consumes.
 
-    Raises ValidationError with clear field-level messages on bad input.
-    Returns the original dict (not the model's dump) so alias keys pass through
-    to the SDK unchanged.
+    - ``by_alias=True``: keep the OpenAPI field names (camelCase) — the SDK
+      forwards the dict verbatim to the API which expects camelCase keys.
+    - ``exclude_none=True``: optional fields that the LLM omitted shouldn't
+      end up as explicit ``"foo": null`` in the request body, which can be
+      semantically different from "absent" for some endpoints (e.g. PATCH
+      semantics where ``null`` means "clear").
     """
-    model.model_validate(data)
-    return data
+    return model.model_dump(by_alias=True, exclude_none=True)
 
 
 def format_error(err: DevhelmError) -> str:
@@ -35,15 +37,6 @@ def format_error(err: DevhelmError) -> str:
     if err.detail:
         parts.append(f"Detail: {err.detail}")
     return " | ".join(parts)
-
-
-def format_validation_error(err: ValidationError) -> str:
-    """Format a Pydantic ValidationError into a readable message for the LLM."""
-    issues = []
-    for e in err.errors():
-        loc = " → ".join(str(part) for part in e["loc"])
-        issues.append(f"  {loc}: {e['msg']}")
-    return "Validation error:\n" + "\n".join(issues)
 
 
 def serialize(data: object) -> dict[str, Any] | list[dict[str, Any]]:

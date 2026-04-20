@@ -2,20 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from devhelm import DevhelmError
 from devhelm.types import CreateAlertChannelRequest, UpdateAlertChannelRequest
 from fastmcp import FastMCP
-from pydantic import ValidationError
 
 from devhelm_mcp.client import (
     ToolResult,
+    as_payload,
     format_error,
-    format_validation_error,
     get_client,
     serialize,
-    validate_body,
 )
 
 
@@ -37,7 +33,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_alert_channel(api_token: str, body: dict[str, Any]) -> ToolResult:
+    def create_alert_channel(
+        api_token: str, body: CreateAlertChannelRequest
+    ) -> ToolResult:
         """Create a new alert channel.
 
         Required: name, type, config (type-specific).
@@ -45,25 +43,23 @@ def register(mcp: FastMCP) -> None:
         TELEGRAM, DISCORD, MSTEAMS.
         """
         try:
-            validate_body(body, CreateAlertChannelRequest)
-            return serialize(get_client(api_token).alert_channels.create(body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(
+                get_client(api_token).alert_channels.create(as_payload(body))
+            )
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
     def update_alert_channel(
-        api_token: str, channel_id: str, body: dict[str, Any]
+        api_token: str, channel_id: str, body: UpdateAlertChannelRequest
     ) -> ToolResult:
         """Update an existing alert channel."""
         try:
-            validate_body(body, UpdateAlertChannelRequest)
             return serialize(
-                get_client(api_token).alert_channels.update(channel_id, body)
+                get_client(api_token).alert_channels.update(
+                    channel_id, as_payload(body)
+                )
             )
-        except ValidationError as e:
-            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 

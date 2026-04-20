@@ -62,3 +62,10 @@ dev = [
     "ruff>=0.8",
     "twine>=5.0",
 ]
+
+# Local dev: when the sister `sdk-python` repo is checked out alongside this
+# one, `uv sync` will install it editable so changes flow through immediately.
+# `tool.uv.sources` is a uv-only key — pip/pypi installs ignore it and pull
+# `devhelm` from PyPI per the `dependencies` array above.
+[tool.uv.sources]
+devhelm = { path = "../sdk-python", editable = true }

@@ -2,20 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from devhelm import DevhelmError
 from devhelm.types import CreateWebhookEndpointRequest, UpdateWebhookEndpointRequest
 from fastmcp import FastMCP
-from pydantic import ValidationError
 
 from devhelm_mcp.client import (
     ToolResult,
+    as_payload,
     format_error,
-    format_validation_error,
     get_client,
     serialize,
-    validate_body,
 )
 
 
@@ -37,29 +33,27 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_webhook(api_token: str, body: dict[str, Any]) -> ToolResult:
+    def create_webhook(
+        api_token: str, body: CreateWebhookEndpointRequest
+    ) -> ToolResult:
         """Create a webhook endpoint.
 
         Required fields: url, events (list of event types to subscribe to).
         """
         try:
-            validate_body(body, CreateWebhookEndpointRequest)
-            return serialize(get_client(api_token).webhooks.create(body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(get_client(api_token).webhooks.create(as_payload(body)))
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
     def update_webhook(
-        api_token: str, webhook_id: str, body: dict[str, Any]
+        api_token: str, webhook_id: str, body: UpdateWebhookEndpointRequest
     ) -> ToolResult:
         """Update a webhook endpoint."""
         try:
-            validate_body(body, UpdateWebhookEndpointRequest)
-            return serialize(get_client(api_token).webhooks.update(webhook_id, body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(
+                get_client(api_token).webhooks.update(webhook_id, as_payload(body))
+            )
         except DevhelmError as e:
             return format_error(e)
 

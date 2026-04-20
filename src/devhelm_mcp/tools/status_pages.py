@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
-from typing import Any
-
 from devhelm import DevhelmError
 from devhelm.resources.status_pages import StatusPages
 from devhelm.types import (
@@ -15,72 +12,21 @@ from devhelm.types import (
     CreateStatusPageIncidentRequest,
     CreateStatusPageIncidentUpdateRequest,
     CreateStatusPageRequest,
+    ReorderComponentsRequest,
     UpdateStatusPageComponentGroupRequest,
     UpdateStatusPageComponentRequest,
     UpdateStatusPageIncidentRequest,
     UpdateStatusPageRequest,
 )
 from fastmcp import FastMCP
-from pydantic import BaseModel, Field, ValidationError
 
 from devhelm_mcp.client import (
     ToolResult,
+    as_payload,
     format_error,
-    format_validation_error,
     get_client,
     serialize,
-    validate_body,
 )
-
-
-class _SpIncidentImpact(StrEnum):
-    NONE = "NONE"
-    MINOR = "MINOR"
-    MAJOR = "MAJOR"
-    CRITICAL = "CRITICAL"
-
-
-class _SpIncidentStatus(StrEnum):
-    INVESTIGATING = "INVESTIGATING"
-    IDENTIFIED = "IDENTIFIED"
-    MONITORING = "MONITORING"
-    RESOLVED = "RESOLVED"
-
-
-class _ComponentPosition(BaseModel):
-    """One entry of a reorder positions list."""
-
-    component_id: str = Field(alias="componentId")
-    position: int = Field(ge=0)
-
-
-class ReorderComponentsRequest(BaseModel):
-    """Local model matching the API's ReorderComponentsRequest.
-
-    Defined locally because the published SDK (0.1.2) does not re-export
-    `ReorderComponentsRequest` from `devhelm.types`; remove once the SDK
-    bumps and exposes it publicly.
-    """
-
-    positions: list[_ComponentPosition] = Field(min_length=1)
-
-
-class PublishStatusPageIncidentRequest(BaseModel):
-    """Local model matching the API's PublishStatusPageIncidentRequest.
-
-    All fields are optional — null keeps the draft value.
-    Defined locally because the published SDK (0.1.2) incorrectly marks
-    these fields as required; remove once SDK is republished.
-    """
-
-    title: str | None = Field(None, max_length=500)
-    impact: _SpIncidentImpact | None = None
-    status: _SpIncidentStatus | None = None
-    body: str | None = None
-    affected_components: list[dict[str, Any]] | None = Field(
-        None, alias="affectedComponents"
-    )
-    notify_subscribers: bool | None = Field(None, alias="notifySubscribers")
 
 
 def _sp(api_token: str) -> StatusPages:
@@ -108,7 +54,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_status_page(api_token: str, body: dict[str, Any]) -> ToolResult:
+    def create_status_page(api_token: str, body: CreateStatusPageRequest) -> ToolResult:
         """Create a new status page.
 
         Required fields: name, slug.
@@ -116,23 +62,17 @@ def register(mcp: FastMCP) -> None:
         visibility (PUBLIC/PASSWORD), enabled, incidentMode (MANUAL/REVIEW/AUTOMATIC).
         """
         try:
-            validate_body(body, CreateStatusPageRequest)
-            return serialize(_sp(api_token).create(body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(_sp(api_token).create(as_payload(body)))
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
     def update_status_page(
-        api_token: str, page_id: str, body: dict[str, Any]
+        api_token: str, page_id: str, body: UpdateStatusPageRequest
     ) -> ToolResult:
         """Update a status page's name, slug, branding, visibility, or incident mode."""
         try:
-            validate_body(body, UpdateStatusPageRequest)
-            return serialize(_sp(api_token).update(page_id, body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(_sp(api_token).update(page_id, as_payload(body)))
         except DevhelmError as e:
             return format_error(e)
 
@@ -157,7 +97,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_status_page_component(
-        api_token: str, page_id: str, body: dict[str, Any]
+        api_token: str, page_id: str, body: CreateStatusPageComponentRequest
     ) -> ToolResult:
         """Add a component to a status page.
 
@@ -165,25 +105,26 @@ def register(mcp: FastMCP) -> None:
         Optional: groupId (nest under a group), monitorId (for MONITOR type).
         """
         try:
-            validate_body(body, CreateStatusPageComponentRequest)
-            return serialize(_sp(api_token).components.create(page_id, body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(
+                _sp(api_token).components.create(page_id, as_payload(body))
+            )
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
     def update_status_page_component(
-        api_token: str, page_id: str, component_id: str, body: dict[str, Any]
+        api_token: str,
+        page_id: str,
+        component_id: str,
+        body: UpdateStatusPageComponentRequest,
     ) -> ToolResult:
         """Update a status page component's name, group, or status."""
         try:
-            validate_body(body, UpdateStatusPageComponentRequest)
             return serialize(
-                _sp(api_token).components.update(page_id, component_id, body)
+                _sp(api_token).components.update(
+                    page_id, component_id, as_payload(body)
+                )
             )
-        except ValidationError as e:
-            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -200,7 +141,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def reorder_status_page_components(
-        api_token: str, page_id: str, body: dict[str, Any]
+        api_token: str, page_id: str, body: ReorderComponentsRequest
     ) -> str:
         """Reorder components on a status page.
 
@@ -209,11 +150,8 @@ def register(mcp: FastMCP) -> None:
         provided; partial reorders are rejected by the API.
         """
         try:
-            validate_body(body, ReorderComponentsRequest)
-            _sp(api_token).components.reorder(page_id, body)
+            _sp(api_token).components.reorder(page_id, as_payload(body))
             return "Components reordered successfully."
-        except ValidationError as e:
-            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
@@ -229,30 +167,29 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_status_page_group(
-        api_token: str, page_id: str, body: dict[str, Any]
+        api_token: str, page_id: str, body: CreateStatusPageComponentGroupRequest
     ) -> ToolResult:
         """Create a component group on a status page.
 
         Required fields: name.
         """
         try:
-            validate_body(body, CreateStatusPageComponentGroupRequest)
-            return serialize(_sp(api_token).groups.create(page_id, body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(_sp(api_token).groups.create(page_id, as_payload(body)))
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
     def update_status_page_group(
-        api_token: str, page_id: str, group_id: str, body: dict[str, Any]
+        api_token: str,
+        page_id: str,
+        group_id: str,
+        body: UpdateStatusPageComponentGroupRequest,
     ) -> ToolResult:
         """Update a component group's name or display order."""
         try:
-            validate_body(body, UpdateStatusPageComponentGroupRequest)
-            return serialize(_sp(api_token).groups.update(page_id, group_id, body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(
+                _sp(api_token).groups.update(page_id, group_id, as_payload(body))
+            )
         except DevhelmError as e:
             return format_error(e)
 
@@ -290,7 +227,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_status_page_incident(
-        api_token: str, page_id: str, body: dict[str, Any]
+        api_token: str, page_id: str, body: CreateStatusPageIncidentRequest
     ) -> ToolResult:
         """Create an incident on a status page.
 
@@ -299,31 +236,31 @@ def register(mcp: FastMCP) -> None:
         affectedComponents (list of {componentId, status}).
         """
         try:
-            validate_body(body, CreateStatusPageIncidentRequest)
-            return serialize(_sp(api_token).incidents.create(page_id, body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(_sp(api_token).incidents.create(page_id, as_payload(body)))
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
     def update_status_page_incident(
-        api_token: str, page_id: str, incident_id: str, body: dict[str, Any]
+        api_token: str,
+        page_id: str,
+        incident_id: str,
+        body: UpdateStatusPageIncidentRequest,
     ) -> ToolResult:
         """Update a status page incident's title, impact, or status."""
         try:
-            validate_body(body, UpdateStatusPageIncidentRequest)
             return serialize(
-                _sp(api_token).incidents.update(page_id, incident_id, body)
+                _sp(api_token).incidents.update(page_id, incident_id, as_payload(body))
             )
-        except ValidationError as e:
-            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
     def post_status_page_incident_update(
-        api_token: str, page_id: str, incident_id: str, body: dict[str, Any]
+        api_token: str,
+        page_id: str,
+        incident_id: str,
+        body: CreateStatusPageIncidentUpdateRequest,
     ) -> ToolResult:
         """Post a timeline update on a status page incident.
 
@@ -332,35 +269,25 @@ def register(mcp: FastMCP) -> None:
         affectedComponents (list of {componentId, status}).
         """
         try:
-            validate_body(body, CreateStatusPageIncidentUpdateRequest)
             return serialize(
-                _sp(api_token).incidents.post_update(page_id, incident_id, body)
+                _sp(api_token).incidents.post_update(
+                    page_id, incident_id, as_payload(body)
+                )
             )
-        except ValidationError as e:
-            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
     def publish_status_page_incident(
-        api_token: str,
-        page_id: str,
-        incident_id: str,
-        body: dict[str, Any] | None = None,
+        api_token: str, page_id: str, incident_id: str
     ) -> ToolResult:
         """Publish a draft incident (sets it live, notifies subscribers).
 
-        Optional body fields: title, impact, status, body (overrides on publish),
-        affectedComponents, notifySubscribers.
+        Use update_status_page_incident first if you need to change the draft's
+        title, impact, status, body, or affected components before publishing.
         """
         try:
-            if body is not None:
-                validate_body(body, PublishStatusPageIncidentRequest)
-            return serialize(
-                _sp(api_token).incidents.publish(page_id, incident_id, body)
-            )
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(_sp(api_token).incidents.publish(page_id, incident_id))
         except DevhelmError as e:
             return format_error(e)
 
@@ -401,17 +328,14 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def add_status_page_subscriber(
-        api_token: str, page_id: str, body: dict[str, Any]
+        api_token: str, page_id: str, body: AdminAddSubscriberRequest
     ) -> ToolResult:
         """Add a subscriber to a status page (admin).
 
         Required fields: email.
         """
         try:
-            validate_body(body, AdminAddSubscriberRequest)
-            return serialize(_sp(api_token).subscribers.add(page_id, body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(_sp(api_token).subscribers.add(page_id, as_payload(body)))
         except DevhelmError as e:
             return format_error(e)
 
@@ -438,7 +362,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def add_status_page_domain(
-        api_token: str, page_id: str, body: dict[str, Any]
+        api_token: str, page_id: str, body: AddCustomDomainRequest
     ) -> ToolResult:
         """Add a custom domain to a status page.
 
@@ -447,10 +371,7 @@ def register(mcp: FastMCP) -> None:
         be configured in your DNS before calling verify.
         """
         try:
-            validate_body(body, AddCustomDomainRequest)
-            return serialize(_sp(api_token).domains.add(page_id, body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(_sp(api_token).domains.add(page_id, as_payload(body)))
         except DevhelmError as e:
             return format_error(e)
 

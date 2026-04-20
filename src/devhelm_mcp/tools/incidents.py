@@ -2,20 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from devhelm import DevhelmError
-from devhelm.types import CreateManualIncidentRequest
+from devhelm.types import CreateManualIncidentRequest, ResolveIncidentRequest
 from fastmcp import FastMCP
-from pydantic import ValidationError
 
 from devhelm_mcp.client import (
     ToolResult,
+    as_payload,
     format_error,
-    format_validation_error,
     get_client,
     serialize,
-    validate_body,
 )
 
 
@@ -37,17 +33,16 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_incident(api_token: str, body: dict[str, Any]) -> ToolResult:
+    def create_incident(
+        api_token: str, body: CreateManualIncidentRequest
+    ) -> ToolResult:
         """Create a manual incident.
 
         Required fields: title, severity (DOWN/DEGRADED/MAINTENANCE).
         Optional: monitorId (UUID), body (detailed description).
         """
         try:
-            validate_body(body, CreateManualIncidentRequest)
-            return serialize(get_client(api_token).incidents.create(body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(get_client(api_token).incidents.create(as_payload(body)))
         except DevhelmError as e:
             return format_error(e)
 
@@ -57,8 +52,10 @@ def register(mcp: FastMCP) -> None:
     ) -> ToolResult:
         """Resolve an active incident, optionally with a resolution message."""
         try:
+            body = ResolveIncidentRequest(body=message) if message else None
+            payload = as_payload(body) if body is not None else None
             return serialize(
-                get_client(api_token).incidents.resolve(incident_id, message)
+                get_client(api_token).incidents.resolve(incident_id, payload)
             )
         except DevhelmError as e:
             return format_error(e)

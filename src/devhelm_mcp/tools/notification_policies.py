@@ -2,23 +2,19 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from devhelm import DevhelmError
 from devhelm.types import (
     CreateNotificationPolicyRequest,
     UpdateNotificationPolicyRequest,
 )
 from fastmcp import FastMCP
-from pydantic import ValidationError
 
 from devhelm_mcp.client import (
     ToolResult,
+    as_payload,
     format_error,
-    format_validation_error,
     get_client,
     serialize,
-    validate_body,
 )
 
 
@@ -40,7 +36,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_notification_policy(api_token: str, body: dict[str, Any]) -> ToolResult:
+    def create_notification_policy(
+        api_token: str, body: CreateNotificationPolicyRequest
+    ) -> ToolResult:
         """Create a notification policy.
 
         Required: name, matchRules (list of {type, value?, monitorIds?, regions?}),
@@ -48,25 +46,23 @@ def register(mcp: FastMCP) -> None:
         enabled (bool), priority (int, higher = evaluated first).
         """
         try:
-            validate_body(body, CreateNotificationPolicyRequest)
-            return serialize(get_client(api_token).notification_policies.create(body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(
+                get_client(api_token).notification_policies.create(as_payload(body))
+            )
         except DevhelmError as e:
             return format_error(e)
 
     @mcp.tool()
     def update_notification_policy(
-        api_token: str, policy_id: str, body: dict[str, Any]
+        api_token: str, policy_id: str, body: UpdateNotificationPolicyRequest
     ) -> ToolResult:
         """Update a notification policy."""
         try:
-            validate_body(body, UpdateNotificationPolicyRequest)
             return serialize(
-                get_client(api_token).notification_policies.update(policy_id, body)
+                get_client(api_token).notification_policies.update(
+                    policy_id, as_payload(body)
+                )
             )
-        except ValidationError as e:
-            return format_validation_error(e)
         except DevhelmError as e:
             return format_error(e)
 
