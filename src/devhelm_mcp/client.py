@@ -5,7 +5,13 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from devhelm import Devhelm, DevhelmError
+from devhelm import (
+    Devhelm,
+    DevhelmApiError,
+    DevhelmError,
+    DevhelmTransportError,
+    DevhelmValidationError,
+)
 from pydantic import BaseModel
 
 API_BASE_URL = os.getenv("DEVHELM_API_URL", "https://api.devhelm.io")
@@ -32,11 +38,41 @@ def as_payload(model: BaseModel) -> dict[str, Any]:
 
 
 def format_error(err: DevhelmError) -> str:
-    """Format a DevhelmError into a human-readable message for the LLM."""
-    parts = [f"Error ({err.code}): {err.message}"]
-    if err.detail:
-        parts.append(f"Detail: {err.detail}")
-    return " | ".join(parts)
+    """Format a DevhelmError into a human-readable message for the LLM.
+
+    The SDK splits errors into three classes (P4):
+      * `DevhelmValidationError` — the request (or response) didn't match
+        the schema; surfaced before/after I/O.
+      * `DevhelmApiError` — the API returned a non-2xx; carries an HTTP
+        status code and body.
+      * `DevhelmTransportError` — the request never reached a server
+        response (DNS, refused, timeout, TLS, …).
+
+    Each gets its own labelled prefix so the LLM can decide whether to
+    fix the inputs, retry, or surface the failure to the user.
+    """
+    if isinstance(err, DevhelmValidationError):
+        parts = [f"ValidationError: {err.message}"]
+        if err.errors:
+            joined = "; ".join(
+                f"{'.'.join(str(p) for p in (e.get('loc') or ()))}: {e.get('msg', '')}"
+                for e in err.errors
+                if isinstance(e, dict)
+            )
+            if joined:
+                parts.append(f"Details: {joined}")
+        return " | ".join(parts)
+
+    if isinstance(err, DevhelmApiError):
+        parts = [f"ApiError ({err.status}): {err.message}"]
+        if err.detail:
+            parts.append(f"Detail: {err.detail}")
+        return " | ".join(parts)
+
+    if isinstance(err, DevhelmTransportError):
+        return f"TransportError: {err.message}"
+
+    return f"Error: {err}"
 
 
 def serialize(data: object) -> dict[str, Any] | list[dict[str, Any]]:
