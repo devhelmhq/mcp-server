@@ -2,25 +2,22 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from devhelm import DevhelmError
 from devhelm.types import CreateApiKeyRequest
 from fastmcp import FastMCP
-from pydantic import ValidationError
 
 from devhelm_mcp.client import (
+    ToolResult,
+    as_payload,
     format_error,
-    format_validation_error,
     get_client,
     serialize,
-    validate_body,
 )
 
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_api_keys(api_token: str) -> Any:
+    def list_api_keys(api_token: str) -> ToolResult:
         """List all API keys in the workspace."""
         try:
             return serialize(get_client(api_token).api_keys.list())
@@ -28,16 +25,13 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_api_key(api_token: str, body: dict[str, Any]) -> Any:
+    def create_api_key(api_token: str, body: CreateApiKeyRequest) -> ToolResult:
         """Create a new API key. The key value is returned only once.
 
         Required fields: name. Optional: expiresAt.
         """
         try:
-            validate_body(body, CreateApiKeyRequest)
-            return serialize(get_client(api_token).api_keys.create(body))
-        except ValidationError as e:
-            return format_validation_error(e)
+            return serialize(get_client(api_token).api_keys.create(as_payload(body)))
         except DevhelmError as e:
             return format_error(e)
 

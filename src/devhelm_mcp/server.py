@@ -12,7 +12,6 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from devhelm import Devhelm, DevhelmError
 from fastmcp import FastMCP
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -33,8 +32,6 @@ from devhelm_mcp.tools import (
     tags,
     webhooks,
 )
-
-API_BASE_URL = os.getenv("DEVHELM_API_URL", "https://api.devhelm.io")
 
 mcp = FastMCP(
     "DevHelm",
@@ -68,14 +65,6 @@ for mod in ALL_TOOL_MODULES:
     mod.register(mcp)
 
 
-def _get_client(token: str) -> Devhelm:
-    return Devhelm(token=token, base_url=API_BASE_URL)
-
-
-def _error_response(err: DevhelmError) -> dict[str, Any]:
-    return {"error": err.code, "message": err.message, "status": err.status}
-
-
 @mcp.custom_route("/health", methods=["GET"])
 async def health(request: Request) -> JSONResponse:
     return JSONResponse({"status": "healthy", "service": "devhelm-mcp-server"})
@@ -93,28 +82,6 @@ def _get_app() -> Any:
     async def health_handler(request: Request) -> JSONResponse:
         return JSONResponse({"status": "healthy", "service": "devhelm-mcp-server"})
 
-    async def path_auth_handler(request: Request) -> JSONResponse:
-        """Handle /{api_key}/mcp/* — extract token from path, proxy to MCP app."""
-        api_key = request.path_params["api_key"]
-        scope = dict(request.scope)
-        original_path: str = scope.get("path", "")
-        prefix = f"/{api_key}"
-        if original_path.startswith(prefix):
-            scope["path"] = original_path[len(prefix) :]
-        scope["headers"] = [
-            *[(k, v) for k, v in scope.get("headers", []) if k != b"authorization"],
-            (b"authorization", f"Bearer {api_key}".encode()),
-        ]
-        from starlette.requests import Request as StarletteRequest
-
-        inner_request = StarletteRequest(scope, request.receive)
-        response = await mcp_app(  # type: ignore[func-returns-value]
-            inner_request.scope,
-            inner_request.receive,
-            None,  # type: ignore[arg-type]
-        )
-        return response  # type: ignore[return-value]
-
     middleware = [
         Middleware(
             CORSMiddleware,
@@ -124,6 +91,16 @@ def _get_app() -> Any:
         ),
     ]
 
+    # Both routes mount the same MCP app:
+    #   - ``/mcp``           — clients send the API token in the
+    #     ``Authorization: Bearer …`` header (preferred).
+    #   - ``/{api_key}/mcp`` — clients that can only configure a URL
+    #     embed the token in the path. The bearer-auth shim that used
+    #     to translate the path segment into an ``Authorization`` header
+    #     was removed (it was unreachable: the ``Mount`` below claims
+    #     these requests first), so per-tool token args remain the
+    #     authoritative auth path for path-style clients today. See
+    #     END-1150.
     app = Starlette(
         routes=[
             Route("/health", health_handler, methods=["GET"]),

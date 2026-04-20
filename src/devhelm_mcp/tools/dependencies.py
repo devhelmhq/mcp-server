@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from devhelm import DevhelmError
 from fastmcp import FastMCP
 
-from devhelm_mcp.client import format_error, get_client, serialize
+from devhelm_mcp.client import ToolResult, format_error, get_client, serialize
 
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_dependencies(api_token: str) -> Any:
+    def list_dependencies(api_token: str) -> ToolResult:
         """List all tracked service dependencies."""
         try:
             return serialize(get_client(api_token).dependencies.list())
@@ -20,7 +18,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_dependency(api_token: str, dependency_id: str) -> Any:
+    def get_dependency(api_token: str, dependency_id: str) -> ToolResult:
         """Get a tracked dependency by ID."""
         try:
             return serialize(get_client(api_token).dependencies.get(dependency_id))
@@ -28,7 +26,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def track_dependency(api_token: str, slug: str) -> Any:
+    def track_dependency(api_token: str, slug: str) -> ToolResult:
         """Start tracking a service dependency by its slug (e.g. 'github', 'aws')."""
         try:
             return serialize(get_client(api_token).dependencies.track(slug))

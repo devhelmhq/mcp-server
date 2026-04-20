@@ -51,14 +51,6 @@ strict = true
 warn_return_any = true
 warn_unused_configs = true
 
-[[tool.mypy.overrides]]
-module = "devhelm.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "fastmcp.*"
-ignore_missing_imports = true
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
@@ -70,3 +62,12 @@ dev = [
     "ruff>=0.8",
     "twine>=5.0",
 ]
+
+# Track the sdk-python branch directly until v0.1.3 ships to PyPI with the
+# typed request models this server depends on (ResolveIncidentRequest,
+# AddResourceGroupMemberRequest, ReorderComponentsRequest, …).
+# `tool.uv.sources` is a uv-only key — pip/pypi installs ignore it and pull
+# `devhelm` from PyPI per the `dependencies` array above. After 0.1.3 lands
+# on PyPI, drop this block and bump the dep pin to `>=0.1.3`.
+[tool.uv.sources]
+devhelm = { git = "https://github.com/devhelmhq/sdk-python.git", branch = "fix/end-1162-strict-typing-spec-parity" }

@@ -1,5 +1,23 @@
 name: Spec Check
 
+# Triggered by ``spec_updated`` repository_dispatch from devhelmhq/mono whenever
+# the canonical OpenAPI spec changes.
+#
+# Unlike sibling surfaces (cli, sdk-js, sdk-python, terraform-provider) the MCP
+# server does NOT consume the spec directly — every API call is delegated to the
+# vendored ``devhelm`` Python SDK. The server only ships a copy of the spec for
+# documentation/reference purposes.
+#
+# What this workflow checks:
+#   1. The freshest spec from the monorepo is committed (so the documentation
+#      copy doesn't go stale relative to other surfaces).
+#   2. The latest published ``devhelm`` SDK still satisfies our resolver
+#      (we pull it via ``uv lock --upgrade-package devhelm``).
+#   3. Tests pass against the upgraded SDK — this is the real contract check
+#      because the SDK regenerates its own typed surface against the spec.
+#   4. If the resolved SDK version or the bundled spec changed, open a PR so a
+#      human can ship the bump. If anything broke, file an issue.
+
 on:
   repository_dispatch:
     types: [spec_updated]
@@ -7,6 +25,7 @@ on:
 permissions:
   contents: write
   issues: write
+  pull-requests: write
 
 jobs:
   check-compatibility:
@@ -22,20 +41,68 @@ jobs:
 
       - name: Download latest OpenAPI spec from monorepo
         run: |
-          gh api repos/devhelmhq/mono/contents/docs/openapi/monitoring-api.yaml \
+          mkdir -p docs/openapi
+          gh api repos/devhelmhq/mono/contents/docs/openapi/monitoring-api.json \
             -H "Accept: application/vnd.github.raw+json" \
             -o docs/openapi/monitoring-api.json
         env:
           GH_TOKEN: ${{ secrets.MONOREPO_DISPATCH_TOKEN }}
 
-      - run: uv sync
-      - run: uv run pytest -v
+      - name: Refresh devhelm SDK to latest
+        run: |
+          uv lock --upgrade-package devhelm
+          uv sync --locked
+
+      - name: Run tests against refreshed SDK
+        run: uv run pytest -v
+
+      - name: Lint and type-check
+        run: |
+          uv run ruff check src tests
+          uv run mypy src
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet docs/openapi/monitoring-api.json uv.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open PR with refreshed spec + SDK
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          branch="chore/spec-sync-$(date +%Y%m%d%H%M%S)"
+          git checkout -b "$branch"
+          git add docs/openapi/monitoring-api.json uv.lock
+          git commit -m "chore: sync OpenAPI spec and refresh devhelm SDK"
+          git push -u origin "$branch"
+          gh pr create \
+            --title "chore: sync OpenAPI spec and refresh devhelm SDK" \
+            --body "Auto-generated after a spec_updated event from the monorepo.
+
+          - Re-downloaded \`docs/openapi/monitoring-api.json\` (reference copy)
+          - Bumped vendored \`devhelm\` SDK to latest published version
+          - Tests + lint + mypy passed against the new SDK" \
+            --base main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Report failure
         if: failure()
         run: |
           gh issue create \
             --title "API spec change broke MCP server build" \
-            --body "The monorepo pushed a spec update that caused CI failures.\n\nWorkflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            --body "The monorepo pushed a spec update that caused CI failures in the MCP server compatibility job.
+
+          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          Likely causes:
+          - The latest \`devhelm\` SDK release is incompatible with how MCP tools call it
+          - Tool definitions reference an SDK method that was removed/renamed
+          - Test fixtures depend on a payload shape that changed in the spec"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

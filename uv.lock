@@ -389,14 +389,10 @@ wheels = [
 [[package]]
 name = "devhelm"
 version = "0.1.2"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/devhelmhq/sdk-python.git?branch=fix%2Fend-1162-strict-typing-spec-parity#eb8e5163ca4fb75138bc58967f15207250144c58" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic", extra = ["email"] },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/1b/95/05b624d78ec61115b45e143376a0b7d5e64353927b3e8a2e0a145e84eed7/devhelm-0.1.2.tar.gz", hash = "sha256:6c01a8f903421116f39176177861796b482e616fb13721c47a31fae559de0cc7", size = 174337, upload-time = "2026-04-16T11:45:04.24Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/8f/e1/2736e58c35053aed629fea0bd9d86ea0e3671e38eb03cad5f39b60917c2f/devhelm-0.1.2-py3-none-any.whl", hash = "sha256:78945186fca9dbec627fed6febd3705fcfc3c84f495db7b6c4c5ef0123f9bfb0", size = 51754, upload-time = "2026-04-16T11:45:03.238Z" },
 ]
 
 [[package]]
@@ -419,7 +415,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "devhelm", specifier = ">=0.1.0" },
+    { name = "devhelm", git = "https://github.com/devhelmhq/sdk-python.git?branch=fix%2Fend-1162-strict-typing-spec-parity" },
     { name = "fastmcp", specifier = ">=2.0.0" },
 ]
 
