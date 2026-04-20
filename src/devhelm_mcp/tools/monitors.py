@@ -52,7 +52,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def update_monitor(api_token: str, monitor_id: str, body: dict[str, Any]) -> ToolResult:
+    def update_monitor(
+        api_token: str, monitor_id: str, body: dict[str, Any]
+    ) -> ToolResult:
         """Update an existing monitor's configuration."""
         try:
             validate_body(body, UpdateMonitorRequest)

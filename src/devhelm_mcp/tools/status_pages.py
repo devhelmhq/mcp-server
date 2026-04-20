@@ -124,7 +124,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def update_status_page(api_token: str, page_id: str, body: dict[str, Any]) -> ToolResult:
+    def update_status_page(
+        api_token: str, page_id: str, body: dict[str, Any]
+    ) -> ToolResult:
         """Update a status page's name, slug, branding, visibility, or incident mode."""
         try:
             validate_body(body, UpdateStatusPageRequest)
@@ -277,7 +279,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_status_page_incident(api_token: str, page_id: str, incident_id: str) -> ToolResult:
+    def get_status_page_incident(
+        api_token: str, page_id: str, incident_id: str
+    ) -> ToolResult:
         """Get a status page incident with its full timeline of updates."""
         try:
             return serialize(_sp(api_token).incidents.get(page_id, incident_id))
@@ -451,7 +455,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def verify_status_page_domain(api_token: str, page_id: str, domain_id: str) -> ToolResult:
+    def verify_status_page_domain(
+        api_token: str, page_id: str, domain_id: str
+    ) -> ToolResult:
         """Trigger DNS verification for a custom domain.
 
         Returns the updated domain with current verification status.

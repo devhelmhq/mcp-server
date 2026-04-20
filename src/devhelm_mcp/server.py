@@ -12,7 +12,6 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from devhelm import Devhelm, DevhelmError
 from fastmcp import FastMCP
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -33,8 +32,6 @@ from devhelm_mcp.tools import (
     tags,
     webhooks,
 )
-
-API_BASE_URL = os.getenv("DEVHELM_API_URL", "https://api.devhelm.io")
 
 mcp = FastMCP(
     "DevHelm",
@@ -66,14 +63,6 @@ ALL_TOOL_MODULES = [
 
 for mod in ALL_TOOL_MODULES:
     mod.register(mcp)
-
-
-def _get_client(token: str) -> Devhelm:
-    return Devhelm(token=token, base_url=API_BASE_URL)
-
-
-def _error_response(err: DevhelmError) -> dict[str, Any]:
-    return {"error": err.code, "message": err.message, "status": err.status}
 
 
 @mcp.custom_route("/health", methods=["GET"])

@@ -62,12 +62,3 @@ def register(mcp: FastMCP) -> None:
             )
         except DevhelmError as e:
             return format_error(e)
-
-    @mcp.tool()
-    def delete_incident(api_token: str, incident_id: str) -> str:
-        """Delete an incident permanently."""
-        try:
-            get_client(api_token).incidents.delete(incident_id)
-            return "Incident deleted successfully."
-        except DevhelmError as e:
-            return format_error(e)

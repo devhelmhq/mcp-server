@@ -51,7 +51,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def update_webhook(api_token: str, webhook_id: str, body: dict[str, Any]) -> ToolResult:
+    def update_webhook(
+        api_token: str, webhook_id: str, body: dict[str, Any]
+    ) -> ToolResult:
         """Update a webhook endpoint."""
         try:
             validate_body(body, UpdateWebhookEndpointRequest)

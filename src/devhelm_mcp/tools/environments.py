@@ -51,7 +51,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def update_environment(api_token: str, slug: str, body: dict[str, Any]) -> ToolResult:
+    def update_environment(
+        api_token: str, slug: str, body: dict[str, Any]
+    ) -> ToolResult:
         """Update an environment by slug."""
         try:
             validate_body(body, UpdateEnvironmentRequest)
