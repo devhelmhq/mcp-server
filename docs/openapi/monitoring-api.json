@@ -21067,34 +21067,30 @@
       },
       "ApiKeyAuthConfig": {
         "required": [
+          "type",
           "headerName"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/MonitorAuthConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "headerName": {
-                "minLength": 1,
-                "pattern": "^[A-Za-z0-9\\-_]+$",
-                "type": "string",
-                "description": "HTTP header name that carries the API key"
-              },
-              "vaultSecretId": {
-                "type": "string",
-                "description": "Vault secret ID for the API key value",
-                "format": "uuid",
-                "nullable": true
-              }
-            },
-            "required": [
-              "headerName"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "api_key"
             ]
+          },
+          "headerName": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9\\-_]+$",
+            "type": "string",
+            "description": "HTTP header name that carries the API key"
+          },
+          "vaultSecretId": {
+            "type": "string",
+            "description": "Vault secret ID for the API key value",
+            "format": "uuid",
+            "nullable": true
           }
-        ]
+        }
       },
       "ApiKeyCreateResponse": {
         "required": [
@@ -21189,65 +21185,6 @@
           }
         },
         "description": "API key for programmatic access to the DevHelm API"
-      },
-      "AssertionConfig": {
-        "required": [
-          "type"
-        ],
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          }
-        },
-        "description": "New assertion configuration (full replacement)",
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "status_code": "#/components/schemas/StatusCodeAssertion",
-            "response_time": "#/components/schemas/ResponseTimeAssertion",
-            "body_contains": "#/components/schemas/BodyContainsAssertion",
-            "json_path": "#/components/schemas/JsonPathAssertion",
-            "header_value": "#/components/schemas/HeaderValueAssertion",
-            "regex_body": "#/components/schemas/RegexBodyAssertion",
-            "dns_resolves": "#/components/schemas/DnsResolvesAssertion",
-            "dns_response_time": "#/components/schemas/DnsResponseTimeAssertion",
-            "dns_expected_ips": "#/components/schemas/DnsExpectedIpsAssertion",
-            "dns_expected_cname": "#/components/schemas/DnsExpectedCnameAssertion",
-            "dns_record_contains": "#/components/schemas/DnsRecordContainsAssertion",
-            "dns_record_equals": "#/components/schemas/DnsRecordEqualsAssertion",
-            "dns_txt_contains": "#/components/schemas/DnsTxtContainsAssertion",
-            "dns_min_answers": "#/components/schemas/DnsMinAnswersAssertion",
-            "dns_max_answers": "#/components/schemas/DnsMaxAnswersAssertion",
-            "dns_response_time_warn": "#/components/schemas/DnsResponseTimeWarnAssertion",
-            "dns_ttl_low": "#/components/schemas/DnsTtlLowAssertion",
-            "dns_ttl_high": "#/components/schemas/DnsTtlHighAssertion",
-            "mcp_connects": "#/components/schemas/McpConnectsAssertion",
-            "mcp_response_time": "#/components/schemas/McpResponseTimeAssertion",
-            "mcp_has_capability": "#/components/schemas/McpHasCapabilityAssertion",
-            "mcp_tool_available": "#/components/schemas/McpToolAvailableAssertion",
-            "mcp_min_tools": "#/components/schemas/McpMinToolsAssertion",
-            "mcp_protocol_version": "#/components/schemas/McpProtocolVersionAssertion",
-            "mcp_response_time_warn": "#/components/schemas/McpResponseTimeWarnAssertion",
-            "mcp_tool_count_changed": "#/components/schemas/McpToolCountChangedAssertion",
-            "ssl_expiry": "#/components/schemas/SslExpiryAssertion",
-            "response_size": "#/components/schemas/ResponseSizeAssertion",
-            "redirect_count": "#/components/schemas/RedirectCountAssertion",
-            "redirect_target": "#/components/schemas/RedirectTargetAssertion",
-            "response_time_warn": "#/components/schemas/ResponseTimeWarnAssertion",
-            "tcp_connects": "#/components/schemas/TcpConnectsAssertion",
-            "tcp_response_time": "#/components/schemas/TcpResponseTimeAssertion",
-            "tcp_response_time_warn": "#/components/schemas/TcpResponseTimeWarnAssertion",
-            "icmp_reachable": "#/components/schemas/IcmpReachableAssertion",
-            "icmp_response_time": "#/components/schemas/IcmpResponseTimeAssertion",
-            "icmp_response_time_warn": "#/components/schemas/IcmpResponseTimeWarnAssertion",
-            "icmp_packet_loss": "#/components/schemas/IcmpPacketLossAssertion",
-            "heartbeat_received": "#/components/schemas/HeartbeatReceivedAssertion",
-            "heartbeat_max_interval": "#/components/schemas/HeartbeatMaxIntervalAssertion",
-            "heartbeat_interval_drift": "#/components/schemas/HeartbeatIntervalDriftAssertion",
-            "heartbeat_payload_contains": "#/components/schemas/HeartbeatPayloadContainsAssertion"
-          }
-        }
       },
       "AssertionResultDto": {
         "required": [
@@ -21465,21 +21402,22 @@
       },
       "BasicAuthConfig": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/MonitorAuthConfig"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "basic"
+            ]
           },
-          {
-            "type": "object",
-            "properties": {
-              "vaultSecretId": {
-                "type": "string",
-                "description": "Vault secret ID holding Basic auth username and password",
-                "format": "uuid",
-                "nullable": true
-              }
-            }
+          "vaultSecretId": {
+            "type": "string",
+            "description": "Vault secret ID holding Basic auth username and password",
+            "format": "uuid",
+            "nullable": true
           }
+        },
+        "required": [
+          "type"
         ]
       },
       "BatchComponentUptimeDto": {
@@ -21504,46 +21442,43 @@
       },
       "BearerAuthConfig": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/MonitorAuthConfig"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "bearer"
+            ]
           },
-          {
-            "type": "object",
-            "properties": {
-              "vaultSecretId": {
-                "type": "string",
-                "description": "Vault secret ID holding the bearer token value",
-                "format": "uuid",
-                "nullable": true
-              }
-            }
+          "vaultSecretId": {
+            "type": "string",
+            "description": "Vault secret ID holding the bearer token value",
+            "format": "uuid",
+            "nullable": true
           }
+        },
+        "required": [
+          "type"
         ]
       },
       "BodyContainsAssertion": {
         "required": [
+          "type",
           "substring"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "substring": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Substring that must appear in the response body"
-              }
-            },
-            "required": [
-              "substring"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "body_contains"
             ]
+          },
+          "substring": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Substring that must appear in the response body"
           }
-        ]
+        }
       },
       "BulkMonitorActionRequest": {
         "required": [
@@ -21678,30 +21613,6 @@
           }
         },
         "description": "Update an organization member's status"
-      },
-      "ChannelConfig": {
-        "required": [
-          "channelType"
-        ],
-        "type": "object",
-        "properties": {
-          "channelType": {
-            "type": "string"
-          }
-        },
-        "description": "New channel configuration (full replacement, not partial update)",
-        "discriminator": {
-          "propertyName": "channelType",
-          "mapping": {
-            "email": "#/components/schemas/EmailChannelConfig",
-            "slack": "#/components/schemas/SlackChannelConfig",
-            "webhook": "#/components/schemas/WebhookChannelConfig",
-            "pagerduty": "#/components/schemas/PagerDutyChannelConfig",
-            "opsgenie": "#/components/schemas/OpsGenieChannelConfig",
-            "teams": "#/components/schemas/TeamsChannelConfig",
-            "discord": "#/components/schemas/DiscordChannelConfig"
-          }
-        }
       },
       "ChartBucketDto": {
         "required": [
@@ -21886,15 +21797,6 @@
         "description": "A single check result from a monitor run"
       },
       "CheckTypeDetailsDto": {
-        "required": [
-          "check_type"
-        ],
-        "type": "object",
-        "properties": {
-          "check_type": {
-            "type": "string"
-          }
-        },
         "description": "Check-type-specific details — polymorphic by check_type discriminator",
         "discriminator": {
           "propertyName": "check_type",
@@ -21905,7 +21807,24 @@
             "dns": "#/components/schemas/Dns",
             "mcp_server": "#/components/schemas/McpServer"
           }
-        }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Http"
+          },
+          {
+            "$ref": "#/components/schemas/Tcp"
+          },
+          {
+            "$ref": "#/components/schemas/Icmp"
+          },
+          {
+            "$ref": "#/components/schemas/Dns"
+          },
+          {
+            "$ref": "#/components/schemas/McpServer"
+          }
+        ]
       },
       "ComponentImpact": {
         "required": [
@@ -23425,493 +23344,447 @@
       },
       "DiscordChannelConfig": {
         "required": [
+          "channelType",
           "webhookUrl"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ChannelConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "webhookUrl": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Discord webhook URL"
-              },
-              "mentionRoleId": {
-                "type": "string",
-                "description": "Optional Discord role ID to mention in notifications",
-                "nullable": true
-              }
-            },
-            "required": [
-              "webhookUrl"
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "discord"
             ]
+          },
+          "webhookUrl": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Discord webhook URL"
+          },
+          "mentionRoleId": {
+            "type": "string",
+            "description": "Optional Discord role ID to mention in notifications",
+            "nullable": true
           }
-        ]
+        }
       },
       "Dns": {
         "type": "object",
         "description": "DNS check-type-specific details",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/CheckTypeDetailsDto"
+        "properties": {
+          "check_type": {
+            "type": "string",
+            "enum": [
+              "dns"
+            ]
           },
-          {
+          "hostname": {
+            "type": "string",
+            "description": "Target hostname",
+            "nullable": true
+          },
+          "requestedTypes": {
+            "type": "array",
+            "description": "Requested DNS record types",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Requested DNS record types",
+              "nullable": true
+            }
+          },
+          "usedResolver": {
+            "type": "string",
+            "description": "Resolver used for lookup",
+            "nullable": true
+          },
+          "records": {
             "type": "object",
-            "properties": {
-              "hostname": {
-                "type": "string",
-                "description": "Target hostname",
-                "nullable": true
-              },
-              "requestedTypes": {
-                "type": "array",
-                "description": "Requested DNS record types",
-                "nullable": true,
-                "items": {
-                  "type": "string",
-                  "description": "Requested DNS record types",
-                  "nullable": true
-                }
-              },
-              "usedResolver": {
-                "type": "string",
-                "description": "Resolver used for lookup",
-                "nullable": true
-              },
-              "records": {
+            "additionalProperties": {
+              "type": "array",
+              "description": "Resolved DNS records keyed by record type",
+              "nullable": true,
+              "items": {
                 "type": "object",
                 "additionalProperties": {
-                  "type": "array",
+                  "type": "object",
                   "description": "Resolved DNS records keyed by record type",
-                  "nullable": true,
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "object",
-                      "description": "Resolved DNS records keyed by record type",
-                      "nullable": true
-                    },
-                    "description": "Resolved DNS records keyed by record type",
-                    "nullable": true
-                  }
+                  "nullable": true
                 },
                 "description": "Resolved DNS records keyed by record type",
                 "nullable": true
-              },
-              "attempts": {
-                "type": "array",
-                "description": "DNS resolution attempts",
-                "nullable": true,
-                "items": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "description": "DNS resolution attempts",
-                    "nullable": true
-                  },
-                  "description": "DNS resolution attempts",
-                  "nullable": true
-                }
-              },
-              "failureKind": {
-                "type": "string",
-                "description": "Kind of DNS failure, if any",
-                "nullable": true
               }
+            },
+            "description": "Resolved DNS records keyed by record type",
+            "nullable": true
+          },
+          "attempts": {
+            "type": "array",
+            "description": "DNS resolution attempts",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "description": "DNS resolution attempts",
+                "nullable": true
+              },
+              "description": "DNS resolution attempts",
+              "nullable": true
             }
+          },
+          "failureKind": {
+            "type": "string",
+            "description": "Kind of DNS failure, if any",
+            "nullable": true
           }
+        },
+        "required": [
+          "check_type"
         ]
       },
       "DnsExpectedCnameAssertion": {
         "required": [
+          "type",
           "value"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "value": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Expected CNAME target the resolution must include"
-              }
-            },
-            "required": [
-              "value"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_expected_cname"
             ]
+          },
+          "value": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Expected CNAME target the resolution must include"
           }
-        ]
+        }
       },
       "DnsExpectedIpsAssertion": {
         "required": [
+          "type",
           "ips"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "ips": {
-                "minItems": 1,
-                "type": "array",
-                "description": "Allowed IP addresses; at least one resolved address must match",
-                "items": {
-                  "type": "string",
-                  "description": "Allowed IP addresses; at least one resolved address must match"
-                }
-              }
-            },
-            "required": [
-              "ips"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_expected_ips"
             ]
+          },
+          "ips": {
+            "minItems": 1,
+            "type": "array",
+            "description": "Allowed IP addresses; at least one resolved address must match",
+            "items": {
+              "type": "string",
+              "description": "Allowed IP addresses; at least one resolved address must match"
+            }
           }
-        ]
+        }
       },
       "DnsMaxAnswersAssertion": {
         "required": [
-          "recordType"
+          "type",
+          "recordType",
+          "max"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "recordType": {
-                "minLength": 1,
-                "type": "string",
-                "description": "DNS record type whose answer count is checked"
-              },
-              "max": {
-                "type": "integer",
-                "description": "Maximum number of answers allowed for that record type",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "recordType",
-              "max"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_max_answers"
             ]
+          },
+          "recordType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "DNS record type whose answer count is checked"
+          },
+          "max": {
+            "type": "integer",
+            "description": "Maximum number of answers allowed for that record type",
+            "format": "int32"
           }
-        ]
+        }
       },
       "DnsMinAnswersAssertion": {
         "required": [
-          "recordType"
+          "type",
+          "recordType",
+          "min"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "recordType": {
-                "minLength": 1,
-                "type": "string",
-                "description": "DNS record type whose answer count is checked"
-              },
-              "min": {
-                "type": "integer",
-                "description": "Minimum number of answers required for that record type",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "recordType",
-              "min"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_min_answers"
             ]
+          },
+          "recordType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "DNS record type whose answer count is checked"
+          },
+          "min": {
+            "type": "integer",
+            "description": "Minimum number of answers required for that record type",
+            "format": "int32"
           }
-        ]
+        }
       },
       "DnsMonitorConfig": {
         "required": [
           "hostname"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/MonitorConfig"
+        "properties": {
+          "hostname": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Domain name to resolve"
           },
-          {
-            "type": "object",
-            "properties": {
-              "hostname": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Domain name to resolve"
-              },
-              "recordTypes": {
-                "type": "array",
-                "description": "DNS record types to query: A, AAAA, CNAME, MX, NS, TXT, SRV, SOA, CAA, PTR",
-                "nullable": true,
-                "items": {
-                  "type": "string",
-                  "description": "DNS record types to query: A, AAAA, CNAME, MX, NS, TXT, SRV, SOA, CAA, PTR",
-                  "nullable": true,
-                  "enum": [
-                    "A",
-                    "AAAA",
-                    "CNAME",
-                    "MX",
-                    "NS",
-                    "TXT",
-                    "SRV",
-                    "SOA",
-                    "CAA",
-                    "PTR"
-                  ]
-                }
-              },
-              "nameservers": {
-                "type": "array",
-                "description": "Custom nameservers to query (uses system defaults if omitted)",
-                "nullable": true,
-                "items": {
-                  "type": "string",
-                  "description": "Custom nameservers to query (uses system defaults if omitted)",
-                  "nullable": true
-                }
-              },
-              "timeoutMs": {
-                "type": "integer",
-                "description": "Per-query timeout in milliseconds",
-                "format": "int32",
-                "nullable": true
-              },
-              "totalTimeoutMs": {
-                "type": "integer",
-                "description": "Total timeout for all queries in milliseconds",
-                "format": "int32",
-                "nullable": true
-              }
-            },
-            "required": [
-              "hostname"
-            ]
+          "recordTypes": {
+            "type": "array",
+            "description": "DNS record types to query: A, AAAA, CNAME, MX, NS, TXT, SRV, SOA, CAA, PTR",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "DNS record types to query: A, AAAA, CNAME, MX, NS, TXT, SRV, SOA, CAA, PTR",
+              "nullable": true,
+              "enum": [
+                "A",
+                "AAAA",
+                "CNAME",
+                "MX",
+                "NS",
+                "TXT",
+                "SRV",
+                "SOA",
+                "CAA",
+                "PTR"
+              ]
+            }
+          },
+          "nameservers": {
+            "type": "array",
+            "description": "Custom nameservers to query (uses system defaults if omitted)",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Custom nameservers to query (uses system defaults if omitted)",
+              "nullable": true
+            }
+          },
+          "timeoutMs": {
+            "type": "integer",
+            "description": "Per-query timeout in milliseconds",
+            "format": "int32",
+            "nullable": true
+          },
+          "totalTimeoutMs": {
+            "type": "integer",
+            "description": "Total timeout for all queries in milliseconds",
+            "format": "int32",
+            "nullable": true
           }
-        ]
+        }
       },
       "DnsRecordContainsAssertion": {
         "required": [
+          "type",
           "recordType",
           "substring"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "recordType": {
-                "minLength": 1,
-                "type": "string",
-                "description": "DNS record type to assert on (A, AAAA, CNAME, MX, TXT)"
-              },
-              "substring": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Substring that must appear in a matching record value"
-              }
-            },
-            "required": [
-              "recordType",
-              "substring"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_record_contains"
             ]
+          },
+          "recordType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "DNS record type to assert on (A, AAAA, CNAME, MX, TXT)"
+          },
+          "substring": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Substring that must appear in a matching record value"
           }
-        ]
+        }
       },
       "DnsRecordEqualsAssertion": {
         "required": [
+          "type",
           "recordType",
           "value"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "recordType": {
-                "minLength": 1,
-                "type": "string",
-                "description": "DNS record type to assert on (A, AAAA, CNAME, MX, TXT)"
-              },
-              "value": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Expected DNS record value for an exact match"
-              }
-            },
-            "required": [
-              "recordType",
-              "value"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_record_equals"
             ]
+          },
+          "recordType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "DNS record type to assert on (A, AAAA, CNAME, MX, TXT)"
+          },
+          "value": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Expected DNS record value for an exact match"
           }
-        ]
+        }
       },
       "DnsResolvesAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_resolves"
+            ]
           }
+        },
+        "required": [
+          "type"
         ]
       },
       "DnsResponseTimeAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "maxMs": {
-                "type": "integer",
-                "description": "Maximum allowed DNS resolution time in milliseconds",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "maxMs"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_response_time"
             ]
+          },
+          "maxMs": {
+            "type": "integer",
+            "description": "Maximum allowed DNS resolution time in milliseconds",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "maxMs"
         ]
       },
       "DnsResponseTimeWarnAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "warnMs": {
-                "type": "integer",
-                "description": "DNS resolution time in milliseconds that triggers a warning only",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "warnMs"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_response_time_warn"
             ]
+          },
+          "warnMs": {
+            "type": "integer",
+            "description": "DNS resolution time in milliseconds that triggers a warning only",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "warnMs"
         ]
       },
       "DnsTtlHighAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "maxTtl": {
-                "type": "integer",
-                "description": "Maximum TTL in seconds before a high-TTL warning is raised",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "maxTtl"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_ttl_high"
             ]
+          },
+          "maxTtl": {
+            "type": "integer",
+            "description": "Maximum TTL in seconds before a high-TTL warning is raised",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "maxTtl"
         ]
       },
       "DnsTtlLowAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "minTtl": {
-                "type": "integer",
-                "description": "Minimum acceptable TTL in seconds before a warning is raised",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "minTtl"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_ttl_low"
             ]
+          },
+          "minTtl": {
+            "type": "integer",
+            "description": "Minimum acceptable TTL in seconds before a warning is raised",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "minTtl"
         ]
       },
       "DnsTxtContainsAssertion": {
         "required": [
+          "type",
           "substring"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "substring": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Substring that must appear in at least one TXT record"
-              }
-            },
-            "required": [
-              "substring"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dns_txt_contains"
             ]
+          },
+          "substring": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Substring that must appear in at least one TXT record"
           }
-        ]
+        }
       },
       "EmailChannelConfig": {
         "required": [
+          "channelType",
           "recipients"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ChannelConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "recipients": {
-                "minItems": 1,
-                "type": "array",
-                "description": "Email addresses to send notifications to",
-                "items": {
-                  "type": "string",
-                  "description": "Email addresses to send notifications to",
-                  "format": "email"
-                }
-              }
-            },
-            "required": [
-              "recipients"
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "email"
             ]
+          },
+          "recipients": {
+            "minItems": 1,
+            "type": "array",
+            "description": "Email addresses to send notifications to",
+            "items": {
+              "type": "string",
+              "description": "Email addresses to send notifications to",
+              "format": "email"
+            }
           }
-        ]
+        }
       },
       "EntitlementDto": {
         "required": [
@@ -24213,130 +24086,112 @@
       },
       "HeaderAuthConfig": {
         "required": [
+          "type",
           "headerName"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/MonitorAuthConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "headerName": {
-                "minLength": 1,
-                "pattern": "^[A-Za-z0-9\\-_]+$",
-                "type": "string",
-                "description": "Custom HTTP header name for the secret value"
-              },
-              "vaultSecretId": {
-                "type": "string",
-                "description": "Vault secret ID for the header value",
-                "format": "uuid",
-                "nullable": true
-              }
-            },
-            "required": [
-              "headerName"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "header"
             ]
+          },
+          "headerName": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9\\-_]+$",
+            "type": "string",
+            "description": "Custom HTTP header name for the secret value"
+          },
+          "vaultSecretId": {
+            "type": "string",
+            "description": "Vault secret ID for the header value",
+            "format": "uuid",
+            "nullable": true
           }
-        ]
+        }
       },
       "HeaderValueAssertion": {
         "required": [
-          "expected",
+          "type",
           "headerName",
+          "expected",
           "operator"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "header_value"
+            ]
           },
-          {
-            "type": "object",
-            "properties": {
-              "headerName": {
-                "minLength": 1,
-                "type": "string",
-                "description": "HTTP header name to assert on"
-              },
-              "expected": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Expected value to compare against"
-              },
-              "operator": {
-                "type": "string",
-                "description": "Comparison operator (equals, contains, less_than, greater_than, etc.)",
-                "enum": [
-                  "equals",
-                  "contains",
-                  "less_than",
-                  "greater_than",
-                  "matches",
-                  "range"
-                ]
-              }
-            },
-            "required": [
-              "headerName",
-              "expected",
-              "operator"
+          "headerName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "HTTP header name to assert on"
+          },
+          "expected": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Expected value to compare against"
+          },
+          "operator": {
+            "type": "string",
+            "description": "Comparison operator (equals, contains, less_than, greater_than, etc.)",
+            "enum": [
+              "equals",
+              "contains",
+              "less_than",
+              "greater_than",
+              "matches",
+              "range"
             ]
           }
-        ]
+        }
       },
       "HeartbeatIntervalDriftAssertion": {
         "required": [
+          "type",
           "maxDeviationPercent"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "maxDeviationPercent": {
-                "maximum": 100,
-                "minimum": 1,
-                "type": "integer",
-                "description": "Max percent drift from expected ping interval before warning (non-fatal)",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "maxDeviationPercent"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "heartbeat_interval_drift"
             ]
+          },
+          "maxDeviationPercent": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Max percent drift from expected ping interval before warning (non-fatal)",
+            "format": "int32"
           }
-        ]
+        }
       },
       "HeartbeatMaxIntervalAssertion": {
         "required": [
+          "type",
           "maxSeconds"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "maxSeconds": {
-                "minimum": 1,
-                "type": "integer",
-                "description": "Maximum allowed gap in seconds between consecutive heartbeat pings",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "maxSeconds"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "heartbeat_max_interval"
             ]
+          },
+          "maxSeconds": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "Maximum allowed gap in seconds between consecutive heartbeat pings",
+            "format": "int32"
           }
-        ]
+        }
       },
       "HeartbeatMonitorConfig": {
         "required": [
@@ -24344,63 +24199,46 @@
           "gracePeriod"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/MonitorConfig"
+        "properties": {
+          "expectedInterval": {
+            "maximum": 86400,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Expected heartbeat interval in seconds",
+            "format": "int32"
           },
-          {
-            "type": "object",
-            "properties": {
-              "expectedInterval": {
-                "maximum": 86400,
-                "minimum": 1,
-                "type": "integer",
-                "description": "Expected heartbeat interval in seconds",
-                "format": "int32"
-              },
-              "gracePeriod": {
-                "minimum": 1,
-                "type": "integer",
-                "description": "Grace period in seconds before marking as down",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "expectedInterval",
-              "gracePeriod"
-            ]
+          "gracePeriod": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "Grace period in seconds before marking as down",
+            "format": "int32"
           }
-        ]
+        }
       },
       "HeartbeatPayloadContainsAssertion": {
         "required": [
+          "type",
           "path",
           "value"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "path": {
-                "minLength": 1,
-                "type": "string",
-                "description": "JSONPath expression into the heartbeat ping JSON payload"
-              },
-              "value": {
-                "type": "string",
-                "description": "Expected value to compare against at that path"
-              }
-            },
-            "required": [
-              "path",
-              "value"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "heartbeat_payload_contains"
             ]
+          },
+          "path": {
+            "minLength": 1,
+            "type": "string",
+            "description": "JSONPath expression into the heartbeat ping JSON payload"
+          },
+          "value": {
+            "type": "string",
+            "description": "Expected value to compare against at that path"
           }
-        ]
+        }
       },
       "HeartbeatPingResponse": {
         "required": [
@@ -24418,39 +24256,46 @@
       },
       "HeartbeatReceivedAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "heartbeat_received"
+            ]
           }
+        },
+        "required": [
+          "type"
         ]
       },
       "Http": {
         "type": "object",
         "description": "HTTP check-type-specific details",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/CheckTypeDetailsDto"
+        "properties": {
+          "check_type": {
+            "type": "string",
+            "enum": [
+              "http"
+            ]
           },
-          {
+          "timing": {
             "type": "object",
-            "properties": {
-              "timing": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "object",
-                  "description": "Request phase timing breakdown",
-                  "nullable": true
-                },
-                "description": "Request phase timing breakdown",
-                "nullable": true
-              },
-              "bodyTruncated": {
-                "type": "boolean",
-                "description": "Whether the response body was truncated before storage",
-                "nullable": true
-              }
-            }
+            "additionalProperties": {
+              "type": "object",
+              "description": "Request phase timing breakdown",
+              "nullable": true
+            },
+            "description": "Request phase timing breakdown",
+            "nullable": true
+          },
+          "bodyTruncated": {
+            "type": "boolean",
+            "description": "Whether the response body was truncated before storage",
+            "nullable": true
           }
+        },
+        "required": [
+          "check_type"
         ]
       },
       "HttpMonitorConfig": {
@@ -24459,242 +24304,218 @@
           "url"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/MonitorConfig"
+        "properties": {
+          "url": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Target URL to send requests to"
           },
-          {
-            "type": "object",
-            "properties": {
-              "url": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Target URL to send requests to"
-              },
-              "method": {
-                "type": "string",
-                "description": "HTTP method: GET, POST, PUT, PATCH, DELETE, or HEAD",
-                "enum": [
-                  "GET",
-                  "POST",
-                  "PUT",
-                  "PATCH",
-                  "DELETE",
-                  "HEAD"
-                ]
-              },
-              "customHeaders": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string",
-                  "description": "Additional HTTP headers to include in requests",
-                  "nullable": true
-                },
-                "description": "Additional HTTP headers to include in requests",
-                "nullable": true
-              },
-              "requestBody": {
-                "type": "string",
-                "description": "Request body content for POST/PUT/PATCH methods",
-                "nullable": true
-              },
-              "contentType": {
-                "type": "string",
-                "description": "Content-Type header value for the request body",
-                "nullable": true
-              },
-              "verifyTls": {
-                "type": "boolean",
-                "description": "Whether to verify TLS certificates (default: true)",
-                "nullable": true
-              }
-            },
-            "required": [
-              "url",
-              "method"
+          "method": {
+            "type": "string",
+            "description": "HTTP method: GET, POST, PUT, PATCH, DELETE, or HEAD",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE",
+              "HEAD"
             ]
+          },
+          "customHeaders": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Additional HTTP headers to include in requests",
+              "nullable": true
+            },
+            "description": "Additional HTTP headers to include in requests",
+            "nullable": true
+          },
+          "requestBody": {
+            "type": "string",
+            "description": "Request body content for POST/PUT/PATCH methods",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "description": "Content-Type header value for the request body",
+            "nullable": true
+          },
+          "verifyTls": {
+            "type": "boolean",
+            "description": "Whether to verify TLS certificates (default: true)",
+            "nullable": true
           }
-        ]
+        }
       },
       "Icmp": {
         "required": [
+          "check_type",
           "host"
         ],
         "type": "object",
         "description": "ICMP (ping) check-type-specific details",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/CheckTypeDetailsDto"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "host": {
-                "type": "string",
-                "description": "Target host",
-                "example": "1.1.1.1"
-              },
-              "packetsSent": {
-                "type": "integer",
-                "description": "Number of ICMP packets sent",
-                "format": "int32",
-                "nullable": true
-              },
-              "packetsReceived": {
-                "type": "integer",
-                "description": "Number of ICMP packets received",
-                "format": "int32",
-                "nullable": true
-              },
-              "packetLoss": {
-                "type": "number",
-                "description": "Packet loss percentage",
-                "format": "double",
-                "nullable": true,
-                "example": 0
-              },
-              "avgRttMs": {
-                "type": "number",
-                "description": "Average round-trip time in ms",
-                "format": "double",
-                "nullable": true
-              },
-              "minRttMs": {
-                "type": "number",
-                "description": "Minimum round-trip time in ms",
-                "format": "double",
-                "nullable": true
-              },
-              "maxRttMs": {
-                "type": "number",
-                "description": "Maximum round-trip time in ms",
-                "format": "double",
-                "nullable": true
-              },
-              "jitterMs": {
-                "type": "number",
-                "description": "Jitter in ms",
-                "format": "double",
-                "nullable": true
-              }
-            },
-            "required": [
-              "host"
+        "properties": {
+          "check_type": {
+            "type": "string",
+            "enum": [
+              "icmp"
             ]
+          },
+          "host": {
+            "type": "string",
+            "description": "Target host",
+            "example": "1.1.1.1"
+          },
+          "packetsSent": {
+            "type": "integer",
+            "description": "Number of ICMP packets sent",
+            "format": "int32",
+            "nullable": true
+          },
+          "packetsReceived": {
+            "type": "integer",
+            "description": "Number of ICMP packets received",
+            "format": "int32",
+            "nullable": true
+          },
+          "packetLoss": {
+            "type": "number",
+            "description": "Packet loss percentage",
+            "format": "double",
+            "nullable": true,
+            "example": 0
+          },
+          "avgRttMs": {
+            "type": "number",
+            "description": "Average round-trip time in ms",
+            "format": "double",
+            "nullable": true
+          },
+          "minRttMs": {
+            "type": "number",
+            "description": "Minimum round-trip time in ms",
+            "format": "double",
+            "nullable": true
+          },
+          "maxRttMs": {
+            "type": "number",
+            "description": "Maximum round-trip time in ms",
+            "format": "double",
+            "nullable": true
+          },
+          "jitterMs": {
+            "type": "number",
+            "description": "Jitter in ms",
+            "format": "double",
+            "nullable": true
           }
-        ]
+        }
       },
       "IcmpMonitorConfig": {
         "required": [
           "host"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/MonitorConfig"
+        "properties": {
+          "host": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Target hostname or IP address to ping"
           },
-          {
-            "type": "object",
-            "properties": {
-              "host": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Target hostname or IP address to ping"
-              },
-              "packetCount": {
-                "maximum": 20,
-                "minimum": 1,
-                "type": "integer",
-                "description": "Number of ICMP packets to send",
-                "format": "int32",
-                "nullable": true
-              },
-              "timeoutMs": {
-                "type": "integer",
-                "description": "Ping timeout in milliseconds",
-                "format": "int32",
-                "nullable": true
-              }
-            },
-            "required": [
-              "host"
-            ]
+          "packetCount": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Number of ICMP packets to send",
+            "format": "int32",
+            "nullable": true
+          },
+          "timeoutMs": {
+            "type": "integer",
+            "description": "Ping timeout in milliseconds",
+            "format": "int32",
+            "nullable": true
           }
-        ]
+        }
       },
       "IcmpPacketLossAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "maxPercent": {
-                "maximum": 100,
-                "exclusiveMaximum": false,
-                "minimum": 0,
-                "exclusiveMinimum": false,
-                "type": "number",
-                "description": "Maximum allowed packet loss percentage before the check fails (0–100)",
-                "format": "double"
-              }
-            },
-            "required": [
-              "maxPercent"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "icmp_packet_loss"
             ]
+          },
+          "maxPercent": {
+            "maximum": 100,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "Maximum allowed packet loss percentage before the check fails (0–100)",
+            "format": "double"
           }
+        },
+        "required": [
+          "type",
+          "maxPercent"
         ]
       },
       "IcmpReachableAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "icmp_reachable"
+            ]
           }
+        },
+        "required": [
+          "type"
         ]
       },
       "IcmpResponseTimeAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "maxMs": {
-                "type": "integer",
-                "description": "Maximum average ICMP round-trip time in milliseconds",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "maxMs"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "icmp_response_time"
             ]
+          },
+          "maxMs": {
+            "type": "integer",
+            "description": "Maximum average ICMP round-trip time in milliseconds",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "maxMs"
         ]
       },
       "IcmpResponseTimeWarnAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "warnMs": {
-                "type": "integer",
-                "description": "ICMP round-trip time in milliseconds that triggers a warning only",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "warnMs"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "icmp_response_time_warn"
             ]
+          },
+          "warnMs": {
+            "type": "integer",
+            "description": "ICMP round-trip time in milliseconds that triggers a warning only",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "warnMs"
         ]
       },
       "IncidentDetailDto": {
@@ -25356,48 +25177,42 @@
       },
       "JsonPathAssertion": {
         "required": [
+          "type",
+          "path",
           "expected",
-          "operator",
-          "path"
+          "operator"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "json_path"
+            ]
           },
-          {
-            "type": "object",
-            "properties": {
-              "path": {
-                "minLength": 1,
-                "type": "string",
-                "description": "JSONPath expression to extract a value from the response body"
-              },
-              "expected": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Expected value to compare against"
-              },
-              "operator": {
-                "type": "string",
-                "description": "Comparison operator (equals, contains, less_than, greater_than, etc.)",
-                "enum": [
-                  "equals",
-                  "contains",
-                  "less_than",
-                  "greater_than",
-                  "matches",
-                  "range"
-                ]
-              }
-            },
-            "required": [
-              "path",
-              "expected",
-              "operator"
+          "path": {
+            "minLength": 1,
+            "type": "string",
+            "description": "JSONPath expression to extract a value from the response body"
+          },
+          "expected": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Expected value to compare against"
+          },
+          "operator": {
+            "type": "string",
+            "description": "Comparison operator (equals, contains, less_than, greater_than, etc.)",
+            "enum": [
+              "equals",
+              "contains",
+              "less_than",
+              "greater_than",
+              "matches",
+              "range"
             ]
           }
-        ]
+        }
       },
       "KeyInfo": {
         "required": [
@@ -25655,173 +25470,169 @@
       },
       "McpConnectsAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "mcp_connects"
+            ]
           }
+        },
+        "required": [
+          "type"
         ]
       },
       "McpHasCapabilityAssertion": {
         "required": [
+          "type",
           "capability"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "capability": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Capability name the server must advertise, e.g. tools or resources"
-              }
-            },
-            "required": [
-              "capability"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "mcp_has_capability"
             ]
+          },
+          "capability": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Capability name the server must advertise, e.g. tools or resources"
           }
-        ]
+        }
       },
       "McpMinToolsAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "min": {
-                "type": "integer",
-                "description": "Minimum number of tools the server must expose",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "min"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "mcp_min_tools"
             ]
+          },
+          "min": {
+            "type": "integer",
+            "description": "Minimum number of tools the server must expose",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "min"
         ]
       },
       "McpProtocolVersionAssertion": {
         "required": [
+          "type",
           "version"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "version": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Expected MCP protocol version string from the server handshake"
-              }
-            },
-            "required": [
-              "version"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "mcp_protocol_version"
             ]
+          },
+          "version": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Expected MCP protocol version string from the server handshake"
           }
-        ]
+        }
       },
       "McpResponseTimeAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "maxMs": {
-                "type": "integer",
-                "description": "Maximum allowed MCP check duration in milliseconds",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "maxMs"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "mcp_response_time"
             ]
+          },
+          "maxMs": {
+            "type": "integer",
+            "description": "Maximum allowed MCP check duration in milliseconds",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "maxMs"
         ]
       },
       "McpResponseTimeWarnAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "warnMs": {
-                "type": "integer",
-                "description": "MCP check duration in milliseconds that triggers a warning only",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "warnMs"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "mcp_response_time_warn"
             ]
+          },
+          "warnMs": {
+            "type": "integer",
+            "description": "MCP check duration in milliseconds that triggers a warning only",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "warnMs"
         ]
       },
       "McpServer": {
         "type": "object",
         "description": "MCP server check-type-specific details",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/CheckTypeDetailsDto"
+        "properties": {
+          "check_type": {
+            "type": "string",
+            "enum": [
+              "mcp_server"
+            ]
           },
-          {
+          "url": {
+            "type": "string",
+            "description": "MCP server URL",
+            "nullable": true
+          },
+          "protocolVersion": {
+            "type": "string",
+            "description": "MCP protocol version",
+            "nullable": true
+          },
+          "serverInfo": {
             "type": "object",
-            "properties": {
-              "url": {
-                "type": "string",
-                "description": "MCP server URL",
-                "nullable": true
-              },
-              "protocolVersion": {
-                "type": "string",
-                "description": "MCP protocol version",
-                "nullable": true
-              },
-              "serverInfo": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "object",
-                  "description": "MCP server info (name, version, etc.)",
-                  "nullable": true
-                },
-                "description": "MCP server info (name, version, etc.)",
-                "nullable": true
-              },
-              "toolCount": {
-                "type": "integer",
-                "description": "Number of tools exposed",
-                "format": "int32",
-                "nullable": true
-              },
-              "resourceCount": {
-                "type": "integer",
-                "description": "Number of resources exposed",
-                "format": "int32",
-                "nullable": true
-              },
-              "promptCount": {
-                "type": "integer",
-                "description": "Number of prompts exposed",
-                "format": "int32",
-                "nullable": true
-              }
-            }
+            "additionalProperties": {
+              "type": "object",
+              "description": "MCP server info (name, version, etc.)",
+              "nullable": true
+            },
+            "description": "MCP server info (name, version, etc.)",
+            "nullable": true
+          },
+          "toolCount": {
+            "type": "integer",
+            "description": "Number of tools exposed",
+            "format": "int32",
+            "nullable": true
+          },
+          "resourceCount": {
+            "type": "integer",
+            "description": "Number of resources exposed",
+            "format": "int32",
+            "nullable": true
+          },
+          "promptCount": {
+            "type": "integer",
+            "description": "Number of prompts exposed",
+            "format": "int32",
+            "nullable": true
           }
+        },
+        "required": [
+          "check_type"
         ]
       },
       "McpServerMonitorConfig": {
@@ -25829,88 +25640,72 @@
           "command"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/MonitorConfig"
+        "properties": {
+          "command": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Command to execute to start the MCP server"
           },
-          {
+          "args": {
+            "type": "array",
+            "description": "Command-line arguments for the MCP server process",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Command-line arguments for the MCP server process",
+              "nullable": true
+            }
+          },
+          "env": {
             "type": "object",
-            "properties": {
-              "command": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Command to execute to start the MCP server"
-              },
-              "args": {
-                "type": "array",
-                "description": "Command-line arguments for the MCP server process",
-                "nullable": true,
-                "items": {
-                  "type": "string",
-                  "description": "Command-line arguments for the MCP server process",
-                  "nullable": true
-                }
-              },
-              "env": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string",
-                  "description": "Environment variables to pass to the MCP server process",
-                  "nullable": true
-                },
-                "description": "Environment variables to pass to the MCP server process",
-                "nullable": true
-              }
+            "additionalProperties": {
+              "type": "string",
+              "description": "Environment variables to pass to the MCP server process",
+              "nullable": true
             },
-            "required": [
-              "command"
-            ]
+            "description": "Environment variables to pass to the MCP server process",
+            "nullable": true
           }
-        ]
+        }
       },
       "McpToolAvailableAssertion": {
         "required": [
+          "type",
           "toolName"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "toolName": {
-                "minLength": 1,
-                "type": "string",
-                "description": "MCP tool name that must appear in the server's tool list"
-              }
-            },
-            "required": [
-              "toolName"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "mcp_tool_available"
             ]
+          },
+          "toolName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "MCP tool name that must appear in the server's tool list"
           }
-        ]
+        }
       },
       "McpToolCountChangedAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "expectedCount": {
-                "type": "integer",
-                "description": "Expected tool count; warns when the live count differs",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "expectedCount"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "mcp_tool_count_changed"
             ]
+          },
+          "expectedCount": {
+            "type": "integer",
+            "description": "Expected tool count; warns when the live count differs",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "expectedCount"
         ]
       },
       "MemberDto": {
@@ -26171,15 +25966,6 @@
         }
       },
       "MonitorAuthConfig": {
-        "required": [
-          "type"
-        ],
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          }
-        },
         "description": "New authentication configuration (full replacement)",
         "discriminator": {
           "propertyName": "type",
@@ -26189,7 +25975,21 @@
             "header": "#/components/schemas/HeaderAuthConfig",
             "api_key": "#/components/schemas/ApiKeyAuthConfig"
           }
-        }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BearerAuthConfig"
+          },
+          {
+            "$ref": "#/components/schemas/BasicAuthConfig"
+          },
+          {
+            "$ref": "#/components/schemas/HeaderAuthConfig"
+          },
+          {
+            "$ref": "#/components/schemas/ApiKeyAuthConfig"
+          }
+        ]
       },
       "MonitorAuthDto": {
         "required": [
@@ -26234,10 +26034,6 @@
             ]
           }
         }
-      },
-      "MonitorConfig": {
-        "type": "object",
-        "description": "Protocol-specific monitor configuration; concrete type is deduced from the JSON shape"
       },
       "MonitorDto": {
         "required": [
@@ -26882,32 +26678,28 @@
       },
       "OpsGenieChannelConfig": {
         "required": [
+          "channelType",
           "apiKey"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ChannelConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "apiKey": {
-                "minLength": 1,
-                "type": "string",
-                "description": "OpsGenie API key for alert creation"
-              },
-              "region": {
-                "type": "string",
-                "description": "OpsGenie API region: us or eu",
-                "nullable": true
-              }
-            },
-            "required": [
-              "apiKey"
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "opsgenie"
             ]
+          },
+          "apiKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "OpsGenie API key for alert creation"
+          },
+          "region": {
+            "type": "string",
+            "description": "OpsGenie API region: us or eu",
+            "nullable": true
           }
-        ]
+        }
       },
       "OrganizationDto": {
         "required": [
@@ -26996,32 +26788,28 @@
       },
       "PagerDutyChannelConfig": {
         "required": [
+          "channelType",
           "routingKey"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ChannelConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "routingKey": {
-                "minLength": 1,
-                "type": "string",
-                "description": "PagerDuty Events API v2 routing (integration) key"
-              },
-              "severityOverride": {
-                "type": "string",
-                "description": "Override PagerDuty severity mapping",
-                "nullable": true
-              }
-            },
-            "required": [
-              "routingKey"
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "pagerduty"
             ]
+          },
+          "routingKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "PagerDuty Events API v2 routing (integration) key"
+          },
+          "severityOverride": {
+            "type": "string",
+            "description": "Override PagerDuty severity mapping",
+            "nullable": true
           }
-        ]
+        }
       },
       "PageSection": {
         "type": "object",
@@ -27245,86 +27033,76 @@
       },
       "RedirectCountAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "maxCount": {
-                "type": "integer",
-                "description": "Maximum number of HTTP redirects allowed before the check fails",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "maxCount"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "redirect_count"
             ]
+          },
+          "maxCount": {
+            "type": "integer",
+            "description": "Maximum number of HTTP redirects allowed before the check fails",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "maxCount"
         ]
       },
       "RedirectTargetAssertion": {
         "required": [
+          "type",
           "expected",
           "operator"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "redirect_target"
+            ]
           },
-          {
-            "type": "object",
-            "properties": {
-              "expected": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Expected final URL after following redirects"
-              },
-              "operator": {
-                "type": "string",
-                "description": "Comparison operator (equals, contains, less_than, greater_than, etc.)",
-                "enum": [
-                  "equals",
-                  "contains",
-                  "less_than",
-                  "greater_than",
-                  "matches",
-                  "range"
-                ]
-              }
-            },
-            "required": [
-              "expected",
-              "operator"
+          "expected": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Expected final URL after following redirects"
+          },
+          "operator": {
+            "type": "string",
+            "description": "Comparison operator (equals, contains, less_than, greater_than, etc.)",
+            "enum": [
+              "equals",
+              "contains",
+              "less_than",
+              "greater_than",
+              "matches",
+              "range"
             ]
           }
-        ]
+        }
       },
       "RegexBodyAssertion": {
         "required": [
+          "type",
           "pattern"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "pattern": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Regular expression the response body must match"
-              }
-            },
-            "required": [
-              "pattern"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "regex_body"
             ]
+          },
+          "pattern": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Regular expression the response body must match"
           }
-        ]
+        }
       },
       "RegionStatusDto": {
         "required": [
@@ -27746,65 +27524,62 @@
       },
       "ResponseSizeAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "maxBytes": {
-                "type": "integer",
-                "description": "Maximum response body size in bytes before the check fails",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "maxBytes"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "response_size"
             ]
+          },
+          "maxBytes": {
+            "type": "integer",
+            "description": "Maximum response body size in bytes before the check fails",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "maxBytes"
         ]
       },
       "ResponseTimeAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "thresholdMs": {
-                "type": "integer",
-                "description": "Maximum allowed response time in milliseconds before the check fails",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "thresholdMs"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "response_time"
             ]
+          },
+          "thresholdMs": {
+            "type": "integer",
+            "description": "Maximum allowed response time in milliseconds before the check fails",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "thresholdMs"
         ]
       },
       "ResponseTimeWarnAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "warnMs": {
-                "type": "integer",
-                "description": "HTTP response time in milliseconds that triggers a warning only",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "warnMs"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "response_time_warn"
             ]
+          },
+          "warnMs": {
+            "type": "integer",
+            "description": "HTTP response time in milliseconds that triggers a warning only",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "warnMs"
         ]
       },
       "ResultSummaryDto": {
@@ -29507,91 +29282,81 @@
       },
       "SlackChannelConfig": {
         "required": [
+          "channelType",
           "webhookUrl"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ChannelConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "webhookUrl": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Slack incoming webhook URL"
-              },
-              "mentionText": {
-                "type": "string",
-                "description": "Optional mention text included in notifications, e.g. @channel",
-                "nullable": true
-              }
-            },
-            "required": [
-              "webhookUrl"
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "slack"
             ]
+          },
+          "webhookUrl": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Slack incoming webhook URL"
+          },
+          "mentionText": {
+            "type": "string",
+            "description": "Optional mention text included in notifications, e.g. @channel",
+            "nullable": true
           }
-        ]
+        }
       },
       "SslExpiryAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "minDaysRemaining": {
-                "type": "integer",
-                "description": "Minimum days before TLS certificate expiry; fails or warns below this threshold",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "minDaysRemaining"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ssl_expiry"
             ]
+          },
+          "minDaysRemaining": {
+            "type": "integer",
+            "description": "Minimum days before TLS certificate expiry; fails or warns below this threshold",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "minDaysRemaining"
         ]
       },
       "StatusCodeAssertion": {
         "required": [
+          "type",
           "expected",
           "operator"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "status_code"
+            ]
           },
-          {
-            "type": "object",
-            "properties": {
-              "expected": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Expected status code, range pattern, or wildcard such as 2xx"
-              },
-              "operator": {
-                "type": "string",
-                "description": "Comparison operator (equals, contains, less_than, greater_than, etc.)",
-                "enum": [
-                  "equals",
-                  "contains",
-                  "less_than",
-                  "greater_than",
-                  "matches",
-                  "range"
-                ]
-              }
-            },
-            "required": [
-              "expected",
-              "operator"
+          "expected": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Expected status code, range pattern, or wildcard such as 2xx"
+          },
+          "operator": {
+            "type": "string",
+            "description": "Comparison operator (equals, contains, less_than, greater_than, etc.)",
+            "enum": [
+              "equals",
+              "contains",
+              "less_than",
+              "greater_than",
+              "matches",
+              "range"
             ]
           }
-        ]
+        }
       },
       "StatusPageBranding": {
         "type": "object",
@@ -31453,152 +31218,137 @@
       },
       "Tcp": {
         "required": [
-          "host"
+          "check_type",
+          "host",
+          "port",
+          "connected"
         ],
         "type": "object",
         "description": "TCP check-type-specific details",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/CheckTypeDetailsDto"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "host": {
-                "type": "string",
-                "description": "Target host",
-                "example": "db.example.com"
-              },
-              "port": {
-                "type": "integer",
-                "description": "Target port",
-                "format": "int32",
-                "example": 5432
-              },
-              "connected": {
-                "type": "boolean",
-                "description": "Whether a TCP connection was established"
-              }
-            },
-            "required": [
-              "host",
-              "port",
-              "connected"
+        "properties": {
+          "check_type": {
+            "type": "string",
+            "enum": [
+              "tcp"
             ]
+          },
+          "host": {
+            "type": "string",
+            "description": "Target host",
+            "example": "db.example.com"
+          },
+          "port": {
+            "type": "integer",
+            "description": "Target port",
+            "format": "int32",
+            "example": 5432
+          },
+          "connected": {
+            "type": "boolean",
+            "description": "Whether a TCP connection was established"
           }
-        ]
+        }
       },
       "TcpConnectsAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "tcp_connects"
+            ]
           }
+        },
+        "required": [
+          "type"
         ]
       },
       "TcpMonitorConfig": {
         "required": [
-          "host"
+          "host",
+          "port"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/MonitorConfig"
+        "properties": {
+          "host": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Target hostname or IP address"
           },
-          {
-            "type": "object",
-            "properties": {
-              "host": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Target hostname or IP address"
-              },
-              "port": {
-                "maximum": 65535,
-                "minimum": 1,
-                "type": "integer",
-                "description": "TCP port to connect to",
-                "format": "int32"
-              },
-              "timeoutMs": {
-                "type": "integer",
-                "description": "Connection timeout in milliseconds",
-                "format": "int32",
-                "nullable": true
-              }
-            },
-            "required": [
-              "host",
-              "port"
-            ]
+          "port": {
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer",
+            "description": "TCP port to connect to",
+            "format": "int32"
+          },
+          "timeoutMs": {
+            "type": "integer",
+            "description": "Connection timeout in milliseconds",
+            "format": "int32",
+            "nullable": true
           }
-        ]
+        }
       },
       "TcpResponseTimeAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "maxMs": {
-                "type": "integer",
-                "description": "Maximum TCP connect time in milliseconds before the check fails",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "maxMs"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "tcp_response_time"
             ]
+          },
+          "maxMs": {
+            "type": "integer",
+            "description": "Maximum TCP connect time in milliseconds before the check fails",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "maxMs"
         ]
       },
       "TcpResponseTimeWarnAssertion": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssertionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "warnMs": {
-                "type": "integer",
-                "description": "TCP connect time in milliseconds that triggers a warning only",
-                "format": "int32"
-              }
-            },
-            "required": [
-              "warnMs"
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "tcp_response_time_warn"
             ]
+          },
+          "warnMs": {
+            "type": "integer",
+            "description": "TCP connect time in milliseconds that triggers a warning only",
+            "format": "int32"
           }
+        },
+        "required": [
+          "type",
+          "warnMs"
         ]
       },
       "TeamsChannelConfig": {
         "required": [
+          "channelType",
           "webhookUrl"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ChannelConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "webhookUrl": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Microsoft Teams incoming webhook URL"
-              }
-            },
-            "required": [
-              "webhookUrl"
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "teams"
             ]
+          },
+          "webhookUrl": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Microsoft Teams incoming webhook URL"
           }
-        ]
+        }
       },
       "TestAlertChannelRequest": {
         "required": [
@@ -32224,9 +31974,24 @@
           },
           "config": {
             "nullable": true,
-            "allOf": [
+            "oneOf": [
               {
-                "$ref": "#/components/schemas/MonitorConfig"
+                "$ref": "#/components/schemas/DnsMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/HeartbeatMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/HttpMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/IcmpMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/McpServerMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/TcpMonitorConfig"
               }
             ]
           },
@@ -32852,42 +32617,38 @@
       },
       "WebhookChannelConfig": {
         "required": [
+          "channelType",
           "url"
         ],
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ChannelConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "url": {
-                "minLength": 1,
-                "type": "string",
-                "description": "Webhook endpoint URL that receives alert payloads"
-              },
-              "signingSecret": {
-                "type": "string",
-                "description": "Optional HMAC signing secret for payload verification",
-                "nullable": true
-              },
-              "customHeaders": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string",
-                  "description": "Additional HTTP headers to include in webhook requests",
-                  "nullable": true
-                },
-                "description": "Additional HTTP headers to include in webhook requests",
-                "nullable": true
-              }
-            },
-            "required": [
-              "url"
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "webhook"
             ]
+          },
+          "url": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Webhook endpoint URL that receives alert payloads"
+          },
+          "signingSecret": {
+            "type": "string",
+            "description": "Optional HMAC signing secret for payload verification",
+            "nullable": true
+          },
+          "customHeaders": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Additional HTTP headers to include in webhook requests",
+              "nullable": true
+            },
+            "description": "Additional HTTP headers to include in webhook requests",
+            "nullable": true
           }
-        ]
+        }
       },
       "WebhookDeliveryDto": {
         "required": [

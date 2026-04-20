@@ -389,7 +389,7 @@ wheels = [
 [[package]]
 name = "devhelm"
 version = "0.1.2"
-source = { git = "https://github.com/devhelmhq/sdk-python.git?branch=fix%2Fend-1162-strict-typing-spec-parity#454ae81bca326c6ddd706cac3cceec53ad0f72c4" }
+source = { git = "https://github.com/devhelmhq/sdk-python.git?branch=fix%2Fend-1162-strict-typing-spec-parity#eb8e5163ca4fb75138bc58967f15207250144c58" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic", extra = ["email"] },
