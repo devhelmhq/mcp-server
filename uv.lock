@@ -389,26 +389,10 @@ wheels = [
 [[package]]
 name = "devhelm"
 version = "0.1.2"
-source = { editable = "../sdk-python" }
+source = { git = "https://github.com/devhelmhq/sdk-python.git?branch=fix%2Fend-1162-strict-typing-spec-parity#454ae81bca326c6ddd706cac3cceec53ad0f72c4" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic", extra = ["email"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "pydantic", extras = ["email"], specifier = ">=2.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "build", specifier = ">=1.0" },
-    { name = "datamodel-code-generator", specifier = ">=0.30" },
-    { name = "mypy", specifier = ">=1.15" },
-    { name = "pytest", specifier = ">=8.0" },
-    { name = "ruff", specifier = ">=0.14" },
-    { name = "twine", specifier = ">=6.0" },
 ]
 
 [[package]]
@@ -431,7 +415,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "devhelm", editable = "../sdk-python" },
+    { name = "devhelm", git = "https://github.com/devhelmhq/sdk-python.git?branch=fix%2Fend-1162-strict-typing-spec-parity" },
     { name = "fastmcp", specifier = ">=2.0.0" },
 ]
 
