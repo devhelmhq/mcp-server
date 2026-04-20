@@ -22483,7 +22483,26 @@
             ]
           },
           "config": {
-            "$ref": "#/components/schemas/MonitorConfig"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DnsMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/HeartbeatMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/HttpMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/IcmpMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/McpServerMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/TcpMonitorConfig"
+              }
+            ]
           },
           "frequencySeconds": {
             "type": "integer",
@@ -26218,27 +26237,7 @@
       },
       "MonitorConfig": {
         "type": "object",
-        "description": "Protocol-specific monitor configuration; concrete type is deduced from the JSON shape",
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/HttpMonitorConfig"
-          },
-          {
-            "$ref": "#/components/schemas/DnsMonitorConfig"
-          },
-          {
-            "$ref": "#/components/schemas/McpServerMonitorConfig"
-          },
-          {
-            "$ref": "#/components/schemas/TcpMonitorConfig"
-          },
-          {
-            "$ref": "#/components/schemas/IcmpMonitorConfig"
-          },
-          {
-            "$ref": "#/components/schemas/HeartbeatMonitorConfig"
-          }
-        ]
+        "description": "Protocol-specific monitor configuration; concrete type is deduced from the JSON shape"
       },
       "MonitorDto": {
         "required": [
@@ -26283,7 +26282,26 @@
             ]
           },
           "config": {
-            "$ref": "#/components/schemas/MonitorConfig"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DnsMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/HeartbeatMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/HttpMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/IcmpMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/McpServerMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/TcpMonitorConfig"
+              }
+            ]
           },
           "frequencySeconds": {
             "type": "integer",
@@ -26468,7 +26486,26 @@
             ]
           },
           "config": {
-            "$ref": "#/components/schemas/MonitorConfig"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DnsMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/HeartbeatMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/HttpMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/IcmpMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/McpServerMonitorConfig"
+              },
+              {
+                "$ref": "#/components/schemas/TcpMonitorConfig"
+              }
+            ]
           },
           "assertions": {
             "type": "array",
