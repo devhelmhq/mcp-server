@@ -57,8 +57,9 @@ fi
 
 # Force uv to relink the local SDK; the harness pins it via tool.uv.sources
 # to a git branch by default, so we override here for the duration of the
-# session via UV_OVERRIDE.
+# session via UV_OVERRIDE. Failures must surface — a silently un-relinked
+# SDK would cause the mono evolution harness to test stale generated code.
 cd "$ROOT_DIR"
-UV_OVERRIDE_DEPENDENCIES="devhelm @ file://$SDK_PYTHON_DIR" uv sync --quiet >&2 || true
+UV_OVERRIDE_DEPENDENCIES="devhelm @ file://$SDK_PYTHON_DIR" uv sync --quiet >&2
 
 echo "$OUTPUT"

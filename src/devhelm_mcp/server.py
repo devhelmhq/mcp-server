@@ -68,11 +68,6 @@ for mod in ALL_TOOL_MODULES:
     mod.register(mcp)
 
 
-@mcp.custom_route("/health", methods=["GET"])
-async def health(request: Request) -> JSONResponse:
-    return JSONResponse({"status": "healthy", "service": "devhelm-mcp-server"})
-
-
 def _get_app() -> "Starlette":
     """Build the ASGI app with path-based auth routing."""
     from starlette.applications import Starlette
