@@ -55,11 +55,18 @@ fi
 # datamodel-codegen) instead of mcp-server's runtime-only venv.
 ( cd "$SDK_PYTHON_DIR" && "$SDK_PYTHON_DIR/scripts/regen-from.sh" "$INPUT_SPEC" >&2 )
 
-# Force uv to relink the local SDK; the harness pins it via tool.uv.sources
-# to a git branch by default, so we override here for the duration of the
-# session via UV_OVERRIDE. Failures must surface — a silently un-relinked
-# SDK would cause the mono evolution harness to test stale generated code.
+# Force uv to relink the local SDK into mcp-server's venv. We can't use
+# `uv sync` here: pyproject pins `devhelm` to a git branch via
+# `tool.uv.sources`, so `uv sync` would either no-op (if the locked git
+# commit is already installed) or re-fetch from git, both ignoring our
+# locally-regenerated source. `uv pip install --force-reinstall --no-deps`
+# bypasses the lockfile and unconditionally copies the local source into
+# site-packages. Callers using this venv must pass `uv run --no-sync` to
+# avoid `uv run`'s implicit pre-execution sync, which would otherwise
+# re-resolve the lockfile and clobber the relink. Failures must surface —
+# a silently un-relinked SDK would cause the mono evolution harness to
+# test stale generated code.
 cd "$ROOT_DIR"
-UV_OVERRIDE_DEPENDENCIES="devhelm @ file://$SDK_PYTHON_DIR" uv sync --quiet >&2
+uv pip install --quiet --force-reinstall --no-deps "$SDK_PYTHON_DIR" >&2
 
 echo "$OUTPUT"
