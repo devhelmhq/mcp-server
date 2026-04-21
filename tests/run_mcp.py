@@ -93,7 +93,20 @@ def main() -> None:
 
     try:
         result = asyncio.run(call_tool())
-        if isinstance(result, str) and result.startswith("Error ("):
+        # `format_error()` (devhelm_mcp.client) emits strings prefixed by the
+        # taxonomy class so the LLM can route the failure. The harness has
+        # to mirror that exact taxonomy — historically only "Error (" was
+        # checked, which silently swallowed every ValidationError / ApiError
+        # / TransportError as a successful run. Surface them as rc=1 so the
+        # surface negative tests can rely on the contract.
+        error_prefixes = (
+            "ValidationError:",
+            "ApiError (",
+            "TransportError:",
+            "Error:",
+            "Error (",
+        )
+        if isinstance(result, str) and result.startswith(error_prefixes):
             err_payload = {"error": result, "code": "SDK_ERROR", "status": 0}
             sys.stderr.write(json.dumps(err_payload))
             sys.exit(1)
