@@ -64,9 +64,21 @@ def format_error(err: DevhelmError) -> str:
         return " | ".join(parts)
 
     if isinstance(err, DevhelmApiError):
-        parts = [f"ApiError ({err.status}): {err.message}"]
+        # Header line: "ApiError (404 NOT_FOUND): Monitor not found".
+        # `code` is optional — older API responses may omit it, in which
+        # case the LLM still sees the HTTP status and human message.
+        if err.code:
+            header = f"ApiError ({err.status} {err.code}): {err.message}"
+        else:
+            header = f"ApiError ({err.status}): {err.message}"
+        parts = [header]
         if err.detail:
             parts.append(f"Detail: {err.detail}")
+        # Always surface the request id when present so the LLM can pass
+        # it back to the user for support correlation. Same value as the
+        # X-Request-Id response header.
+        if err.request_id:
+            parts.append(f"request_id={err.request_id}")
         return " | ".join(parts)
 
     if isinstance(err, DevhelmTransportError):
@@ -75,9 +87,7 @@ def format_error(err: DevhelmError) -> str:
     return f"Error: {err}"
 
 
-JsonValue = (
-    dict[str, "JsonValue"] | list["JsonValue"] | str | int | float | bool | None
-)
+JsonValue = dict[str, "JsonValue"] | list["JsonValue"] | str | int | float | bool | None
 
 
 def _serialize_value(data: object) -> JsonValue:
