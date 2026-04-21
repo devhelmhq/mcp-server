@@ -100,10 +100,17 @@ def _serialize_value(data: object) -> JsonValue:
     being silently coerced — `serialize` is meant for SDK return shapes.
     """
     if isinstance(data, BaseModel):
-        # `.model_dump(mode="json")` returns plain Python primitives that are
-        # all instances of `JsonValue`; recursing through `_serialize_value`
-        # is unnecessary because Pydantic has already done the work.
-        dumped = data.model_dump(mode="json")
+        # `.model_dump(mode="json", by_alias=True)` returns plain Python
+        # primitives that are all instances of `JsonValue`; recursing through
+        # `_serialize_value` is unnecessary because Pydantic has already done
+        # the work.
+        #
+        # `by_alias=True` is critical: the SDK's generated models pin field
+        # names to their snake_case Python identifiers and reach the API's
+        # camelCase shape only via `Field(alias=...)`. Dumping without
+        # `by_alias` would emit snake_case keys that no consumer (LLM tool
+        # output, public docs, our own surface tests) expects.
+        dumped = data.model_dump(mode="json", by_alias=True)
         return _serialize_value(dumped)
     if isinstance(data, dict):
         return {str(k): _serialize_value(v) for k, v in data.items()}
