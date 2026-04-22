@@ -10128,8 +10128,7 @@
                 "$ref": "#/components/schemas/TestNotificationPolicyRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -22290,8 +22289,7 @@
       "CreateEnvironmentRequest": {
         "required": [
           "name",
-          "slug",
-          "isDefault"
+          "slug"
         ],
         "type": "object",
         "properties": {
@@ -22320,7 +22318,8 @@
           },
           "isDefault": {
             "type": "boolean",
-            "description": "Whether this is the default environment for new monitors"
+            "description": "Whether this is the default environment for new monitors (default: false)",
+            "nullable": true
           }
         }
       },

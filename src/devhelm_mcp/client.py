@@ -65,9 +65,12 @@ def format_error(err: DevhelmError) -> str:
 
     if isinstance(err, DevhelmApiError):
         # Header line: "ApiError (404 NOT_FOUND): Monitor not found".
-        # `code` is optional — older API responses may omit it, in which
-        # case the LLM still sees the HTTP status and human message.
-        if err.code:
+        # The SDK always populates `code`, but falls back to the generic
+        # "API_ERROR" sentinel when the server didn't supply a more specific
+        # one (non-canonical envelopes, HTML proxy errors). Suppress the
+        # label in that case — the HTTP status already conveys all the same
+        # info, and "(429 API_ERROR)" is just noise.
+        if err.code and err.code != "API_ERROR":
             header = f"ApiError ({err.status} {err.code}): {err.message}"
         else:
             header = f"ApiError ({err.status}): {err.message}"
