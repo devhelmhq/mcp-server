@@ -22,7 +22,7 @@ dependencies = [
     # Floor bumped to 0.2.1 for `StatusPages.reorder_layout` and the
     # `Incidents.delete` removal (which the `reorder_status_page_layout`
     # tool below depends on, and which the parity check requires).
-    "devhelm>=0.2.1",
+    "devhelm>=0.3.0",
     "fastmcp>=2.0.0",
 ]
 
