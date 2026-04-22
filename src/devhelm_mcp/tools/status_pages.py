@@ -13,6 +13,7 @@ from devhelm.types import (
     CreateStatusPageIncidentUpdateRequest,
     CreateStatusPageRequest,
     ReorderComponentsRequest,
+    ReorderPageLayoutRequest,
     UpdateStatusPageComponentGroupRequest,
     UpdateStatusPageComponentRequest,
     UpdateStatusPageIncidentRequest,
@@ -82,6 +83,29 @@ def register(mcp: FastMCP) -> None:
         try:
             _sp(api_token).delete(page_id)
             return "Status page deleted successfully."
+        except DevhelmError as e:
+            return format_error(e)
+
+    @mcp.tool()
+    def reorder_status_page_layout(
+        api_token: str, page_id: str, body: ReorderPageLayoutRequest
+    ) -> str:
+        """Batch-reorder a status page's full layout.
+
+        Required: sections — top-level layout in their new order, where each
+        entry is either {kind:"component", componentId} or
+        {kind:"group", groupId}. Use ``groupOrders`` (optional) to also
+        reorder components within specific groups; only include groups whose
+        internal order changed. The full top-level set must be provided —
+        partial reorders are rejected by the API.
+
+        Use this for "drag-and-drop" layout edits that touch both groups and
+        ungrouped components. To reorder components within a single group
+        only, prefer ``reorder_status_page_components``.
+        """
+        try:
+            _sp(api_token).reorder_layout(page_id, as_payload(body))
+            return "Status page layout reordered successfully."
         except DevhelmError as e:
             return format_error(e)
 
