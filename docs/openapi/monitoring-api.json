@@ -22744,9 +22744,9 @@
             "format": "int32",
             "nullable": true
           },
-          "collapsed": {
+          "defaultOpen": {
             "type": "boolean",
-            "description": "Whether the group is collapsed by default (default: true)",
+            "description": "Initial expand/collapse state when a visitor first loads the page; renderer may auto-expand on active incidents (default: true)",
             "nullable": true
           }
         }
@@ -22816,7 +22816,7 @@
           },
           "startDate": {
             "type": "string",
-            "description": "Date from which to start showing uptime data",
+            "description": "Date from which to start showing uptime; defaults to component creation. Set earlier to backdate (e.g. launch day); clamped at the monitor's createdAt for MONITOR-type components",
             "format": "date",
             "nullable": true
           }
@@ -29659,7 +29659,7 @@
           "updatedAt",
           "displayOrder",
           "pageOrder",
-          "collapsed"
+          "defaultOpen"
         ],
         "type": "object",
         "properties": {
@@ -29686,7 +29686,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "collapsed": {
+          "defaultOpen": {
             "type": "boolean"
           },
           "components": {
@@ -32405,9 +32405,9 @@
             "format": "int32",
             "nullable": true
           },
-          "collapsed": {
+          "defaultOpen": {
             "type": "boolean",
-            "description": "Whether the group is collapsed by default; null preserves current",
+            "description": "Initial expand/collapse state on first page load; null preserves current. Renderer may auto-expand on active incidents",
             "nullable": true
           }
         }
@@ -32458,7 +32458,7 @@
           },
           "startDate": {
             "type": "string",
-            "description": "Date from which to start showing uptime data; null preserves current",
+            "description": "Date from which to start showing uptime; null preserves current. Bars never extend earlier than the underlying monitor's createdAt regardless of value",
             "format": "date",
             "nullable": true
           }
