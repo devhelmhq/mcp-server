@@ -22,7 +22,7 @@ dependencies = [
     # Floor bumped to 0.1.3 because mcp-server depends on the strict error
     # taxonomy (DevhelmValidationError / DevhelmApiError / DevhelmTransportError)
     # and `extra='forbid'` response validation introduced in that release.
-    "devhelm>=0.1.3",
+    "devhelm>=0.2.0",
     "fastmcp>=2.0.0",
 ]
 
