@@ -68,7 +68,7 @@ for mod in ALL_TOOL_MODULES:
     mod.register(mcp)
 
 
-def _get_app() -> "Starlette":
+def _get_app() -> Starlette:
     """Build the ASGI app with path-based auth routing."""
     from starlette.applications import Starlette
     from starlette.middleware import Middleware

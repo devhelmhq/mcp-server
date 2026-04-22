@@ -64,9 +64,24 @@ def format_error(err: DevhelmError) -> str:
         return " | ".join(parts)
 
     if isinstance(err, DevhelmApiError):
-        parts = [f"ApiError ({err.status}): {err.message}"]
+        # Header line: "ApiError (404 NOT_FOUND): Monitor not found".
+        # The SDK always populates `code`, but falls back to the generic
+        # "API_ERROR" sentinel when the server didn't supply a more specific
+        # one (non-canonical envelopes, HTML proxy errors). Suppress the
+        # label in that case — the HTTP status already conveys all the same
+        # info, and "(429 API_ERROR)" is just noise.
+        if err.code and err.code != "API_ERROR":
+            header = f"ApiError ({err.status} {err.code}): {err.message}"
+        else:
+            header = f"ApiError ({err.status}): {err.message}"
+        parts = [header]
         if err.detail:
             parts.append(f"Detail: {err.detail}")
+        # Always surface the request id when present so the LLM can pass
+        # it back to the user for support correlation. Same value as the
+        # X-Request-Id response header.
+        if err.request_id:
+            parts.append(f"request_id={err.request_id}")
         return " | ".join(parts)
 
     if isinstance(err, DevhelmTransportError):
@@ -75,9 +90,7 @@ def format_error(err: DevhelmError) -> str:
     return f"Error: {err}"
 
 
-JsonValue = (
-    dict[str, "JsonValue"] | list["JsonValue"] | str | int | float | bool | None
-)
+JsonValue = dict[str, "JsonValue"] | list["JsonValue"] | str | int | float | bool | None
 
 
 def _serialize_value(data: object) -> JsonValue:
@@ -90,10 +103,17 @@ def _serialize_value(data: object) -> JsonValue:
     being silently coerced — `serialize` is meant for SDK return shapes.
     """
     if isinstance(data, BaseModel):
-        # `.model_dump(mode="json")` returns plain Python primitives that are
-        # all instances of `JsonValue`; recursing through `_serialize_value`
-        # is unnecessary because Pydantic has already done the work.
-        dumped = data.model_dump(mode="json")
+        # `.model_dump(mode="json", by_alias=True)` returns plain Python
+        # primitives that are all instances of `JsonValue`; recursing through
+        # `_serialize_value` is unnecessary because Pydantic has already done
+        # the work.
+        #
+        # `by_alias=True` is critical: the SDK's generated models pin field
+        # names to their snake_case Python identifiers and reach the API's
+        # camelCase shape only via `Field(alias=...)`. Dumping without
+        # `by_alias` would emit snake_case keys that no consumer (LLM tool
+        # output, public docs, our own surface tests) expects.
+        dumped = data.model_dump(mode="json", by_alias=True)
         return _serialize_value(dumped)
     if isinstance(data, dict):
         return {str(k): _serialize_value(v) for k, v in data.items()}

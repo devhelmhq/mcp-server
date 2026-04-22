@@ -388,11 +388,15 @@ wheels = [
 
 [[package]]
 name = "devhelm"
-version = "0.1.2"
-source = { git = "https://github.com/devhelmhq/sdk-python.git?branch=chore%2Fcodegen-audit-phase-0-and-1#30d2412919b6308406a7982e3ab58975d660ba86" }
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic", extra = ["email"] },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7e/f2/5af595f2eaa3696874f5d93aae2a7efd3d06abf36d38f56cfb1a5824f632/devhelm-0.2.0.tar.gz", hash = "sha256:3160c5f6098756bf80a49cc2489ed809797790f209214376091c8e560532fba8", size = 223354, upload-time = "2026-04-22T08:30:19.004Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c1/73/fed4d13b648b5c2bdc06a944bcb7d1787b40778a8ff98fd05c41b88212f7/devhelm-0.2.0-py3-none-any.whl", hash = "sha256:655772d06931fc65a823230346d581a6c93be23c5ee9158039f3e9ac4f30c9bb", size = 67575, upload-time = "2026-04-22T08:30:17.808Z" },
 ]
 
 [[package]]
@@ -415,7 +419,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "devhelm", git = "https://github.com/devhelmhq/sdk-python.git?branch=chore%2Fcodegen-audit-phase-0-and-1" },
+    { name = "devhelm", specifier = ">=0.2.0" },
     { name = "fastmcp", specifier = ">=2.0.0" },
 ]
 
