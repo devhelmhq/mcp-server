@@ -24474,14 +24474,12 @@
             ]
           },
           "timing": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object",
-              "description": "Request phase timing breakdown",
-              "nullable": true
-            },
-            "description": "Request phase timing breakdown",
-            "nullable": true
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TimingPhasesDto"
+              }
+            ]
           },
           "bodyTruncated": {
             "type": "boolean",
@@ -31652,6 +31650,54 @@
           }
         },
         "description": "Event type to use for a test webhook delivery"
+      },
+      "TimingPhasesDto": {
+        "type": "object",
+        "properties": {
+          "dns_ms": {
+            "type": "integer",
+            "description": "DNS resolution time in milliseconds",
+            "format": "int32",
+            "nullable": true,
+            "example": 12
+          },
+          "tcp_ms": {
+            "type": "integer",
+            "description": "TCP connect time in milliseconds",
+            "format": "int32",
+            "nullable": true,
+            "example": 18
+          },
+          "tls_ms": {
+            "type": "integer",
+            "description": "TLS handshake time in milliseconds (null for plain HTTP)",
+            "format": "int32",
+            "nullable": true,
+            "example": 34
+          },
+          "ttfb_ms": {
+            "type": "integer",
+            "description": "Time to first response byte in milliseconds",
+            "format": "int32",
+            "nullable": true,
+            "example": 42
+          },
+          "download_ms": {
+            "type": "integer",
+            "description": "Response body download time in milliseconds",
+            "format": "int32",
+            "nullable": true,
+            "example": 8
+          },
+          "total_ms": {
+            "type": "integer",
+            "description": "Total wall-clock request time in milliseconds",
+            "format": "int32",
+            "nullable": true,
+            "example": 114
+          }
+        },
+        "description": "Per-phase HTTP request timing breakdown (milliseconds)"
       },
       "TlsInfoDto": {
         "type": "object",
