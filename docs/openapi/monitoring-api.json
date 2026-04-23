@@ -15794,7 +15794,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/TableValueResultStatusPageComponentUptimeDayDto"
+                  "$ref": "#/components/schemas/TableValueResultComponentUptimeDayDto"
                 }
               }
             }
@@ -16259,6 +16259,127 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/status-pages/{id}/domains/{domainId}/primary": {
+      "post": {
+        "tags": [
+          "Status Pages"
+        ],
+        "summary": "Mark a verified custom domain as the page's primary host",
+        "operationId": "setPrimaryDomain",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "domainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseStatusPageCustomDomainDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request — the payload failed validation",
@@ -21970,7 +22091,6 @@
       "ComponentUptimeDayDto": {
         "required": [
           "date",
-          "source",
           "partialOutageSeconds",
           "majorOutageSeconds",
           "degradedSeconds",
@@ -21980,7 +22100,7 @@
         "properties": {
           "date": {
             "type": "string",
-            "description": "Date of the daily bucket (ISO 8601)",
+            "description": "Start-of-day timestamp for this bucket (UTC midnight, ISO 8601)",
             "format": "date-time"
           },
           "partialOutageSeconds": {
@@ -22000,17 +22120,16 @@
           },
           "uptimePercentage": {
             "type": "number",
-            "description": "Computed uptime percentage for the day",
+            "description": "Computed uptime percentage using the weighted formula (degraded does not lower it)",
             "format": "double"
           },
-          "eventsJson": {
-            "type": "string",
-            "description": "Incident event references for this day as raw JSON",
-            "nullable": true
-          },
-          "source": {
-            "type": "string",
-            "description": "Data source: vendor_reported or incident_derived"
+          "incidents": {
+            "type": "array",
+            "description": "Incidents that overlapped this day, in display order",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/IncidentRef"
+            }
           }
         },
         "description": "Daily uptime data for a component"
@@ -24991,19 +25110,19 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Status page incident ID",
+            "description": "Internal incident ID — UUID for status-page incidents, service incident UUID for catalog",
             "format": "uuid"
           },
           "title": {
             "type": "string",
-            "description": "Incident title"
+            "description": "Incident title at the time of the overlap"
           },
           "impact": {
             "type": "string",
-            "description": "Incident impact level"
+            "description": "Incident impact level (e.g. minor, major, critical for catalog; NONE/MINOR/MAJOR/CRITICAL for status pages)"
           }
         },
-        "description": "Lightweight reference to an incident overlapping this day"
+        "description": "Lightweight reference to an incident overlapping a given uptime day"
       },
       "IncidentsSummaryDto": {
         "type": "object",
@@ -29706,46 +29825,6 @@
           }
         }
       },
-      "StatusPageComponentUptimeDayDto": {
-        "required": [
-          "date",
-          "partialOutageSeconds",
-          "majorOutageSeconds",
-          "uptimePercentage"
-        ],
-        "type": "object",
-        "properties": {
-          "date": {
-            "type": "string",
-            "description": "Start-of-day timestamp for this bucket (UTC midnight)",
-            "format": "date-time"
-          },
-          "partialOutageSeconds": {
-            "type": "integer",
-            "description": "Seconds of partial outage on this day",
-            "format": "int32"
-          },
-          "majorOutageSeconds": {
-            "type": "integer",
-            "description": "Seconds of major outage on this day",
-            "format": "int32"
-          },
-          "uptimePercentage": {
-            "type": "number",
-            "description": "Computed uptime percentage using weighted formula",
-            "format": "double"
-          },
-          "incidents": {
-            "type": "array",
-            "description": "Incidents that overlapped this day",
-            "nullable": true,
-            "items": {
-              "$ref": "#/components/schemas/IncidentRef"
-            }
-          }
-        },
-        "description": "Daily uptime data for a status page component"
-      },
       "StatusPageCustomDomainDto": {
         "required": [
           "createdAt",
@@ -29799,6 +29878,19 @@
           },
           "verificationError": {
             "type": "string",
+            "nullable": true
+          },
+          "cfCustomHostnameId": {
+            "type": "string",
+            "nullable": true
+          },
+          "cfSslStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "sslActiveAt": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           },
           "createdAt": {
@@ -30959,38 +31051,6 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/StatusPageComponentGroupDto"
-            }
-          },
-          "hasNext": {
-            "type": "boolean"
-          },
-          "hasPrev": {
-            "type": "boolean"
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          }
-        }
-      },
-      "TableValueResultStatusPageComponentUptimeDayDto": {
-        "required": [
-          "data",
-          "hasNext",
-          "hasPrev"
-        ],
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StatusPageComponentUptimeDayDto"
             }
           },
           "hasNext": {
