@@ -19,10 +19,9 @@ classifiers = [
 ]
 
 dependencies = [
-    # Floor bumped to 0.2.1 for `StatusPages.reorder_layout` and the
-    # `Incidents.delete` removal (which the `reorder_status_page_layout`
-    # tool below depends on, and which the parity check requires).
-    "devhelm>=0.3.0",
+    # Floor bumped to 0.4.0 for typed TimingPhasesDto in HTTP check details
+    # and the unified ComponentUptimeDayDto across catalog + status pages.
+    "devhelm>=0.4.0",
     "fastmcp>=2.0.0",
 ]
 
