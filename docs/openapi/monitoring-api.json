@@ -59,6 +59,10 @@
       "description": "Variable namespace management for monitors"
     },
     {
+      "name": "Forensics",
+      "description": "Detection engine event-sourced history (policy snapshots, rule evaluations, state transitions)"
+    },
+    {
       "name": "Heartbeat",
       "description": "Public ping endpoint for heartbeat monitors"
     },
@@ -3280,6 +3284,645 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/forensics/incidents/{id}/timeline": {
+      "get": {
+        "tags": [
+          "Forensics"
+        ],
+        "summary": "Full forensic timeline for an incident",
+        "description": "Returns every state-machine transition for this incident plus the rule evaluations that caused each transition, plus the policy snapshot that triggered confirmation. Correlate evaluations to transitions via evaluation.triggeringTransitionId == transition.id.",
+        "operationId": "getTimeline",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseIncidentTimelineDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/forensics/monitors/{id}/rule-evaluations": {
+      "get": {
+        "tags": [
+          "Forensics"
+        ],
+        "summary": "Paged list of rule evaluations for a monitor",
+        "description": "Filter by ruleType (e.g. consecutive_failures), region, onlyMatched=true to narrow to firing evaluations, and occurredAt window.",
+        "operationId": "listMonitorRuleEvaluations",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ruleType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onlyMatched",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableValueResultRuleEvaluationDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/forensics/monitors/{id}/transitions": {
+      "get": {
+        "tags": [
+          "Forensics"
+        ],
+        "summary": "Paged list of state transitions for a monitor (optionally time-bounded)",
+        "operationId": "listMonitorTransitions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableValueResultIncidentStateTransitionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/forensics/policy-snapshots/{hashHex}": {
+      "get": {
+        "tags": [
+          "Forensics"
+        ],
+        "summary": "Fetch a policy snapshot by its content hash",
+        "description": "Hash is SHA-256 over canonical policy JSON, hex-encoded. Access is gated: caller's org must have evaluated against this hash at least once.",
+        "operationId": "getPolicySnapshot",
+        "parameters": [
+          {
+            "name": "hashHex",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponsePolicySnapshotDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/forensics/traces/{checkId}": {
+      "get": {
+        "tags": [
+          "Forensics"
+        ],
+        "summary": "Replay a single check execution",
+        "description": "Returns every rule evaluation and state transition emitted for this scheduler-minted check_id (V92), plus the policy snapshot that governed them.",
+        "operationId": "getTrace",
+        "parameters": [
+          {
+            "name": "checkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseCheckTraceDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request — the payload failed validation",
@@ -21502,14 +22145,12 @@
             "nullable": true
           },
           "metadata": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object",
-              "description": "Additional context about the action",
-              "nullable": true
-            },
-            "description": "Additional context about the action",
-            "nullable": true
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuditMetadata"
+              }
+            ]
           },
           "createdAt": {
             "type": "string",
@@ -21517,6 +22158,21 @@
             "format": "date-time"
           }
         }
+      },
+      "AuditMetadata": {
+        "description": "Typed metadata payload attached to an audit event; null for actions that carry no extra context.",
+        "nullable": true,
+        "discriminator": {
+          "propertyName": "kind",
+          "mapping": {
+            "member_role_changed": "#/components/schemas/MemberRoleChangedMetadata"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/MemberRoleChangedMetadata"
+          }
+        ]
       },
       "AuthMeResponse": {
         "required": [
@@ -21937,6 +22593,43 @@
           }
         },
         "description": "A single check result from a monitor run"
+      },
+      "CheckTraceDto": {
+        "required": [
+          "checkId",
+          "evaluations",
+          "transitions"
+        ],
+        "type": "object",
+        "properties": {
+          "checkId": {
+            "type": "string",
+            "description": "The check execution ID this trace is keyed by",
+            "format": "uuid"
+          },
+          "evaluations": {
+            "type": "array",
+            "description": "All rule evaluations that ran for this check",
+            "items": {
+              "$ref": "#/components/schemas/RuleEvaluationDto"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "description": "State-machine transitions this check caused (may be empty if nothing fired)",
+            "items": {
+              "$ref": "#/components/schemas/IncidentStateTransitionDto"
+            }
+          },
+          "policySnapshot": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PolicySnapshotDto"
+              }
+            ]
+          }
+        }
       },
       "CheckTypeDetailsDto": {
         "description": "Check-type-specific details — polymorphic by check_type discriminator",
@@ -24935,6 +25628,28 @@
             "type": "string",
             "description": "Name of the resource group; populated on list responses. Omitted from JSON (undefined to SDKs) on detail responses, treat missing as null.",
             "nullable": true
+          },
+          "triggeringCheckId": {
+            "type": "string",
+            "description": "Scheduler-minted check execution ID whose result confirmed this incident; joins to check_results, rule_evaluations, and incident_state_transitions. Omitted from JSON (undefined to SDKs) when null, treat missing as null.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "triggeredByRuleSnapshotHashHex": {
+            "type": "string",
+            "description": "Hex SHA-256 of the canonical policy snapshot that fired; combined with triggeredByRuleIndex points to the exact TriggerRule. Omitted from JSON when null, treat missing as null.",
+            "nullable": true
+          },
+          "triggeredByRuleIndex": {
+            "type": "integer",
+            "description": "Index of the fired rule inside the policy's trigger_rules array. Omitted from JSON when null, treat missing as null.",
+            "format": "int32",
+            "nullable": true
+          },
+          "engineVersion": {
+            "type": "string",
+            "description": "Detection engine semver that evaluated the rule. Omitted from JSON when null, treat missing as null.",
+            "nullable": true
           }
         },
         "description": "Incident triggered by a monitor check failure or manual creation"
@@ -25144,6 +25859,128 @@
           "active",
           "resolvedToday"
         ]
+      },
+      "IncidentStateTransitionDto": {
+        "required": [
+          "affectedRegions",
+          "checkId",
+          "details",
+          "engineVersion",
+          "fromStatus",
+          "id",
+          "monitorId",
+          "occurredAt",
+          "policySnapshotHashHex",
+          "reason",
+          "toStatus",
+          "triggeringEvaluationIds"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Forensic row UUID",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "When the state transition occurred",
+            "format": "date-time"
+          },
+          "monitorId": {
+            "type": "string",
+            "description": "Monitor this transition pertains to",
+            "format": "uuid"
+          },
+          "incidentId": {
+            "type": "string",
+            "description": "Incident this transition belongs to; null for pre-incident (auto-cleared) transitions",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fromStatus": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Previous status (WATCHING | TRIGGERED | CONFIRMED | RESOLVED)"
+          },
+          "toStatus": {
+            "minLength": 1,
+            "type": "string",
+            "description": "New status (WATCHING | TRIGGERED | CONFIRMED | RESOLVED)"
+          },
+          "reason": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Why the transition fired (trigger | confirm | resolve | auto_clear | reopen)"
+          },
+          "triggeringEvaluationIds": {
+            "type": "array",
+            "description": "rule_evaluation ids that caused this transition (may be empty for timeout-driven edges)",
+            "items": {
+              "type": "string",
+              "description": "rule_evaluation ids that caused this transition (may be empty for timeout-driven edges)",
+              "format": "uuid"
+            }
+          },
+          "affectedRegions": {
+            "type": "array",
+            "description": "Regions whose evaluations contributed to this transition",
+            "items": {
+              "type": "string",
+              "description": "Regions whose evaluations contributed to this transition"
+            }
+          },
+          "policySnapshotHashHex": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Hex-encoded hash of the policy snapshot that governed this transition"
+          },
+          "engineVersion": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Detection engine version that emitted this transition"
+          },
+          "checkId": {
+            "type": "string",
+            "description": "Scheduler-minted check execution ID (V92) of the triggering result",
+            "format": "uuid"
+          },
+          "details": {
+            "$ref": "#/components/schemas/StateTransitionDetails"
+          }
+        },
+        "description": "State-machine transitions this check caused (may be empty if nothing fired)"
+      },
+      "IncidentTimelineDto": {
+        "required": [
+          "transitions",
+          "triggeringEvaluations"
+        ],
+        "type": "object",
+        "properties": {
+          "transitions": {
+            "type": "array",
+            "description": "State-machine transitions in chronological order",
+            "items": {
+              "$ref": "#/components/schemas/IncidentStateTransitionDto"
+            }
+          },
+          "triggeringEvaluations": {
+            "type": "array",
+            "description": "Rule evaluations that caused any of the transitions above. Correlate via evaluation.triggeringTransitionId == transition.id",
+            "items": {
+              "$ref": "#/components/schemas/RuleEvaluationDto"
+            }
+          },
+          "policySnapshot": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PolicySnapshotDto"
+              }
+            ]
+          }
+        }
       },
       "IncidentUpdateDto": {
         "required": [
@@ -25964,6 +26801,41 @@
           }
         },
         "description": "Organization member with role and status"
+      },
+      "MemberRoleChangedMetadata": {
+        "required": [
+          "kind",
+          "oldRole",
+          "newRole"
+        ],
+        "type": "object",
+        "description": "Role transition recorded when an organization member's role changes.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "member_role_changed"
+            ]
+          },
+          "oldRole": {
+            "type": "string",
+            "description": "Role the member held before the change",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "MEMBER"
+            ]
+          },
+          "newRole": {
+            "type": "string",
+            "description": "Role the member holds after the change",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "MEMBER"
+            ]
+          }
+        }
       },
       "MonitorAssertionDto": {
         "required": [
@@ -27096,6 +27968,48 @@
         },
         "description": "Billing plan and entitlement state"
       },
+      "PolicySnapshotDto": {
+        "required": [
+          "engineVersion",
+          "firstSeenAt",
+          "hashHex",
+          "lastSeenAt",
+          "policy"
+        ],
+        "type": "object",
+        "properties": {
+          "hashHex": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Hex-encoded SHA-256 of the canonical policy JSON"
+          },
+          "policy": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Canonical policy document (snake_case, sorted keys)"
+            },
+            "description": "Canonical policy document (snake_case, sorted keys)"
+          },
+          "engineVersion": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Detection engine version that observed this policy"
+          },
+          "firstSeenAt": {
+            "type": "string",
+            "description": "First time the detection engine evaluated against this policy bytes",
+            "format": "date-time"
+          },
+          "lastSeenAt": {
+            "type": "string",
+            "description": "Most recent time the engine evaluated against this policy bytes",
+            "format": "date-time"
+          }
+        },
+        "description": "Policy snapshot used during this check (all evaluations of a single check are against one policy)",
+        "nullable": true
+      },
       "PollChartBucketDto": {
         "required": [
           "bucket",
@@ -27859,6 +28773,105 @@
           }
         },
         "description": "Default retry strategy for member monitors; null clears"
+      },
+      "RuleEvaluationDto": {
+        "required": [
+          "checkId",
+          "engineVersion",
+          "evaluationDetails",
+          "id",
+          "inputResultIds",
+          "monitorId",
+          "occurredAt",
+          "policySnapshotHashHex",
+          "region",
+          "ruleScope",
+          "ruleType",
+          "ruleIndex",
+          "outputMatched"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Forensic row UUID",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "When the evaluation ran",
+            "format": "date-time"
+          },
+          "monitorId": {
+            "type": "string",
+            "description": "Monitor that produced the input check result",
+            "format": "uuid"
+          },
+          "region": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Probe region of the input check result"
+          },
+          "policySnapshotHashHex": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Hex-encoded hash of the policy snapshot this rule came from"
+          },
+          "ruleIndex": {
+            "type": "integer",
+            "description": "Index into the policy's triggerRules array (0-based)",
+            "format": "int32"
+          },
+          "ruleType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Rule type (e.g. consecutive_failures, failures_in_window)"
+          },
+          "ruleScope": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Rule scope (per_region | multi_region)"
+          },
+          "inputResultIds": {
+            "minItems": 1,
+            "type": "array",
+            "description": "check_results IDs that were inputs to this evaluation (newest first)",
+            "items": {
+              "type": "string",
+              "description": "check_results IDs that were inputs to this evaluation (newest first)",
+              "format": "uuid"
+            }
+          },
+          "outputMatched": {
+            "type": "boolean",
+            "description": "Whether the rule fired on this evaluation"
+          },
+          "evaluationDetails": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Structured details (e.g. failure counts, response-time aggregates)"
+            },
+            "description": "Structured details (e.g. failure counts, response-time aggregates)"
+          },
+          "engineVersion": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Detection engine version that ran this evaluation"
+          },
+          "checkId": {
+            "type": "string",
+            "description": "Scheduler-minted check execution ID (V92) — the causal chain identifier",
+            "format": "uuid"
+          },
+          "triggeringTransitionId": {
+            "type": "string",
+            "description": "If this evaluation caused a state transition, points to that transition's id",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "description": "All rule evaluations that ran for this check"
       },
       "ScheduledMaintenanceDto": {
         "required": [
@@ -28981,6 +29994,17 @@
           }
         }
       },
+      "SingleValueResponseCheckTraceDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CheckTraceDto"
+          }
+        }
+      },
       "SingleValueResponseDashboardOverviewDto": {
         "required": [
           "data"
@@ -29055,6 +30079,17 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/IncidentPolicyDto"
+          }
+        }
+      },
+      "SingleValueResponseIncidentTimelineDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/IncidentTimelineDto"
           }
         }
       },
@@ -29192,6 +30227,17 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/OrganizationDto"
+          }
+        }
+      },
+      "SingleValueResponsePolicySnapshotDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PolicySnapshotDto"
           }
         }
       },
@@ -29536,6 +30582,23 @@
           "type",
           "minDaysRemaining"
         ]
+      },
+      "StateTransitionDetails": {
+        "required": [
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Actor that produced this transition (pipeline | public-api)",
+            "enum": [
+              "pipeline",
+              "public-api"
+            ]
+          }
+        },
+        "description": "Typed metadata about this transition (currently: actor source)"
       },
       "StatusCodeAssertion": {
         "required": [
@@ -30525,6 +31588,38 @@
           }
         }
       },
+      "TableValueResultIncidentStateTransitionDto": {
+        "required": [
+          "data",
+          "hasNext",
+          "hasPrev"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncidentStateTransitionDto"
+            }
+          },
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrev": {
+            "type": "boolean"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
       "TableValueResultIntegrationDto": {
         "required": [
           "data",
@@ -30825,6 +31920,38 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ResourceGroupDto"
+            }
+          },
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrev": {
+            "type": "boolean"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "TableValueResultRuleEvaluationDto": {
+        "required": [
+          "data",
+          "hasNext",
+          "hasPrev"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleEvaluationDto"
             }
           },
           "hasNext": {
