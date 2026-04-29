@@ -64,9 +64,7 @@ def register(mcp: FastMCP) -> None:
         even if the monitor has been edited since.
         """
         try:
-            return serialize(
-                get_client(api_token).forensics.policy_snapshot(hash_hex)
-            )
+            return serialize(get_client(api_token).forensics.policy_snapshot(hash_hex))
         except DevhelmError as e:
             return format_error(e)
 
