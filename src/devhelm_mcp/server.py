@@ -25,6 +25,7 @@ from devhelm_mcp.tools import (
     dependencies,
     deploy_lock,
     environments,
+    forensics,
     incidents,
     monitors,
     notification_policies,
@@ -50,6 +51,7 @@ mcp = FastMCP(
 ALL_TOOL_MODULES = [
     monitors,
     incidents,
+    forensics,
     alert_channels,
     notification_policies,
     environments,
