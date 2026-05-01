@@ -44,7 +44,7 @@ jobs:
           mkdir -p docs/openapi
           gh api repos/devhelmhq/mono/contents/docs/openapi/monitoring-api.json \
             -H "Accept: application/vnd.github.raw+json" \
-            -o docs/openapi/monitoring-api.json
+            > docs/openapi/monitoring-api.json
         env:
           GH_TOKEN: ${{ secrets.MONOREPO_DISPATCH_TOKEN }}
 
