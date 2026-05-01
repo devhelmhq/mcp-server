@@ -92,3 +92,31 @@ def test_format_transport_error_passthrough() -> None:
     err = DevhelmTransportError("connection refused")
     out = format_error(err)
     assert out == "TransportError: connection refused"
+
+
+# ---------- Surface telemetry override ----------
+
+
+def test_get_client_overrides_surface_to_mcp() -> None:
+    """The MCP server wraps the SDK; its traffic must be attributed to
+    surface=mcp on the API side, not to the SDK's default sdk-py.
+
+    See https://devhelm.io/telemetry for the wire contract.
+    """
+    from devhelm_mcp.client import get_client
+
+    client = get_client("dummy-token-for-test")
+    # The SDK's underlying httpx.Client lives under several private attributes
+    # depending on the SDK release; reach in via the resources to touch the
+    # one we know exists. Resources hold the same httpx.Client by reference.
+    httpx_client = client.monitors._client  # type: ignore[attr-defined]
+    headers = httpx_client.headers
+    assert headers["x-devhelm-surface"] == "mcp"
+    # SDK identity is preserved alongside the wrapper surface so the API can
+    # still see which SDK version this MCP build is on.
+    assert headers["x-devhelm-sdk-name"] == "sdk-py"
+    # surface_version comes from importlib.metadata; in source-tree installs
+    # it may be "unknown", in published installs it's the package version.
+    # Either way it must be a non-empty string.
+    assert headers["x-devhelm-surface-version"]
+    httpx_client.close()

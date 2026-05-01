@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import os
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _pkg_version
 from typing import Any
 
 from devhelm import (
@@ -19,9 +21,41 @@ API_BASE_URL = os.getenv("DEVHELM_API_URL", "https://api.devhelm.io")
 ToolResult = dict[str, Any] | list[dict[str, Any]] | str
 
 
+def _server_version() -> str:
+    """Resolve the installed ``devhelm-mcp-server`` version once.
+
+    Reported on every API call as ``X-DevHelm-Surface-Version`` so the API
+    can track which MCP server release is in active use across the fleet.
+    Falls back to ``"unknown"`` for source-tree installs.
+    """
+    try:
+        return _pkg_version("devhelm-mcp-server")
+    except PackageNotFoundError:
+        return "unknown"
+
+
 def get_client(api_token: str) -> Devhelm:
-    """Build a Devhelm SDK client from the user's API token."""
-    return Devhelm(token=api_token, base_url=API_BASE_URL)
+    """Build a Devhelm SDK client from the user's API token.
+
+    Overrides the SDK's default surface (``sdk-py``) with ``mcp`` so the
+    API attributes traffic to the MCP server rather than to bare-SDK use.
+    The SDK's ``X-DevHelm-Sdk-Name`` header is preserved, so the API can
+    still see *which* SDK version this MCP server release is built on for
+    debugging client-version skew.
+
+    Detecting the host MCP client (Cursor vs Claude Desktop vs ...) is a
+    follow-up: ``fastmcp.Context.session.client_params.clientInfo`` carries
+    that info, but threading Context through every tool would be a wide
+    surgery against the no-callsite-changes goal of this PR. The wire
+    contract already supports ``X-DevHelm-Mcp-Client`` via
+    ``surface_metadata`` so we can layer it in later without an API change.
+    """
+    return Devhelm(
+        token=api_token,
+        base_url=API_BASE_URL,
+        surface="mcp",
+        surface_version=_server_version(),
+    )
 
 
 def as_payload(model: BaseModel) -> dict[str, Any]:

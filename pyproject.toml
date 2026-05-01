@@ -21,7 +21,7 @@ classifiers = [
 dependencies = [
     # Floor bumped to 0.5.0 for the forensic read resource (timeline / trace /
     # evaluations / transitions / policy snapshot) used by tools/forensics.py.
-    "devhelm>=0.5.0",
+    "devhelm>=0.6.0",
     "fastmcp>=2.0.0",
 ]
 
