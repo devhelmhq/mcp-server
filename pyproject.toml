@@ -31,6 +31,8 @@ Repository = "https://github.com/devhelmhq/mcp-server"
 Documentation = "https://docs.devhelm.io"
 
 [project.scripts]
+devhelm-mcp-server = "devhelm_mcp.server:main"
+# Backwards-compatible alias for v0.x consumers (deprecated; prefer devhelm-mcp-server).
 devhelm-mcp = "devhelm_mcp.server:main"
 
 [build-system]

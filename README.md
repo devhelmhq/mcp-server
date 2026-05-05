@@ -24,7 +24,14 @@ URL: https://mcp.devhelm.io/<your-api-token>/mcp
 ```bash
 pip install devhelm-mcp-server
 export DEVHELM_API_TOKEN=your-token
-devhelm-mcp
+devhelm-mcp-server
+```
+
+Or with `uvx` (no install required):
+
+```bash
+export DEVHELM_API_TOKEN=your-token
+uvx devhelm-mcp-server
 ```
 
 ### Cursor / Claude Desktop
