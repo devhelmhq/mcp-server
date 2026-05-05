@@ -17,7 +17,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_secrets(api_token: str) -> ToolResult:
+    def list_secrets(api_token: str | None = None) -> ToolResult:
         """List all secrets (metadata only, values are never returned)."""
         try:
             return serialize(get_client(api_token).secrets.list())
@@ -25,7 +25,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_secret(api_token: str, body: CreateSecretRequest) -> ToolResult:
+    def create_secret(
+        body: CreateSecretRequest, api_token: str | None = None
+    ) -> ToolResult:
         """Create an encrypted secret.
 
         Required fields: key, value. The value is encrypted at rest
@@ -38,7 +40,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_secret(
-        api_token: str, key: str, body: UpdateSecretRequest
+        key: str,
+        body: UpdateSecretRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Update a secret's value by key."""
         try:
@@ -49,7 +53,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def delete_secret(api_token: str, key: str) -> str:
+    def delete_secret(key: str, api_token: str | None = None) -> str:
         """Delete a secret by key."""
         try:
             get_client(api_token).secrets.delete(key)

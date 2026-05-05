@@ -17,7 +17,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_tags(api_token: str) -> ToolResult:
+    def list_tags(api_token: str | None = None) -> ToolResult:
         """List all tags in the workspace."""
         try:
             return serialize(get_client(api_token).tags.list())
@@ -25,7 +25,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_tag(api_token: str, tag_id: str) -> ToolResult:
+    def get_tag(tag_id: str, api_token: str | None = None) -> ToolResult:
         """Get a tag by ID."""
         try:
             return serialize(get_client(api_token).tags.get(tag_id))
@@ -33,7 +33,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_tag(api_token: str, body: CreateTagRequest) -> ToolResult:
+    def create_tag(body: CreateTagRequest, api_token: str | None = None) -> ToolResult:
         """Create a tag.
 
         Required fields: name. Optional: color.
@@ -44,7 +44,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def update_tag(api_token: str, tag_id: str, body: UpdateTagRequest) -> ToolResult:
+    def update_tag(
+        tag_id: str, body: UpdateTagRequest, api_token: str | None = None
+    ) -> ToolResult:
         """Update a tag."""
         try:
             return serialize(
@@ -54,7 +56,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def delete_tag(api_token: str, tag_id: str) -> str:
+    def delete_tag(tag_id: str, api_token: str | None = None) -> str:
         """Delete a tag."""
         try:
             get_client(api_token).tags.delete(tag_id)

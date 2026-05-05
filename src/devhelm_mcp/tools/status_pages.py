@@ -30,7 +30,7 @@ from devhelm_mcp.client import (
 )
 
 
-def _sp(api_token: str) -> StatusPages:
+def _sp(api_token: str | None) -> StatusPages:
     """Return status_pages resource."""
     return get_client(api_token).status_pages
 
@@ -39,7 +39,7 @@ def register(mcp: FastMCP) -> None:
     # ── Page CRUD ─────────────────────────────────────────────────────────
 
     @mcp.tool()
-    def list_status_pages(api_token: str) -> ToolResult:
+    def list_status_pages(api_token: str | None = None) -> ToolResult:
         """List all status pages in the workspace."""
         try:
             return serialize(_sp(api_token).list())
@@ -47,7 +47,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_status_page(api_token: str, page_id: str) -> ToolResult:
+    def get_status_page(page_id: str, api_token: str | None = None) -> ToolResult:
         """Get a status page by ID, including branding and overall status."""
         try:
             return serialize(_sp(api_token).get(page_id))
@@ -55,7 +55,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_status_page(api_token: str, body: CreateStatusPageRequest) -> ToolResult:
+    def create_status_page(
+        body: CreateStatusPageRequest, api_token: str | None = None
+    ) -> ToolResult:
         """Create a new status page.
 
         Required fields: name, slug.
@@ -69,7 +71,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_status_page(
-        api_token: str, page_id: str, body: UpdateStatusPageRequest
+        page_id: str,
+        body: UpdateStatusPageRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Update a status page's name, slug, branding, visibility, or incident mode."""
         try:
@@ -78,7 +82,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def delete_status_page(api_token: str, page_id: str) -> str:
+    def delete_status_page(page_id: str, api_token: str | None = None) -> str:
         """Delete a status page permanently."""
         try:
             _sp(api_token).delete(page_id)
@@ -88,7 +92,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def reorder_status_page_layout(
-        api_token: str, page_id: str, body: ReorderPageLayoutRequest
+        page_id: str,
+        body: ReorderPageLayoutRequest,
+        api_token: str | None = None,
     ) -> str:
         """Batch-reorder a status page's full layout.
 
@@ -112,7 +118,9 @@ def register(mcp: FastMCP) -> None:
     # ── Components ────────────────────────────────────────────────────────
 
     @mcp.tool()
-    def list_status_page_components(api_token: str, page_id: str) -> ToolResult:
+    def list_status_page_components(
+        page_id: str, api_token: str | None = None
+    ) -> ToolResult:
         """List all components on a status page."""
         try:
             return serialize(_sp(api_token).components.list(page_id))
@@ -121,7 +129,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_status_page_component(
-        api_token: str, page_id: str, body: CreateStatusPageComponentRequest
+        page_id: str,
+        body: CreateStatusPageComponentRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Add a component to a status page.
 
@@ -137,10 +147,10 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_status_page_component(
-        api_token: str,
         page_id: str,
         component_id: str,
         body: UpdateStatusPageComponentRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Update a status page component's name, group, or status."""
         try:
@@ -154,7 +164,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def delete_status_page_component(
-        api_token: str, page_id: str, component_id: str
+        page_id: str,
+        component_id: str,
+        api_token: str | None = None,
     ) -> str:
         """Remove a component from a status page."""
         try:
@@ -165,7 +177,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def reorder_status_page_components(
-        api_token: str, page_id: str, body: ReorderComponentsRequest
+        page_id: str,
+        body: ReorderComponentsRequest,
+        api_token: str | None = None,
     ) -> str:
         """Reorder components on a status page.
 
@@ -182,7 +196,9 @@ def register(mcp: FastMCP) -> None:
     # ── Component Groups ──────────────────────────────────────────────────
 
     @mcp.tool()
-    def list_status_page_groups(api_token: str, page_id: str) -> ToolResult:
+    def list_status_page_groups(
+        page_id: str, api_token: str | None = None
+    ) -> ToolResult:
         """List component groups on a status page (with nested components)."""
         try:
             return serialize(_sp(api_token).groups.list(page_id))
@@ -191,7 +207,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_status_page_group(
-        api_token: str, page_id: str, body: CreateStatusPageComponentGroupRequest
+        page_id: str,
+        body: CreateStatusPageComponentGroupRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Create a component group on a status page.
 
@@ -204,10 +222,10 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_status_page_group(
-        api_token: str,
         page_id: str,
         group_id: str,
         body: UpdateStatusPageComponentGroupRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Update a component group's name or display order."""
         try:
@@ -218,7 +236,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def delete_status_page_group(api_token: str, page_id: str, group_id: str) -> str:
+    def delete_status_page_group(
+        page_id: str, group_id: str, api_token: str | None = None
+    ) -> str:
         """Delete a component group from a status page."""
         try:
             _sp(api_token).groups.delete(page_id, group_id)
@@ -230,7 +250,10 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def list_status_page_incidents(
-        api_token: str, page_id: str, page: int = 0, size: int = 20
+        page_id: str,
+        page: int = 0,
+        size: int = 20,
+        api_token: str | None = None,
     ) -> ToolResult:
         """List incidents on a status page (paginated)."""
         try:
@@ -241,7 +264,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def get_status_page_incident(
-        api_token: str, page_id: str, incident_id: str
+        page_id: str,
+        incident_id: str,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Get a status page incident with its full timeline of updates."""
         try:
@@ -251,7 +276,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_status_page_incident(
-        api_token: str, page_id: str, body: CreateStatusPageIncidentRequest
+        page_id: str,
+        body: CreateStatusPageIncidentRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Create an incident on a status page.
 
@@ -266,10 +293,10 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_status_page_incident(
-        api_token: str,
         page_id: str,
         incident_id: str,
         body: UpdateStatusPageIncidentRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Update a status page incident's title, impact, or status."""
         try:
@@ -281,10 +308,10 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def post_status_page_incident_update(
-        api_token: str,
         page_id: str,
         incident_id: str,
         body: CreateStatusPageIncidentUpdateRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Post a timeline update on a status page incident.
 
@@ -303,7 +330,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def publish_status_page_incident(
-        api_token: str, page_id: str, incident_id: str
+        page_id: str,
+        incident_id: str,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Publish a draft incident (sets it live, notifies subscribers).
 
@@ -317,7 +346,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def dismiss_status_page_incident(
-        api_token: str, page_id: str, incident_id: str
+        page_id: str,
+        incident_id: str,
+        api_token: str | None = None,
     ) -> str:
         """Dismiss a draft incident (deletes it without publishing)."""
         try:
@@ -328,7 +359,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def delete_status_page_incident(
-        api_token: str, page_id: str, incident_id: str
+        page_id: str,
+        incident_id: str,
+        api_token: str | None = None,
     ) -> str:
         """Delete a status page incident permanently."""
         try:
@@ -341,7 +374,10 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def list_status_page_subscribers(
-        api_token: str, page_id: str, page: int = 0, size: int = 20
+        page_id: str,
+        page: int = 0,
+        size: int = 20,
+        api_token: str | None = None,
     ) -> ToolResult:
         """List confirmed subscribers on a status page (paginated)."""
         try:
@@ -352,7 +388,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def add_status_page_subscriber(
-        api_token: str, page_id: str, body: AdminAddSubscriberRequest
+        page_id: str,
+        body: AdminAddSubscriberRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Add a subscriber to a status page (admin).
 
@@ -365,7 +403,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def remove_status_page_subscriber(
-        api_token: str, page_id: str, subscriber_id: str
+        page_id: str,
+        subscriber_id: str,
+        api_token: str | None = None,
     ) -> str:
         """Remove a subscriber from a status page."""
         try:
@@ -377,7 +417,9 @@ def register(mcp: FastMCP) -> None:
     # ── Custom Domains ────────────────────────────────────────────────────
 
     @mcp.tool()
-    def list_status_page_domains(api_token: str, page_id: str) -> ToolResult:
+    def list_status_page_domains(
+        page_id: str, api_token: str | None = None
+    ) -> ToolResult:
         """List custom domains on a status page."""
         try:
             return serialize(_sp(api_token).domains.list(page_id))
@@ -386,7 +428,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def add_status_page_domain(
-        api_token: str, page_id: str, body: AddCustomDomainRequest
+        page_id: str,
+        body: AddCustomDomainRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Add a custom domain to a status page.
 
@@ -401,7 +445,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def verify_status_page_domain(
-        api_token: str, page_id: str, domain_id: str
+        page_id: str,
+        domain_id: str,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Trigger DNS verification for a custom domain.
 
@@ -413,7 +459,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def remove_status_page_domain(api_token: str, page_id: str, domain_id: str) -> str:
+    def remove_status_page_domain(
+        page_id: str, domain_id: str, api_token: str | None = None
+    ) -> str:
         """Remove a custom domain from a status page."""
         try:
             _sp(api_token).domains.remove(page_id, domain_id)

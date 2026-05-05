@@ -17,7 +17,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_alert_channels(api_token: str) -> ToolResult:
+    def list_alert_channels(api_token: str | None = None) -> ToolResult:
         """List all alert channels configured in the workspace."""
         try:
             return serialize(get_client(api_token).alert_channels.list())
@@ -25,7 +25,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_alert_channel(api_token: str, channel_id: str) -> ToolResult:
+    def get_alert_channel(channel_id: str, api_token: str | None = None) -> ToolResult:
         """Get an alert channel by ID."""
         try:
             return serialize(get_client(api_token).alert_channels.get(channel_id))
@@ -34,7 +34,8 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_alert_channel(
-        api_token: str, body: CreateAlertChannelRequest
+        body: CreateAlertChannelRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Create a new alert channel.
 
@@ -51,7 +52,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_alert_channel(
-        api_token: str, channel_id: str, body: UpdateAlertChannelRequest
+        channel_id: str,
+        body: UpdateAlertChannelRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Update an existing alert channel."""
         try:
@@ -64,7 +67,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def delete_alert_channel(api_token: str, channel_id: str) -> str:
+    def delete_alert_channel(channel_id: str, api_token: str | None = None) -> str:
         """Delete an alert channel."""
         try:
             get_client(api_token).alert_channels.delete(channel_id)
@@ -73,7 +76,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def test_alert_channel(api_token: str, channel_id: str) -> ToolResult:
+    def test_alert_channel(channel_id: str, api_token: str | None = None) -> ToolResult:
         """Send a test notification to an alert channel to verify it works."""
         try:
             return serialize(get_client(api_token).alert_channels.test(channel_id))

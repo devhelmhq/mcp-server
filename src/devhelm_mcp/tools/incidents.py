@@ -17,7 +17,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_incidents(api_token: str) -> ToolResult:
+    def list_incidents(api_token: str | None = None) -> ToolResult:
         """List all incidents in the workspace."""
         try:
             return serialize(get_client(api_token).incidents.list())
@@ -25,7 +25,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_incident(api_token: str, incident_id: str) -> ToolResult:
+    def get_incident(incident_id: str, api_token: str | None = None) -> ToolResult:
         """Get a single incident by ID with full details."""
         try:
             return serialize(get_client(api_token).incidents.get(incident_id))
@@ -34,7 +34,8 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_incident(
-        api_token: str, body: CreateManualIncidentRequest
+        body: CreateManualIncidentRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Create a manual incident.
 
@@ -48,7 +49,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def resolve_incident(
-        api_token: str, incident_id: str, message: str | None = None
+        incident_id: str,
+        message: str | None = None,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Resolve an active incident, optionally with a resolution message."""
         try:

@@ -18,7 +18,8 @@ from devhelm_mcp.client import (
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def acquire_deploy_lock(
-        api_token: str, body: AcquireDeployLockRequest
+        body: AcquireDeployLockRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Acquire a deploy lock to prevent concurrent deployments.
 
@@ -33,7 +34,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_current_deploy_lock(api_token: str) -> ToolResult | None:
+    def get_current_deploy_lock(api_token: str | None = None) -> ToolResult | None:
         """Get the currently active deploy lock, or null if unlocked."""
         try:
             result = get_client(api_token).deploy_lock.current()
@@ -42,7 +43,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def release_deploy_lock(api_token: str, lock_id: str) -> str:
+    def release_deploy_lock(lock_id: str, api_token: str | None = None) -> str:
         """Release a deploy lock by ID."""
         try:
             get_client(api_token).deploy_lock.release(lock_id)
@@ -51,7 +52,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def force_release_deploy_lock(api_token: str) -> str:
+    def force_release_deploy_lock(api_token: str | None = None) -> str:
         """Force-release any active deploy lock (admin action)."""
         try:
             get_client(api_token).deploy_lock.force_release()

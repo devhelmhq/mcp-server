@@ -17,7 +17,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_api_keys(api_token: str) -> ToolResult:
+    def list_api_keys(api_token: str | None = None) -> ToolResult:
         """List all API keys in the workspace."""
         try:
             return serialize(get_client(api_token).api_keys.list())
@@ -25,7 +25,9 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def create_api_key(api_token: str, body: CreateApiKeyRequest) -> ToolResult:
+    def create_api_key(
+        body: CreateApiKeyRequest, api_token: str | None = None
+    ) -> ToolResult:
         """Create a new API key. The key value is returned only once.
 
         Required fields: name. Optional: expiresAt.
@@ -36,7 +38,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def revoke_api_key(api_token: str, key_id: str) -> str:
+    def revoke_api_key(key_id: str, api_token: str | None = None) -> str:
         """Revoke an API key (disables it without deleting)."""
         try:
             get_client(api_token).api_keys.revoke(key_id)
@@ -45,7 +47,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def delete_api_key(api_token: str, key_id: str) -> str:
+    def delete_api_key(key_id: str, api_token: str | None = None) -> str:
         """Delete an API key permanently."""
         try:
             get_client(api_token).api_keys.delete(key_id)

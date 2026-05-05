@@ -9,7 +9,11 @@ Both resolve the token to a Devhelm SDK client per-request.
 
 from __future__ import annotations
 
+import argparse
 import os
+import sys
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _pkg_version
 from typing import TYPE_CHECKING
 
 from fastmcp import FastMCP
@@ -137,14 +141,121 @@ def _get_app() -> Starlette:
 app = _get_app()
 
 
-def main() -> None:
+def _package_version() -> str:
+    """Best-effort lookup of the installed package version for ``--version``."""
+    try:
+        return _pkg_version("devhelm-mcp-server")
+    except PackageNotFoundError:
+        return "unknown"
+
+
+def _build_arg_parser() -> argparse.ArgumentParser:
+    """Build the CLI parser for ``devhelm-mcp-server``.
+
+    Defined as a separate function so the wheel's entry point and tests
+    can both render the same ``--help`` output without booting the
+    server. Every flag has an env-var equivalent and the env var wins
+    only when the flag is *not* passed on the command line — that's the
+    contract every existing deployment relies on (Dockerfile sets
+    ``DEVHELM_MCP_TRANSPORT=http``; ``uvx devhelm-mcp-server`` reads
+    nothing and gets stdio).
+    """
+    parser = argparse.ArgumentParser(
+        prog="devhelm-mcp-server",
+        description=(
+            "DevHelm MCP server — exposes monitors, incidents, alerting, "
+            "and more to AI agents over the Model Context Protocol."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Examples:\n"
+            "  # Local stdio (Cursor / Claude Desktop / Windsurf):\n"
+            "  DEVHELM_API_TOKEN=dh_live_xxx devhelm-mcp-server\n"
+            "\n"
+            "  # Self-hosted HTTP listener:\n"
+            "  devhelm-mcp-server --transport http --host 0.0.0.0 --port 8080\n"
+            "\n"
+            "Environment variables (overridden by the matching flag):\n"
+            "  DEVHELM_MCP_TRANSPORT  stdio | http (default: stdio)\n"
+            "  DEVHELM_MCP_HOST       HTTP bind host (default: 0.0.0.0)\n"
+            "  DEVHELM_MCP_PORT       HTTP bind port (default: 8000)\n"
+            "  DEVHELM_API_TOKEN      Bearer token used when none is provided\n"
+            "                         in tool args or Authorization header\n"
+            "  DEVHELM_API_URL        Override the upstream DevHelm API URL"
+        ),
+    )
+    parser.add_argument(
+        "--transport",
+        choices=("stdio", "http"),
+        default=None,
+        help=(
+            "transport to serve (default: stdio, or DEVHELM_MCP_TRANSPORT). "
+            "stdio is what local MCP clients (Cursor, Claude Desktop, "
+            "Windsurf, uvx) spawn as a subprocess; http is the hosted / "
+            "self-hosted ASGI listener under Uvicorn."
+        ),
+    )
+    parser.add_argument(
+        "--host",
+        default=None,
+        help=(
+            "HTTP bind host (default: 0.0.0.0, or DEVHELM_MCP_HOST). "
+            "Ignored when --transport stdio."
+        ),
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help=(
+            "HTTP bind port (default: 8000, or DEVHELM_MCP_PORT). "
+            "Ignored when --transport stdio."
+        ),
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"devhelm-mcp-server {_package_version()}",
+    )
+    return parser
+
+
+def _resolve_transport(arg: str | None) -> str:
+    transport = (arg or os.getenv("DEVHELM_MCP_TRANSPORT") or "stdio").lower()
+    if transport not in ("stdio", "http"):
+        raise SystemExit(
+            f"Unknown transport {transport!r}; expected 'stdio' or 'http'."
+        )
+    return transport
+
+
+def _resolve_host(arg: str | None) -> str:
+    # ``DEVHELM_MCP_HOST`` is the documented env var; ``HOST`` is the
+    # legacy name still set by some Dockerfile setups, kept as a
+    # back-compat fallback so we don't silently regress on the existing
+    # production deploy.
+    return arg or os.getenv("DEVHELM_MCP_HOST") or os.getenv("HOST") or "0.0.0.0"
+
+
+def _resolve_port(arg: int | None) -> int:
+    if arg is not None:
+        return arg
+    raw = os.getenv("DEVHELM_MCP_PORT") or os.getenv("PORT") or "8000"
+    try:
+        return int(raw)
+    except ValueError as exc:
+        raise SystemExit(f"Invalid port {raw!r}: {exc}") from exc
+
+
+def main(argv: list[str] | None = None) -> None:
     """Entry point for the ``devhelm-mcp-server`` console script.
 
     Defaults to **stdio** — the transport that local MCP clients (Cursor,
     Claude Desktop, Windsurf) speak when they spawn the server as a
-    subprocess. Set ``DEVHELM_MCP_TRANSPORT=http`` to start the ASGI app
-    under Uvicorn instead, which is what the hosted ``mcp.devhelm.io``
-    deployment uses (and what the Dockerfile sets via env).
+    subprocess. Set ``DEVHELM_MCP_TRANSPORT=http`` (or pass
+    ``--transport http``) to start the ASGI app under Uvicorn instead,
+    which is what the hosted ``mcp.devhelm.io`` deployment uses (and
+    what the Dockerfile sets via env).
 
     Why stdio is the default: the published binary is overwhelmingly
     invoked from MCP client configs that look like::
@@ -159,20 +270,23 @@ def main() -> None:
     If the binary booted an HTTP server in that context, every documented
     Cursor / Claude Desktop config would silently fail. The HTTP path is
     a deliberate opt-in for the hosted-server deployment.
+
+    The ``--help`` / ``--version`` flags exit immediately without booting
+    a transport — before this CLI parser was added, ``--help`` was
+    silently consumed and the server started in stdio mode, leaving
+    users unable to discover any of the flags or env vars.
     """
-    transport = os.getenv("DEVHELM_MCP_TRANSPORT", "stdio").lower()
+    args = _build_arg_parser().parse_args(argv if argv is not None else sys.argv[1:])
+
+    transport = _resolve_transport(args.transport)
     if transport == "stdio":
         mcp.run()
         return
-    if transport != "http":
-        raise SystemExit(
-            f"Unknown DEVHELM_MCP_TRANSPORT={transport!r}; expected 'stdio' or 'http'."
-        )
 
     import uvicorn
 
-    host = os.getenv("HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", "8000"))
+    host = _resolve_host(args.host)
+    port = _resolve_port(args.port)
     # ``proxy_headers=True`` + ``forwarded_allow_ips="*"`` make Uvicorn honor
     # ``X-Forwarded-Proto`` (and ``X-Forwarded-For``) from the reverse proxy
     # in front of the deployment (Cloudflare → Traefik → here). Without this,

@@ -10,7 +10,7 @@ from devhelm_mcp.client import ToolResult, format_error, get_client, serialize
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def get_status_overview(api_token: str) -> ToolResult:
+    def get_status_overview(api_token: str | None = None) -> ToolResult:
         """Get the dashboard overview with monitor counts,
         incident summary, and uptime stats."""
         try:

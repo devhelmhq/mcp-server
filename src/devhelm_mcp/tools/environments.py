@@ -17,7 +17,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_environments(api_token: str) -> ToolResult:
+    def list_environments(api_token: str | None = None) -> ToolResult:
         """List all environments in the workspace."""
         try:
             return serialize(get_client(api_token).environments.list())
@@ -25,7 +25,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_environment(api_token: str, slug: str) -> ToolResult:
+    def get_environment(slug: str, api_token: str | None = None) -> ToolResult:
         """Get an environment by slug (e.g. 'production', 'staging')."""
         try:
             return serialize(get_client(api_token).environments.get(slug))
@@ -34,7 +34,8 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_environment(
-        api_token: str, body: CreateEnvironmentRequest
+        body: CreateEnvironmentRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Create an environment.
 
@@ -49,7 +50,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_environment(
-        api_token: str, slug: str, body: UpdateEnvironmentRequest
+        slug: str,
+        body: UpdateEnvironmentRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Update an environment by slug."""
         try:
@@ -60,7 +63,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def delete_environment(api_token: str, slug: str) -> str:
+    def delete_environment(slug: str, api_token: str | None = None) -> str:
         """Delete an environment by slug."""
         try:
             get_client(api_token).environments.delete(slug)
