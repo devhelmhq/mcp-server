@@ -20,9 +20,11 @@ from typing import TYPE_CHECKING, Any
 from fastmcp import FastMCP
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from starlette.types import Receive, Scope, Send
 
 if TYPE_CHECKING:
     from starlette.applications import Starlette
+    from starlette.types import ASGIApp
 
 from devhelm_mcp.tools import (
     alert_channels,
@@ -180,6 +182,42 @@ def _strip_field_from_object_schema(schema: dict[str, Any], field: str) -> None:
 _strip_internal_schema_fields()
 
 
+class _NormalizeMcpPath:
+    """Rewrite ``/mcp`` → ``/mcp/`` (and ``/{key}/mcp`` → ``/{key}/mcp/``).
+
+    Starlette's ``Mount("/mcp", inner_app)`` only forwards requests under
+    ``/mcp/`` to the inner app — the bare ``/mcp`` URL gets a 307 redirect
+    to ``/mcp/``. Naive HTTP clients (some MCP wrappers, raw curl scripts,
+    LangChain's older HTTP transport) drop the request body and the
+    ``Authorization`` header on a 307, then fail with ``-32600 invalid
+    request`` or 401.
+
+    This middleware sits *outside* the Starlette router and rewrites the
+    ASGI scope's ``path`` / ``raw_path`` before routing happens, so the
+    request is delivered straight to the inner MCP handler with no
+    redirect. The rewrite is idempotent — paths that already end in
+    ``/`` are left alone — and only fires for the ``/mcp`` family, so
+    ``/health`` and other routes are untouched.
+
+    DevEx P1.Bug6.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] == "http":
+            path = scope.get("path", "")
+            if path == "/mcp" or (
+                path.endswith("/mcp")
+                and len(path) > len("/mcp")
+                and path.count("/") >= 2
+            ):
+                new_path = path + "/"
+                scope = {**scope, "path": new_path, "raw_path": new_path.encode()}
+        await self.app(scope, receive, send)
+
+
 def _get_app() -> Starlette:
     """Build the ASGI app with path-based auth routing."""
     from starlette.applications import Starlette
@@ -223,16 +261,7 @@ def _get_app() -> Starlette:
     # ``StreamableHTTPSessionManager`` — without it the inner app raises
     # "task group was not initialized" on the first POST. See
     # https://gofastmcp.com/deployment/asgi.
-    #
-    # Trailing-slash semantics: Starlette's ``Mount("/mcp", inner_app)``
-    # only forwards paths under ``/mcp/`` to the inner app — the bare
-    # ``/mcp`` URL gets a 307 redirect to ``/mcp/``. With
-    # ``proxy_headers=True`` on Uvicorn (set in ``main()``), the redirect's
-    # ``Location`` honors ``X-Forwarded-Proto: https`` from the upstream
-    # proxy (Cloudflare → Traefik → here), so clients still end up on
-    # ``https://mcp.devhelm.io/mcp/`` instead of being downgraded to HTTP.
-    # See END-1186 for why this matters.
-    app = Starlette(
+    starlette_app = Starlette(
         routes=[
             Route("/health", health_handler, methods=["GET"]),
             Mount("/mcp", app=mcp_app),
@@ -241,7 +270,12 @@ def _get_app() -> Starlette:
         middleware=middleware,
         lifespan=mcp_app.lifespan,
     )
-    return app
+    # Wrap with the path normalizer so POST /mcp (no trailing slash) reaches
+    # the inner app directly instead of bouncing through a 307. The
+    # middleware lives outside Starlette's router because the redirect is
+    # emitted by ``Mount`` before the middleware chain executes.
+    starlette_app.add_middleware(_NormalizeMcpPath)
+    return starlette_app
 
 
 app = _get_app()
@@ -419,6 +453,10 @@ def main(argv: list[str] | None = None) -> None:
     # discovered this by seeing every MCP client (Cursor, Claude Desktop,
     # raw curl) bounce through ``Location: http://mcp.devhelm.io/mcp/`` and
     # never reach the JSON-RPC handler. END-1186.
+    #
+    # The trailing-slash redirect itself is now obviated by the
+    # ``_NormalizeMcpPath`` middleware in ``_get_app``, but proxy_headers
+    # remains useful for any future redirect (auth challenge, etc.).
     uvicorn.run(
         "devhelm_mcp.server:app",
         host=host,
