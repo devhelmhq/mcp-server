@@ -10,11 +10,12 @@ Both resolve the token to a Devhelm SDK client per-request.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import os
 import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastmcp import FastMCP
 from starlette.requests import Request
@@ -72,6 +73,68 @@ ALL_TOOL_MODULES = [
 
 for mod in ALL_TOOL_MODULES:
     mod.register(mcp)
+
+
+def _strip_managed_by_from_create_monitor_schema() -> None:
+    """Hide ``managedBy`` from the ``create_monitor`` JSON Schema.
+
+    The MCP server forces ``managedBy="MCP"`` on every monitor create (see
+    ``tools/monitors.py``). Surfacing the field in the LLM-facing input
+    schema invited the model to set it to ``"DASHBOARD"`` (or whatever
+    string it found in chat context), which would either be silently
+    overridden server-side (confusing) or — on stale SDKs — fail Pydantic
+    validation with a ``-32602`` envelope before the server-side override
+    even ran. Stripping the field from the advertised schema makes the
+    server-side guarantee match what the LLM sees.
+
+    ``run_middleware=False`` returns the source-of-truth ``Tool`` objects
+    from the providers; the dereference middleware copies them on every
+    ``tools/list`` and would lose any edits we made to the copies.
+    DevEx round-3 P0.Bug5 + P1.Bug4 + P1.Bug5.
+    """
+    tools = asyncio.run(mcp.list_tools(run_middleware=False))
+    for tool in tools:
+        if tool.name != "create_monitor":
+            continue
+        _strip_managed_by_from_create_monitor(tool.parameters)
+
+
+def _strip_managed_by_from_create_monitor(params: dict[str, Any]) -> None:
+    """Remove ``managedBy`` from the ``create_monitor`` body schema.
+
+    FastMCP emits the body either inline (``properties.body.properties``) or
+    behind a ``$ref`` into ``$defs`` — depends on whether the Pydantic model
+    has nested ``$ref``-able children. For ``CreateMonitorRequest`` it's the
+    second shape because of the discriminated ``config`` union, so the fix
+    has to drop ``managedBy`` from the def *before* the dereference
+    middleware inlines it for the wire response.
+    """
+    properties = params.get("properties")
+    if isinstance(properties, dict):
+        body = properties.get("body")
+        if isinstance(body, dict):
+            _strip_field_from_object_schema(body, "managedBy")
+            ref = body.get("$ref")
+            if isinstance(ref, str):
+                defs = params.get("$defs")
+                if isinstance(defs, dict):
+                    def_name = ref.rsplit("/", 1)[-1]
+                    target = defs.get(def_name)
+                    if isinstance(target, dict):
+                        _strip_field_from_object_schema(target, "managedBy")
+
+
+def _strip_field_from_object_schema(schema: dict[str, Any], field: str) -> None:
+    """Remove ``field`` from a JSON Schema object's ``properties`` and ``required``."""
+    schema_props = schema.get("properties")
+    if isinstance(schema_props, dict):
+        schema_props.pop(field, None)
+    schema_required = schema.get("required")
+    if isinstance(schema_required, list) and field in schema_required:
+        schema_required.remove(field)
+
+
+_strip_managed_by_from_create_monitor_schema()
 
 
 def _get_app() -> Starlette:
