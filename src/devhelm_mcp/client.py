@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
-from typing import Any
+from typing import Any, NoReturn
 
 from devhelm import (
     Devhelm,
@@ -15,6 +15,7 @@ from devhelm import (
     DevhelmTransportError,
     DevhelmValidationError,
 )
+from fastmcp.exceptions import ToolError
 from pydantic import BaseModel
 
 API_BASE_URL = os.getenv("DEVHELM_API_URL", "https://api.devhelm.io")
@@ -199,6 +200,26 @@ def format_error(err: DevhelmError) -> str:
         return f"TransportError: {err.message}"
 
     return f"Error: {err}"
+
+
+def raise_tool_error(err: DevhelmError) -> NoReturn:
+    """Convert an SDK error into a FastMCP ``ToolError`` so ``isError=true``.
+
+    Per the MCP spec, upstream API failures must surface as
+    ``CallToolResult.isError = true`` so the LLM can distinguish a tool that
+    *ran but failed* from one that *succeeded with an error message in the
+    response* — those have the same shape on the wire otherwise.
+
+    The previous behavior returned ``format_error(err)`` as a regular tool
+    return value (``isError = false``), which caused agents to confidently
+    report success after a 4xx/5xx (silent-corruption bug from the round-3
+    DevEx audit). FastMCP catches the ``ToolError`` raised here and
+    serializes it into ``CallToolResult(isError=True, content=[...])``,
+    preserving the human-readable formatted message for the LLM.
+
+    See https://modelcontextprotocol.io/specification/server/tools#error-handling.
+    """
+    raise ToolError(format_error(err)) from err
 
 
 JsonValue = dict[str, "JsonValue"] | list["JsonValue"] | str | int | float | bool | None

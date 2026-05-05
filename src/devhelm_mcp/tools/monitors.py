@@ -9,8 +9,8 @@ from fastmcp import FastMCP
 from devhelm_mcp.client import (
     ToolResult,
     as_payload,
-    format_error,
     get_client,
+    raise_tool_error,
     serialize,
 )
 
@@ -22,7 +22,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).monitors.list())
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def get_monitor(monitor_id: str, api_token: str | None = None) -> ToolResult:
@@ -30,7 +30,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).monitors.get(monitor_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def create_monitor(
@@ -44,7 +44,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).monitors.create(as_payload(body)))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def update_monitor(
@@ -58,7 +58,7 @@ def register(mcp: FastMCP) -> None:
                 get_client(api_token).monitors.update(monitor_id, as_payload(body))
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def delete_monitor(monitor_id: str, api_token: str | None = None) -> str:
@@ -67,7 +67,7 @@ def register(mcp: FastMCP) -> None:
             get_client(api_token).monitors.delete(monitor_id)
             return "Monitor deleted successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def pause_monitor(monitor_id: str, api_token: str | None = None) -> ToolResult:
@@ -75,7 +75,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).monitors.pause(monitor_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def resume_monitor(monitor_id: str, api_token: str | None = None) -> ToolResult:
@@ -83,7 +83,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).monitors.resume(monitor_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def test_monitor(monitor_id: str, api_token: str | None = None) -> ToolResult:
@@ -91,7 +91,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).monitors.test(monitor_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def list_monitor_results(
@@ -107,7 +107,7 @@ def register(mcp: FastMCP) -> None:
             )
             return serialize({"data": page.data, "next_cursor": page.next_cursor})
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def list_monitor_versions(
@@ -123,4 +123,4 @@ def register(mcp: FastMCP) -> None:
             )
             return serialize({"data": result.data, "hasNext": result.has_next})
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)

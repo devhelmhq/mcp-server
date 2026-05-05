@@ -15,8 +15,8 @@ from fastmcp import FastMCP
 
 from devhelm_mcp.client import (
     ToolResult,
-    format_error,
     get_client,
+    raise_tool_error,
     serialize,
 )
 
@@ -40,7 +40,7 @@ def register(mcp: FastMCP) -> None:
                 get_client(api_token).forensics.incident_timeline(incident_id)
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def get_check_trace(check_id: str, api_token: str | None = None) -> ToolResult:
@@ -54,7 +54,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).forensics.check_trace(check_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def get_policy_snapshot(hash_hex: str, api_token: str | None = None) -> ToolResult:
@@ -68,7 +68,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).forensics.policy_snapshot(hash_hex))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def list_monitor_rule_evaluations(
@@ -113,7 +113,7 @@ def register(mcp: FastMCP) -> None:
                 }
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def list_monitor_transitions(
@@ -150,4 +150,4 @@ def register(mcp: FastMCP) -> None:
                 }
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
