@@ -42,8 +42,33 @@ from devhelm_mcp.tools import (
     webhooks,
 )
 
+
+def _package_version() -> str:
+    """Best-effort lookup of the installed package version.
+
+    Reported via the MCP ``initialize`` ``serverInfo.version`` field and on
+    every API call as ``X-DevHelm-Surface-Version``. Falls back to
+    ``"unknown"`` for source-tree installs (no installed dist-info).
+    """
+    try:
+        return _pkg_version("devhelm-mcp-server")
+    except PackageNotFoundError:
+        return "unknown"
+
+
+__version__ = _package_version()
+
+
+# Pinning the FastMCP ``name``/``version`` here pegs the values reported in
+# the MCP ``initialize`` handshake's ``serverInfo`` to *our* package, not to
+# the FastMCP framework version (which the constructor would otherwise use
+# as a default for ``version``). Before this fix every MCP client surfaced
+# the FastMCP runtime version (e.g. "3.2.4") as the DevHelm server version,
+# which made it impossible to correlate user reports with a specific MCP
+# server release. END / DevEx P2.Bug8.
 mcp = FastMCP(
-    "DevHelm",
+    "devhelm-mcp-server",
+    version=__version__,
     instructions=(
         "DevHelm MCP server for monitoring infrastructure. "
         "Use these tools to manage uptime monitors, incidents, alert channels, "
@@ -222,14 +247,6 @@ def _get_app() -> Starlette:
 app = _get_app()
 
 
-def _package_version() -> str:
-    """Best-effort lookup of the installed package version for ``--version``."""
-    try:
-        return _pkg_version("devhelm-mcp-server")
-    except PackageNotFoundError:
-        return "unknown"
-
-
 def _build_arg_parser() -> argparse.ArgumentParser:
     """Build the CLI parser for ``devhelm-mcp-server``.
 
@@ -296,7 +313,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--version",
         action="version",
-        version=f"devhelm-mcp-server {_package_version()}",
+        version=f"devhelm-mcp-server {__version__}",
     )
     return parser
 
