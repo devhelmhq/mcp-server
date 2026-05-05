@@ -6412,14 +6412,25 @@
               "enum": [
                 "DASHBOARD",
                 "CLI",
-                "TERRAFORM"
+                "TERRAFORM",
+                "MCP",
+                "API"
               ]
             }
           },
           {
             "name": "tags",
             "in": "query",
-            "description": "Filter by tag names, comma-separated (e.g. prod,critical)",
+            "description": "Filter by tag names, comma-separated (e.g. prod,critical); OR semantics",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "Filter by a single tag name (alias for ?tags=); merged with ?tags using OR semantics",
             "required": false,
             "schema": {
               "type": "string"
@@ -21727,6 +21738,18 @@
             "description": "SHA-256 hash of the channel config; use for change detection",
             "nullable": true
           },
+          "managedBy": {
+            "type": "string",
+            "description": "Source that created/owns this channel: DASHBOARD, CLI, TERRAFORM, MCP, or API. Null on channels created before this attribution column existed.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
+          },
           "lastDeliveryAt": {
             "type": "string",
             "description": "Timestamp of the most recent delivery attempt",
@@ -22927,6 +22950,18 @@
                 "$ref": "#/components/schemas/WebhookChannelConfig"
               }
             ]
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "Source creating this channel: DASHBOARD, CLI, TERRAFORM, MCP, or API. Defaults to API when omitted.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
           }
         }
       },
@@ -23307,11 +23342,13 @@
           },
           "managedBy": {
             "type": "string",
-            "description": "Who manages this monitor: DASHBOARD or CLI",
+            "description": "Source that created/owns this monitor: DASHBOARD, CLI, TERRAFORM, MCP, or API. Use the value matching your surface so audit logs, drift detection, and analytics attribute correctly.",
             "enum": [
               "DASHBOARD",
               "CLI",
-              "TERRAFORM"
+              "TERRAFORM",
+              "MCP",
+              "API"
             ]
           },
           "environmentId": {
@@ -23506,6 +23543,18 @@
             "description": "Recovery cooldown in minutes after group incident resolves (0–60)",
             "format": "int32",
             "nullable": true
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "Source creating this group: DASHBOARD, CLI, TERRAFORM, MCP, or API. Defaults to API when omitted.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
           }
         },
         "description": "Request body for creating a resource group"
@@ -23806,6 +23855,18 @@
               "MANUAL",
               "REVIEW",
               "AUTOMATIC"
+            ]
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "Source creating this page: DASHBOARD, CLI, TERRAFORM, MCP, or API. Defaults to API when omitted.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
             ]
           }
         }
@@ -27194,11 +27255,13 @@
           },
           "managedBy": {
             "type": "string",
-            "description": "Management source: DASHBOARD or CLI",
+            "description": "Source that created/owns this monitor: DASHBOARD, CLI, TERRAFORM, MCP, or API",
             "enum": [
               "DASHBOARD",
               "CLI",
-              "TERRAFORM"
+              "TERRAFORM",
+              "MCP",
+              "API"
             ]
           },
           "createdAt": {
@@ -28454,6 +28517,18 @@
             "items": {
               "$ref": "#/components/schemas/ResourceGroupMemberDto"
             }
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "Source that created/owns this group: DASHBOARD, CLI, TERRAFORM, MCP, or API. Null on groups created before this attribution column existed.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
           },
           "createdAt": {
             "type": "string",
@@ -31050,6 +31125,18 @@
               "UNDER_MAINTENANCE"
             ]
           },
+          "managedBy": {
+            "type": "string",
+            "description": "Source that created/owns this status page: DASHBOARD, CLI, TERRAFORM, MCP, or API. Null on pages created before this attribution column existed.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -32993,6 +33080,18 @@
                 "$ref": "#/components/schemas/WebhookChannelConfig"
               }
             ]
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "New attribution source: DASHBOARD, CLI, TERRAFORM, MCP, or API; null preserves current value.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
           }
         }
       },
@@ -33345,12 +33444,14 @@
           },
           "managedBy": {
             "type": "string",
-            "description": "New management source; null preserves current",
+            "description": "New ownership source: DASHBOARD, CLI, TERRAFORM, MCP, or API; null preserves current value",
             "nullable": true,
             "enum": [
               "DASHBOARD",
               "CLI",
-              "TERRAFORM"
+              "TERRAFORM",
+              "MCP",
+              "API"
             ]
           },
           "environmentId": {
@@ -33597,6 +33698,18 @@
             "description": "Recovery cooldown in minutes; null clears",
             "format": "int32",
             "nullable": true
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "New attribution source: DASHBOARD, CLI, TERRAFORM, MCP, or API; null preserves current value.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
           }
         },
         "description": "Request body for updating a resource group"
@@ -33800,6 +33913,18 @@
               "MANUAL",
               "REVIEW",
               "AUTOMATIC"
+            ]
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "New attribution source: DASHBOARD, CLI, TERRAFORM, MCP, or API; null preserves current value.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
             ]
           }
         }
