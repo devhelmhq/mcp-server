@@ -75,28 +75,46 @@ for mod in ALL_TOOL_MODULES:
     mod.register(mcp)
 
 
-def _strip_managed_by_from_create_monitor_schema() -> None:
-    """Hide ``managedBy`` from the ``create_monitor`` JSON Schema.
+def _strip_internal_schema_fields() -> None:
+    """Hide server-controlled / sensitive fields from the LLM-facing schema.
 
-    The MCP server forces ``managedBy="MCP"`` on every monitor create (see
-    ``tools/monitors.py``). Surfacing the field in the LLM-facing input
-    schema invited the model to set it to ``"DASHBOARD"`` (or whatever
-    string it found in chat context), which would either be silently
-    overridden server-side (confusing) or — on stale SDKs — fail Pydantic
-    validation with a ``-32602`` envelope before the server-side override
-    even ran. Stripping the field from the advertised schema makes the
-    server-side guarantee match what the LLM sees.
+    Two targets:
+
+    1. ``api_token`` — every tool accepts it as a kwarg for back-compat with
+       path-style ``/{api_key}/mcp`` clients, but after the 0.7.0 Bearer /
+       env-var fix the LLM should never need to set it. Surfacing it in
+       ``inputSchema.properties`` invites the model to populate the field
+       from chat context, which leaks the user's API token into telemetry
+       and tool-call traces. Removing the property entirely keeps the
+       Python signature wired (so direct callers / tests still work) while
+       preventing the LLM from seeing it. DevEx P2.Bug7.
+
+    2. ``managedBy`` on ``create_monitor`` — the MCP server forces this to
+       ``"MCP"`` server-side (see ``tools/monitors.py``). Hiding the field
+       from the schema stops the LLM from trying to set it (which would
+       either be ignored or, worse, fail validation on a stale SDK enum).
+       The Pydantic model for the body still excludes the field from
+       serialization, so this strip is purely about LLM ergonomics.
+       DevEx P0.Bug5 + P1.Bug4 + P1.Bug5.
 
     ``run_middleware=False`` returns the source-of-truth ``Tool`` objects
     from the providers; the dereference middleware copies them on every
     ``tools/list`` and would lose any edits we made to the copies.
-    DevEx round-3 P0.Bug5 + P1.Bug4 + P1.Bug5.
     """
     tools = asyncio.run(mcp.list_tools(run_middleware=False))
     for tool in tools:
-        if tool.name != "create_monitor":
+        params = tool.parameters
+        if not isinstance(params, dict):
             continue
-        _strip_managed_by_from_create_monitor(tool.parameters)
+        properties = params.get("properties")
+        if isinstance(properties, dict):
+            properties.pop("api_token", None)
+        required = params.get("required")
+        if isinstance(required, list) and "api_token" in required:
+            required.remove("api_token")
+
+        if tool.name == "create_monitor":
+            _strip_managed_by_from_create_monitor(params)
 
 
 def _strip_managed_by_from_create_monitor(params: dict[str, Any]) -> None:
@@ -134,7 +152,7 @@ def _strip_field_from_object_schema(schema: dict[str, Any], field: str) -> None:
         schema_required.remove(field)
 
 
-_strip_managed_by_from_create_monitor_schema()
+_strip_internal_schema_fields()
 
 
 def _get_app() -> Starlette:
