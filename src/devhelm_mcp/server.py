@@ -10,18 +10,21 @@ Both resolve the token to a Devhelm SDK client per-request.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import os
 import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastmcp import FastMCP
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from starlette.types import Receive, Scope, Send
 
 if TYPE_CHECKING:
     from starlette.applications import Starlette
+    from starlette.types import ASGIApp
 
 from devhelm_mcp.tools import (
     alert_channels,
@@ -41,8 +44,33 @@ from devhelm_mcp.tools import (
     webhooks,
 )
 
+
+def _package_version() -> str:
+    """Best-effort lookup of the installed package version.
+
+    Reported via the MCP ``initialize`` ``serverInfo.version`` field and on
+    every API call as ``X-DevHelm-Surface-Version``. Falls back to
+    ``"unknown"`` for source-tree installs (no installed dist-info).
+    """
+    try:
+        return _pkg_version("devhelm-mcp-server")
+    except PackageNotFoundError:
+        return "unknown"
+
+
+__version__ = _package_version()
+
+
+# Pinning the FastMCP ``name``/``version`` here pegs the values reported in
+# the MCP ``initialize`` handshake's ``serverInfo`` to *our* package, not to
+# the FastMCP framework version (which the constructor would otherwise use
+# as a default for ``version``). Before this fix every MCP client surfaced
+# the FastMCP runtime version (e.g. "3.2.4") as the DevHelm server version,
+# which made it impossible to correlate user reports with a specific MCP
+# server release. END / DevEx P2.Bug8.
 mcp = FastMCP(
-    "DevHelm",
+    "devhelm-mcp-server",
+    version=__version__,
     instructions=(
         "DevHelm MCP server for monitoring infrastructure. "
         "Use these tools to manage uptime monitors, incidents, alert channels, "
@@ -72,6 +100,122 @@ ALL_TOOL_MODULES = [
 
 for mod in ALL_TOOL_MODULES:
     mod.register(mcp)
+
+
+def _strip_internal_schema_fields() -> None:
+    """Hide server-controlled / sensitive fields from the LLM-facing schema.
+
+    Two targets:
+
+    1. ``api_token`` — every tool accepts it as a kwarg for back-compat with
+       path-style ``/{api_key}/mcp`` clients, but after the 0.7.0 Bearer /
+       env-var fix the LLM should never need to set it. Surfacing it in
+       ``inputSchema.properties`` invites the model to populate the field
+       from chat context, which leaks the user's API token into telemetry
+       and tool-call traces. Removing the property entirely keeps the
+       Python signature wired (so direct callers / tests still work) while
+       preventing the LLM from seeing it. DevEx P2.Bug7.
+
+    2. ``managedBy`` on ``create_monitor`` — the MCP server forces this to
+       ``"MCP"`` server-side (see ``tools/monitors.py``). Hiding the field
+       from the schema stops the LLM from trying to set it (which would
+       either be ignored or, worse, fail validation on a stale SDK enum).
+       The Pydantic model for the body still excludes the field from
+       serialization, so this strip is purely about LLM ergonomics.
+       DevEx P0.Bug5 + P1.Bug4 + P1.Bug5.
+
+    ``run_middleware=False`` returns the source-of-truth ``Tool`` objects
+    from the providers; the dereference middleware copies them on every
+    ``tools/list`` and would lose any edits we made to the copies.
+    """
+    tools = asyncio.run(mcp.list_tools(run_middleware=False))
+    for tool in tools:
+        params = tool.parameters
+        if not isinstance(params, dict):
+            continue
+        properties = params.get("properties")
+        if isinstance(properties, dict):
+            properties.pop("api_token", None)
+        required = params.get("required")
+        if isinstance(required, list) and "api_token" in required:
+            required.remove("api_token")
+
+        if tool.name == "create_monitor":
+            _strip_managed_by_from_create_monitor(params)
+
+
+def _strip_managed_by_from_create_monitor(params: dict[str, Any]) -> None:
+    """Remove ``managedBy`` from the ``create_monitor`` body schema.
+
+    FastMCP emits the body either inline (``properties.body.properties``) or
+    behind a ``$ref`` into ``$defs`` — depends on whether the Pydantic model
+    has nested ``$ref``-able children. For ``CreateMonitorRequest`` it's the
+    second shape because of the discriminated ``config`` union, so the fix
+    has to drop ``managedBy`` from the def *before* the dereference
+    middleware inlines it for the wire response.
+    """
+    properties = params.get("properties")
+    if isinstance(properties, dict):
+        body = properties.get("body")
+        if isinstance(body, dict):
+            _strip_field_from_object_schema(body, "managedBy")
+            ref = body.get("$ref")
+            if isinstance(ref, str):
+                defs = params.get("$defs")
+                if isinstance(defs, dict):
+                    def_name = ref.rsplit("/", 1)[-1]
+                    target = defs.get(def_name)
+                    if isinstance(target, dict):
+                        _strip_field_from_object_schema(target, "managedBy")
+
+
+def _strip_field_from_object_schema(schema: dict[str, Any], field: str) -> None:
+    """Remove ``field`` from a JSON Schema object's ``properties`` and ``required``."""
+    schema_props = schema.get("properties")
+    if isinstance(schema_props, dict):
+        schema_props.pop(field, None)
+    schema_required = schema.get("required")
+    if isinstance(schema_required, list) and field in schema_required:
+        schema_required.remove(field)
+
+
+_strip_internal_schema_fields()
+
+
+class _NormalizeMcpPath:
+    """Rewrite ``/mcp`` → ``/mcp/`` (and ``/{key}/mcp`` → ``/{key}/mcp/``).
+
+    Starlette's ``Mount("/mcp", inner_app)`` only forwards requests under
+    ``/mcp/`` to the inner app — the bare ``/mcp`` URL gets a 307 redirect
+    to ``/mcp/``. Naive HTTP clients (some MCP wrappers, raw curl scripts,
+    LangChain's older HTTP transport) drop the request body and the
+    ``Authorization`` header on a 307, then fail with ``-32600 invalid
+    request`` or 401.
+
+    This middleware sits *outside* the Starlette router and rewrites the
+    ASGI scope's ``path`` / ``raw_path`` before routing happens, so the
+    request is delivered straight to the inner MCP handler with no
+    redirect. The rewrite is idempotent — paths that already end in
+    ``/`` are left alone — and only fires for the ``/mcp`` family, so
+    ``/health`` and other routes are untouched.
+
+    DevEx P1.Bug6.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] == "http":
+            path = scope.get("path", "")
+            if path == "/mcp" or (
+                path.endswith("/mcp")
+                and len(path) > len("/mcp")
+                and path.count("/") >= 2
+            ):
+                new_path = path + "/"
+                scope = {**scope, "path": new_path, "raw_path": new_path.encode()}
+        await self.app(scope, receive, send)
 
 
 def _get_app() -> Starlette:
@@ -117,16 +261,7 @@ def _get_app() -> Starlette:
     # ``StreamableHTTPSessionManager`` — without it the inner app raises
     # "task group was not initialized" on the first POST. See
     # https://gofastmcp.com/deployment/asgi.
-    #
-    # Trailing-slash semantics: Starlette's ``Mount("/mcp", inner_app)``
-    # only forwards paths under ``/mcp/`` to the inner app — the bare
-    # ``/mcp`` URL gets a 307 redirect to ``/mcp/``. With
-    # ``proxy_headers=True`` on Uvicorn (set in ``main()``), the redirect's
-    # ``Location`` honors ``X-Forwarded-Proto: https`` from the upstream
-    # proxy (Cloudflare → Traefik → here), so clients still end up on
-    # ``https://mcp.devhelm.io/mcp/`` instead of being downgraded to HTTP.
-    # See END-1186 for why this matters.
-    app = Starlette(
+    starlette_app = Starlette(
         routes=[
             Route("/health", health_handler, methods=["GET"]),
             Mount("/mcp", app=mcp_app),
@@ -135,18 +270,15 @@ def _get_app() -> Starlette:
         middleware=middleware,
         lifespan=mcp_app.lifespan,
     )
-    return app
+    # Wrap with the path normalizer so POST /mcp (no trailing slash) reaches
+    # the inner app directly instead of bouncing through a 307. The
+    # middleware lives outside Starlette's router because the redirect is
+    # emitted by ``Mount`` before the middleware chain executes.
+    starlette_app.add_middleware(_NormalizeMcpPath)
+    return starlette_app
 
 
 app = _get_app()
-
-
-def _package_version() -> str:
-    """Best-effort lookup of the installed package version for ``--version``."""
-    try:
-        return _pkg_version("devhelm-mcp-server")
-    except PackageNotFoundError:
-        return "unknown"
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
@@ -215,7 +347,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--version",
         action="version",
-        version=f"devhelm-mcp-server {_package_version()}",
+        version=f"devhelm-mcp-server {__version__}",
     )
     return parser
 
@@ -245,6 +377,30 @@ def _resolve_port(arg: int | None) -> int:
         return int(raw)
     except ValueError as exc:
         raise SystemExit(f"Invalid port {raw!r}: {exc}") from exc
+
+
+def _run_stdio() -> None:
+    """Start the stdio transport without FastMCP's ASCII banner.
+
+    FastMCP's default ``run()`` prints a multi-line ASCII banner on stderr
+    that includes a third-party promo URL. On stdio it's the very first
+    thing local MCP clients (Cursor, Claude Desktop, Windsurf) see when
+    they tail the server log, and it's been a recurring source of
+    "is the server working?" support tickets — DevEx P2.Bug9.
+
+    Setting ``show_banner=False`` is supported on FastMCP 2.x+ and is the
+    cleanest way to suppress it without intercepting stderr globally
+    (which would also swallow real warnings / tracebacks the user needs
+    to see).
+    """
+    extra: dict[str, Any] = {}
+    try:
+        mcp.run(show_banner=False, **extra)
+    except TypeError:
+        # Older FastMCP releases don't accept ``show_banner``; fall back
+        # to the default behavior so the server still starts. The banner
+        # is cosmetic — never break startup over it.
+        mcp.run()
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -280,7 +436,7 @@ def main(argv: list[str] | None = None) -> None:
 
     transport = _resolve_transport(args.transport)
     if transport == "stdio":
-        mcp.run()
+        _run_stdio()
         return
 
     import uvicorn
@@ -297,6 +453,10 @@ def main(argv: list[str] | None = None) -> None:
     # discovered this by seeing every MCP client (Cursor, Claude Desktop,
     # raw curl) bounce through ``Location: http://mcp.devhelm.io/mcp/`` and
     # never reach the JSON-RPC handler. END-1186.
+    #
+    # The trailing-slash redirect itself is now obviated by the
+    # ``_NormalizeMcpPath`` middleware in ``_get_app``, but proxy_headers
+    # remains useful for any future redirect (auth challenge, etc.).
     uvicorn.run(
         "devhelm_mcp.server:app",
         host=host,

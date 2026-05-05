@@ -9,8 +9,8 @@ from fastmcp import FastMCP
 from devhelm_mcp.client import (
     ToolResult,
     as_payload,
-    format_error,
     get_client,
+    raise_tool_error,
     serialize,
 )
 
@@ -31,7 +31,7 @@ def register(mcp: FastMCP) -> None:
                 get_client(api_token).deploy_lock.acquire(as_payload(body))
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def get_current_deploy_lock(api_token: str | None = None) -> ToolResult | None:
@@ -40,7 +40,7 @@ def register(mcp: FastMCP) -> None:
             result = get_client(api_token).deploy_lock.current()
             return serialize(result) if result else None
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def release_deploy_lock(lock_id: str, api_token: str | None = None) -> str:
@@ -49,7 +49,7 @@ def register(mcp: FastMCP) -> None:
             get_client(api_token).deploy_lock.release(lock_id)
             return "Deploy lock released."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def force_release_deploy_lock(api_token: str | None = None) -> str:
@@ -58,4 +58,4 @@ def register(mcp: FastMCP) -> None:
             get_client(api_token).deploy_lock.force_release()
             return "Deploy lock force-released."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)

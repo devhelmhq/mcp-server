@@ -24,8 +24,8 @@ from fastmcp import FastMCP
 from devhelm_mcp.client import (
     ToolResult,
     as_payload,
-    format_error,
     get_client,
+    raise_tool_error,
     serialize,
 )
 
@@ -44,7 +44,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).list())
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def get_status_page(page_id: str, api_token: str | None = None) -> ToolResult:
@@ -52,7 +52,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).get(page_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def create_status_page(
@@ -67,7 +67,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).create(as_payload(body)))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def update_status_page(
@@ -79,7 +79,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).update(page_id, as_payload(body)))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def delete_status_page(page_id: str, api_token: str | None = None) -> str:
@@ -88,7 +88,7 @@ def register(mcp: FastMCP) -> None:
             _sp(api_token).delete(page_id)
             return "Status page deleted successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def reorder_status_page_layout(
@@ -113,7 +113,7 @@ def register(mcp: FastMCP) -> None:
             _sp(api_token).reorder_layout(page_id, as_payload(body))
             return "Status page layout reordered successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     # ── Components ────────────────────────────────────────────────────────
 
@@ -125,7 +125,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).components.list(page_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def create_status_page_component(
@@ -143,7 +143,7 @@ def register(mcp: FastMCP) -> None:
                 _sp(api_token).components.create(page_id, as_payload(body))
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def update_status_page_component(
@@ -160,7 +160,7 @@ def register(mcp: FastMCP) -> None:
                 )
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def delete_status_page_component(
@@ -173,7 +173,7 @@ def register(mcp: FastMCP) -> None:
             _sp(api_token).components.delete(page_id, component_id)
             return "Component deleted successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def reorder_status_page_components(
@@ -191,7 +191,7 @@ def register(mcp: FastMCP) -> None:
             _sp(api_token).components.reorder(page_id, as_payload(body))
             return "Components reordered successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     # ── Component Groups ──────────────────────────────────────────────────
 
@@ -203,7 +203,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).groups.list(page_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def create_status_page_group(
@@ -218,7 +218,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).groups.create(page_id, as_payload(body)))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def update_status_page_group(
@@ -233,7 +233,7 @@ def register(mcp: FastMCP) -> None:
                 _sp(api_token).groups.update(page_id, group_id, as_payload(body))
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def delete_status_page_group(
@@ -244,7 +244,7 @@ def register(mcp: FastMCP) -> None:
             _sp(api_token).groups.delete(page_id, group_id)
             return "Component group deleted successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     # ── Incidents ─────────────────────────────────────────────────────────
 
@@ -260,7 +260,7 @@ def register(mcp: FastMCP) -> None:
             result = _sp(api_token).incidents.list(page_id, page=page, size=size)
             return serialize({"data": result.data, "hasNext": result.has_next})
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def get_status_page_incident(
@@ -272,7 +272,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).incidents.get(page_id, incident_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def create_status_page_incident(
@@ -289,7 +289,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).incidents.create(page_id, as_payload(body)))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def update_status_page_incident(
@@ -304,7 +304,7 @@ def register(mcp: FastMCP) -> None:
                 _sp(api_token).incidents.update(page_id, incident_id, as_payload(body))
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def post_status_page_incident_update(
@@ -326,7 +326,7 @@ def register(mcp: FastMCP) -> None:
                 )
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def publish_status_page_incident(
@@ -342,7 +342,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).incidents.publish(page_id, incident_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def dismiss_status_page_incident(
@@ -355,7 +355,7 @@ def register(mcp: FastMCP) -> None:
             _sp(api_token).incidents.dismiss(page_id, incident_id)
             return "Draft incident dismissed successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def delete_status_page_incident(
@@ -368,7 +368,7 @@ def register(mcp: FastMCP) -> None:
             _sp(api_token).incidents.delete(page_id, incident_id)
             return "Status page incident deleted successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     # ── Subscribers ───────────────────────────────────────────────────────
 
@@ -384,7 +384,7 @@ def register(mcp: FastMCP) -> None:
             result = _sp(api_token).subscribers.list(page_id, page=page, size=size)
             return serialize({"data": result.data, "hasNext": result.has_next})
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def add_status_page_subscriber(
@@ -399,7 +399,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).subscribers.add(page_id, as_payload(body)))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def remove_status_page_subscriber(
@@ -412,7 +412,7 @@ def register(mcp: FastMCP) -> None:
             _sp(api_token).subscribers.remove(page_id, subscriber_id)
             return "Subscriber removed successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     # ── Custom Domains ────────────────────────────────────────────────────
 
@@ -424,7 +424,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).domains.list(page_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def add_status_page_domain(
@@ -441,7 +441,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).domains.add(page_id, as_payload(body)))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def verify_status_page_domain(
@@ -456,7 +456,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(_sp(api_token).domains.verify(page_id, domain_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def remove_status_page_domain(
@@ -467,4 +467,4 @@ def register(mcp: FastMCP) -> None:
             _sp(api_token).domains.remove(page_id, domain_id)
             return "Custom domain removed successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)

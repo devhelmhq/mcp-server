@@ -12,8 +12,8 @@ from fastmcp import FastMCP
 from devhelm_mcp.client import (
     ToolResult,
     as_payload,
-    format_error,
     get_client,
+    raise_tool_error,
     serialize,
 )
 
@@ -25,7 +25,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).notification_policies.list())
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def get_notification_policy(
@@ -35,7 +35,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).notification_policies.get(policy_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def create_notification_policy(
@@ -53,7 +53,7 @@ def register(mcp: FastMCP) -> None:
                 get_client(api_token).notification_policies.create(as_payload(body))
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def update_notification_policy(
@@ -69,7 +69,7 @@ def register(mcp: FastMCP) -> None:
                 )
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def delete_notification_policy(policy_id: str, api_token: str | None = None) -> str:
@@ -78,7 +78,7 @@ def register(mcp: FastMCP) -> None:
             get_client(api_token).notification_policies.delete(policy_id)
             return "Notification policy deleted successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def test_notification_policy(policy_id: str, api_token: str | None = None) -> str:
@@ -87,4 +87,4 @@ def register(mcp: FastMCP) -> None:
             get_client(api_token).notification_policies.test(policy_id)
             return "Test dispatch sent successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)

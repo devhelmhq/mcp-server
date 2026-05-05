@@ -6412,7 +6412,9 @@
               "enum": [
                 "DASHBOARD",
                 "CLI",
-                "TERRAFORM"
+                "TERRAFORM",
+                "MCP",
+                "API"
               ]
             }
           },
@@ -23307,11 +23309,13 @@
           },
           "managedBy": {
             "type": "string",
-            "description": "Who manages this monitor: DASHBOARD or CLI",
+            "description": "Source that created/owns this monitor: DASHBOARD, CLI, TERRAFORM, MCP, or API. Use the value matching your surface so audit logs, drift detection, and analytics attribute correctly.",
             "enum": [
               "DASHBOARD",
               "CLI",
-              "TERRAFORM"
+              "TERRAFORM",
+              "MCP",
+              "API"
             ]
           },
           "environmentId": {
@@ -27194,11 +27198,13 @@
           },
           "managedBy": {
             "type": "string",
-            "description": "Management source: DASHBOARD or CLI",
+            "description": "Source that created/owns this monitor: DASHBOARD, CLI, TERRAFORM, MCP, or API",
             "enum": [
               "DASHBOARD",
               "CLI",
-              "TERRAFORM"
+              "TERRAFORM",
+              "MCP",
+              "API"
             ]
           },
           "createdAt": {
@@ -33345,12 +33351,14 @@
           },
           "managedBy": {
             "type": "string",
-            "description": "New management source; null preserves current",
+            "description": "New ownership source: DASHBOARD, CLI, TERRAFORM, MCP, or API; null preserves current value",
             "nullable": true,
             "enum": [
               "DASHBOARD",
               "CLI",
-              "TERRAFORM"
+              "TERRAFORM",
+              "MCP",
+              "API"
             ]
           },
           "environmentId": {

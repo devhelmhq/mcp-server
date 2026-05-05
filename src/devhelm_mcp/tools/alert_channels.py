@@ -9,8 +9,8 @@ from fastmcp import FastMCP
 from devhelm_mcp.client import (
     ToolResult,
     as_payload,
-    format_error,
     get_client,
+    raise_tool_error,
     serialize,
 )
 
@@ -22,7 +22,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).alert_channels.list())
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def get_alert_channel(channel_id: str, api_token: str | None = None) -> ToolResult:
@@ -30,7 +30,7 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).alert_channels.get(channel_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def create_alert_channel(
@@ -48,7 +48,7 @@ def register(mcp: FastMCP) -> None:
                 get_client(api_token).alert_channels.create(as_payload(body))
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def update_alert_channel(
@@ -64,7 +64,7 @@ def register(mcp: FastMCP) -> None:
                 )
             )
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def delete_alert_channel(channel_id: str, api_token: str | None = None) -> str:
@@ -73,7 +73,7 @@ def register(mcp: FastMCP) -> None:
             get_client(api_token).alert_channels.delete(channel_id)
             return "Alert channel deleted successfully."
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)
 
     @mcp.tool()
     def test_alert_channel(channel_id: str, api_token: str | None = None) -> ToolResult:
@@ -81,4 +81,4 @@ def register(mcp: FastMCP) -> None:
         try:
             return serialize(get_client(api_token).alert_channels.test(channel_id))
         except DevhelmError as e:
-            return format_error(e)
+            raise_tool_error(e)

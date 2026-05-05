@@ -266,19 +266,24 @@ class TestStatusPageToolSchemas:
         result: list[str] = tool.parameters.get("required", [])
         return result
 
-    def test_all_tools_accept_optional_api_token(
+    def test_api_token_hidden_from_input_schema(
         self, registered_tools: RegisteredTools
     ) -> None:
-        # ``api_token`` is now resolved from the request context (the
-        # ``Authorization: Bearer …`` header on the hosted ``/mcp`` endpoint,
-        # or ``DEVHELM_API_TOKEN`` for stdio), so it must NOT appear in the
-        # tool's ``required`` list — that was the bug behind the round-2
-        # DevEx ``-32602: api_token Field required`` error. The parameter
-        # is still surfaced in ``properties`` so path-style callers can
-        # override it on a per-call basis.
+        # Round-3 DevEx (P2.Bug7): ``api_token`` MUST NOT appear in the
+        # JSON Schema FastMCP advertises. Surfacing it tempted LLMs to
+        # populate it from chat context, which leaked the user's API token
+        # into prompt-trace telemetry. After 0.7.0 the token is resolved
+        # exclusively from (1) the explicit Python kwarg for
+        # back-compat with path-style ``/{api_key}/mcp`` clients,
+        # (2) the ``Authorization: Bearer …`` header, or
+        # (3) the ``DEVHELM_API_TOKEN`` env var — the LLM never needs to
+        # see the field at all.
         for name in STATUS_PAGE_TOOLS:
             params = self._params(registered_tools, name)
-            assert "api_token" in params, f"{name} missing api_token parameter"
+            assert "api_token" not in params, (
+                f"{name} should hide api_token from the input schema "
+                f"(resolved from header / env)"
+            )
             required = self._required(registered_tools, name)
             assert "api_token" not in required, (
                 f"{name} should not require api_token (resolved from request)"
