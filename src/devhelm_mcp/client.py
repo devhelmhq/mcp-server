@@ -10,6 +10,7 @@ from typing import Any
 from devhelm import (
     Devhelm,
     DevhelmApiError,
+    DevhelmAuthError,
     DevhelmError,
     DevhelmTransportError,
     DevhelmValidationError,
@@ -19,6 +20,74 @@ from pydantic import BaseModel
 API_BASE_URL = os.getenv("DEVHELM_API_URL", "https://api.devhelm.io")
 
 ToolResult = dict[str, Any] | list[dict[str, Any]] | str
+
+
+def _bearer_token_from_request() -> str | None:
+    """Pull the bearer token from the active HTTP request, if any.
+
+    In HTTP mode the MCP client typically authenticates with
+    ``Authorization: Bearer <token>`` on every JSON-RPC POST. FastMCP's
+    ``get_http_headers`` exposes the headers of the current request, but
+    by default it strips ``authorization`` (treated as a sensitive
+    forwarded header) — so we have to opt back in via ``include``. When
+    no HTTP request is active (stdio mode, background task, tests
+    invoking tools directly) the helper returns ``{}`` instead of
+    raising, which is exactly what we want: stdio falls through to the
+    env-var path below.
+    """
+    try:
+        from fastmcp.server.dependencies import get_http_headers
+    except ImportError:
+        return None
+    headers = get_http_headers(include={"authorization"})
+    auth = headers.get("authorization") or headers.get("Authorization")
+    if not auth:
+        return None
+    scheme, _, value = auth.partition(" ")
+    if scheme.lower() != "bearer":
+        return None
+    token = value.strip()
+    return token or None
+
+
+def resolve_api_token(api_token: str | None) -> str:
+    """Resolve the API token used for an MCP tool invocation.
+
+    Resolution order (first match wins):
+
+    1. ``api_token`` passed explicitly as a tool argument — back-compat
+       with the original tool surface, and the only path that path-style
+       (``/{api_key}/mcp``) clients have today.
+    2. ``Authorization: Bearer <token>`` header on the current HTTP
+       request — the canonical auth path for the hosted ``/mcp``
+       endpoint. Before this fix, hosted clients had to send the token
+       in BOTH the header and in every tool call's ``api_token`` arg
+       (-32602 ``api_token Field required``); the header alone is now
+       sufficient.
+    3. ``DEVHELM_API_TOKEN`` environment variable — the documented
+       stdio path (``DEVHELM_API_TOKEN=… devhelm-mcp-server``), so local
+       MCP clients (Cursor / Claude Desktop / Windsurf) don't have to
+       teach the LLM to thread the secret through every tool call.
+
+    Raises ``DevhelmAuthError`` (401) if none of those produce a token,
+    so the failure surfaces through the same ``format_error`` envelope
+    every other auth failure does.
+    """
+    if api_token:
+        return api_token
+    bearer = _bearer_token_from_request()
+    if bearer:
+        return bearer
+    env_token = os.getenv("DEVHELM_API_TOKEN")
+    if env_token:
+        return env_token
+    raise DevhelmAuthError(
+        "API token not provided. Pass `api_token` in the tool arguments, "
+        "send `Authorization: Bearer <token>` on the HTTP request, or set "
+        "DEVHELM_API_TOKEN in the server's environment.",
+        status=401,
+        code="UNAUTHORIZED",
+    )
 
 
 def _server_version() -> str:
@@ -34,8 +103,16 @@ def _server_version() -> str:
         return "unknown"
 
 
-def get_client(api_token: str) -> Devhelm:
+def get_client(api_token: str | None = None) -> Devhelm:
     """Build a Devhelm SDK client from the user's API token.
+
+    Token resolution is delegated to :func:`resolve_api_token`, so callers
+    can pass the value through from a tool argument *or* leave it ``None``
+    and let the helper pick the token up from the active HTTP request's
+    ``Authorization: Bearer …`` header (hosted ``/mcp``) or from the
+    ``DEVHELM_API_TOKEN`` env var (stdio). This is the single seam every
+    tool goes through, so a missing / mistyped token surfaces in exactly
+    one place.
 
     Overrides the SDK's default surface (``sdk-py``) with ``mcp`` so the
     API attributes traffic to the MCP server rather than to bare-SDK use.
@@ -51,7 +128,7 @@ def get_client(api_token: str) -> Devhelm:
     ``surface_metadata`` so we can layer it in later without an API change.
     """
     return Devhelm(
-        token=api_token,
+        token=resolve_api_token(api_token),
         base_url=API_BASE_URL,
         surface="mcp",
         surface_version=_server_version(),

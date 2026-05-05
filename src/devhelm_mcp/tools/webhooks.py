@@ -17,7 +17,7 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_webhooks(api_token: str) -> ToolResult:
+    def list_webhooks(api_token: str | None = None) -> ToolResult:
         """List all webhook endpoints in the workspace."""
         try:
             return serialize(get_client(api_token).webhooks.list())
@@ -25,7 +25,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_webhook(api_token: str, webhook_id: str) -> ToolResult:
+    def get_webhook(webhook_id: str, api_token: str | None = None) -> ToolResult:
         """Get a webhook endpoint by ID."""
         try:
             return serialize(get_client(api_token).webhooks.get(webhook_id))
@@ -34,7 +34,8 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_webhook(
-        api_token: str, body: CreateWebhookEndpointRequest
+        body: CreateWebhookEndpointRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Create a webhook endpoint.
 
@@ -47,7 +48,9 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_webhook(
-        api_token: str, webhook_id: str, body: UpdateWebhookEndpointRequest
+        webhook_id: str,
+        body: UpdateWebhookEndpointRequest,
+        api_token: str | None = None,
     ) -> ToolResult:
         """Update a webhook endpoint."""
         try:
@@ -58,7 +61,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def delete_webhook(api_token: str, webhook_id: str) -> str:
+    def delete_webhook(webhook_id: str, api_token: str | None = None) -> str:
         """Delete a webhook endpoint."""
         try:
             get_client(api_token).webhooks.delete(webhook_id)
@@ -67,7 +70,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def test_webhook(api_token: str, webhook_id: str) -> ToolResult:
+    def test_webhook(webhook_id: str, api_token: str | None = None) -> ToolResult:
         """Send a test event to a webhook endpoint to verify it works."""
         try:
             return serialize(get_client(api_token).webhooks.test(webhook_id))

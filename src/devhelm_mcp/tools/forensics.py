@@ -23,7 +23,9 @@ from devhelm_mcp.client import (
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def get_incident_timeline(api_token: str, incident_id: str) -> ToolResult:
+    def get_incident_timeline(
+        incident_id: str, api_token: str | None = None
+    ) -> ToolResult:
         """Full forensic timeline for an incident.
 
         Returns every recorded state transition for the incident, the
@@ -41,7 +43,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_check_trace(api_token: str, check_id: str) -> ToolResult:
+    def get_check_trace(check_id: str, api_token: str | None = None) -> ToolResult:
         """Everything the detection engine recorded for a single check.
 
         Includes the rule evaluations produced for this check_id, the
@@ -55,7 +57,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_policy_snapshot(api_token: str, hash_hex: str) -> ToolResult:
+    def get_policy_snapshot(hash_hex: str, api_token: str | None = None) -> ToolResult:
         """Fetch a policy snapshot by its content-addressed SHA-256 hash.
 
         Useful for inspecting the exact detection policy that was active
@@ -70,7 +72,6 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def list_monitor_rule_evaluations(
-        api_token: str,
         monitor_id: str,
         rule_type: str | None = None,
         region: str | None = None,
@@ -79,6 +80,7 @@ def register(mcp: FastMCP) -> None:
         to: str | None = None,
         page: int = 0,
         size: int = 50,
+        api_token: str | None = None,
     ) -> ToolResult:
         """List rule evaluations produced for a monitor (paginated).
 
@@ -115,12 +117,12 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def list_monitor_transitions(
-        api_token: str,
         monitor_id: str,
         from_: str | None = None,
         to: str | None = None,
         page: int = 0,
         size: int = 50,
+        api_token: str | None = None,
     ) -> ToolResult:
         """List state transitions recorded for a monitor (paginated).
 

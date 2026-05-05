@@ -10,7 +10,7 @@ from devhelm_mcp.client import ToolResult, format_error, get_client, serialize
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def list_dependencies(api_token: str) -> ToolResult:
+    def list_dependencies(api_token: str | None = None) -> ToolResult:
         """List all tracked service dependencies."""
         try:
             return serialize(get_client(api_token).dependencies.list())
@@ -18,7 +18,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def get_dependency(api_token: str, dependency_id: str) -> ToolResult:
+    def get_dependency(dependency_id: str, api_token: str | None = None) -> ToolResult:
         """Get a tracked dependency by ID."""
         try:
             return serialize(get_client(api_token).dependencies.get(dependency_id))
@@ -26,7 +26,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def track_dependency(api_token: str, slug: str) -> ToolResult:
+    def track_dependency(slug: str, api_token: str | None = None) -> ToolResult:
         """Start tracking a service dependency by its slug (e.g. 'github', 'aws')."""
         try:
             return serialize(get_client(api_token).dependencies.track(slug))
@@ -34,7 +34,7 @@ def register(mcp: FastMCP) -> None:
             return format_error(e)
 
     @mcp.tool()
-    def delete_dependency(api_token: str, dependency_id: str) -> str:
+    def delete_dependency(dependency_id: str, api_token: str | None = None) -> str:
         """Stop tracking a service dependency."""
         try:
             get_client(api_token).dependencies.delete(dependency_id)

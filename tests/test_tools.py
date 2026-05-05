@@ -266,14 +266,23 @@ class TestStatusPageToolSchemas:
         result: list[str] = tool.parameters.get("required", [])
         return result
 
-    def test_all_tools_require_api_token(
+    def test_all_tools_accept_optional_api_token(
         self, registered_tools: RegisteredTools
     ) -> None:
+        # ``api_token`` is now resolved from the request context (the
+        # ``Authorization: Bearer …`` header on the hosted ``/mcp`` endpoint,
+        # or ``DEVHELM_API_TOKEN`` for stdio), so it must NOT appear in the
+        # tool's ``required`` list — that was the bug behind the round-2
+        # DevEx ``-32602: api_token Field required`` error. The parameter
+        # is still surfaced in ``properties`` so path-style callers can
+        # override it on a per-call basis.
         for name in STATUS_PAGE_TOOLS:
             params = self._params(registered_tools, name)
             assert "api_token" in params, f"{name} missing api_token parameter"
             required = self._required(registered_tools, name)
-            assert "api_token" in required, f"{name} should require api_token"
+            assert "api_token" not in required, (
+                f"{name} should not require api_token (resolved from request)"
+            )
 
     def test_page_id_tools_require_page_id(
         self, registered_tools: RegisteredTools
