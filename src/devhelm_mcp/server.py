@@ -345,6 +345,30 @@ def _resolve_port(arg: int | None) -> int:
         raise SystemExit(f"Invalid port {raw!r}: {exc}") from exc
 
 
+def _run_stdio() -> None:
+    """Start the stdio transport without FastMCP's ASCII banner.
+
+    FastMCP's default ``run()`` prints a multi-line ASCII banner on stderr
+    that includes a third-party promo URL. On stdio it's the very first
+    thing local MCP clients (Cursor, Claude Desktop, Windsurf) see when
+    they tail the server log, and it's been a recurring source of
+    "is the server working?" support tickets — DevEx P2.Bug9.
+
+    Setting ``show_banner=False`` is supported on FastMCP 2.x+ and is the
+    cleanest way to suppress it without intercepting stderr globally
+    (which would also swallow real warnings / tracebacks the user needs
+    to see).
+    """
+    extra: dict[str, Any] = {}
+    try:
+        mcp.run(show_banner=False, **extra)
+    except TypeError:
+        # Older FastMCP releases don't accept ``show_banner``; fall back
+        # to the default behavior so the server still starts. The banner
+        # is cosmetic — never break startup over it.
+        mcp.run()
+
+
 def main(argv: list[str] | None = None) -> None:
     """Entry point for the ``devhelm-mcp-server`` console script.
 
@@ -378,7 +402,7 @@ def main(argv: list[str] | None = None) -> None:
 
     transport = _resolve_transport(args.transport)
     if transport == "stdio":
-        mcp.run()
+        _run_stdio()
         return
 
     import uvicorn

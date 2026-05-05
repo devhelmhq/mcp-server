@@ -144,7 +144,11 @@ class TestMainDispatch:
             patch("uvicorn.run") as uvi_run,
         ):
             main([])
-            run.assert_called_once_with()
+            # Banner suppression on stdio is mandatory now (DevEx P2.Bug9):
+            # FastMCP's ASCII banner shows up as the first line in MCP
+            # client logs and includes a third-party promo URL, which
+            # confuses Cursor / Claude Desktop users tailing the log.
+            run.assert_called_once_with(show_banner=False)
             uvi_run.assert_not_called()
 
     def test_transport_http_invokes_uvicorn_with_resolved_host_port(
