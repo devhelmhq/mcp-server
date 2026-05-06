@@ -441,8 +441,7 @@ class TestImportFromRunningLoopDoesNotCrash:
                     t.name
                     for t in tools
                     if isinstance(t.parameters, dict)
-                    and "api_token"
-                    in (t.parameters.get("properties") or {})
+                    and "api_token" in (t.parameters.get("properties") or {})
                 ]
                 assert not api_token_leaks, (
                     f"lifespan must strip api_token from {api_token_leaks!r}"
