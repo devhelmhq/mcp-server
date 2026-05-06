@@ -19,9 +19,11 @@ classifiers = [
 ]
 
 dependencies = [
-    # Floor bumped to 0.5.0 for the forensic read resource (timeline / trace /
-    # evaluations / transitions / policy snapshot) used by tools/forensics.py.
-    "devhelm>=0.6.0",
+    # Floor bumped to 0.7.2: required for `managedBy` field on resource DTOs
+    # and for the new monitor validation contract (frequencySeconds bounds,
+    # dynamic region whitelist). Older devhelm versions raise Pydantic
+    # `extra_forbidden` errors when the API returns `managedBy`.
+    "devhelm>=0.7.2",
     "fastmcp>=2.0.0",
 ]
 
