@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import contextlib
 import os
 import sys
 from importlib.metadata import PackageNotFoundError
@@ -102,7 +103,7 @@ for mod in ALL_TOOL_MODULES:
     mod.register(mcp)
 
 
-def _strip_internal_schema_fields() -> None:
+async def _strip_internal_schema_fields() -> None:
     """Hide server-controlled / sensitive fields from the LLM-facing schema.
 
     Two targets:
@@ -127,8 +128,15 @@ def _strip_internal_schema_fields() -> None:
     ``run_middleware=False`` returns the source-of-truth ``Tool`` objects
     from the providers; the dereference middleware copies them on every
     ``tools/list`` and would lose any edits we made to the copies.
+
+    This function is async because ``mcp.list_tools()`` is async-only in
+    FastMCP. It must be awaited from inside the running event loop —
+    calling it via ``asyncio.run()`` at import time crashed Uvicorn
+    workers (``RuntimeError: asyncio.run() cannot be called from a
+    running event loop``) because Uvicorn imports user code from inside
+    its own ``asyncio_run(self.serve(...))`` call. v0.7.2 hotfix.
     """
-    tools = asyncio.run(mcp.list_tools(run_middleware=False))
+    tools = await mcp.list_tools(run_middleware=False)
     for tool in tools:
         params = tool.parameters
         if not isinstance(params, dict):
@@ -177,9 +185,6 @@ def _strip_field_from_object_schema(schema: dict[str, Any], field: str) -> None:
     schema_required = schema.get("required")
     if isinstance(schema_required, list) and field in schema_required:
         schema_required.remove(field)
-
-
-_strip_internal_schema_fields()
 
 
 class _NormalizeMcpPath:
@@ -261,6 +266,17 @@ def _get_app() -> Starlette:
     # ``StreamableHTTPSessionManager`` — without it the inner app raises
     # "task group was not initialized" on the first POST. See
     # https://gofastmcp.com/deployment/asgi.
+    #
+    # We wrap that lifespan so the input-schema strip runs inside the
+    # running event loop *before* the inner app starts handling requests.
+    # Doing the strip at module import time crashed Uvicorn workers under
+    # Python 3.13 (``asyncio.run()`` from a running loop). v0.7.2 hotfix.
+    @contextlib.asynccontextmanager
+    async def _lifespan(app: Starlette) -> Any:
+        await _strip_internal_schema_fields()
+        async with mcp_app.lifespan(app):
+            yield
+
     starlette_app = Starlette(
         routes=[
             Route("/health", health_handler, methods=["GET"]),
@@ -268,7 +284,7 @@ def _get_app() -> Starlette:
             Mount("/{api_key}/mcp", app=mcp_app),
         ],
         middleware=middleware,
-        lifespan=mcp_app.lifespan,
+        lifespan=_lifespan,
     )
     # Wrap with the path normalizer so POST /mcp (no trailing slash) reaches
     # the inner app directly instead of bouncing through a 307. The
@@ -393,6 +409,12 @@ def _run_stdio() -> None:
     (which would also swallow real warnings / tracebacks the user needs
     to see).
     """
+    # Run the schema strip synchronously here — at this point we're still
+    # outside any event loop (FastMCP's ``mcp.run()`` will create its own
+    # below), so ``asyncio.run()`` is safe. For HTTP mode the equivalent
+    # call lives in the Starlette lifespan, see ``_get_app``.
+    asyncio.run(_strip_internal_schema_fields())
+
     extra: dict[str, Any] = {}
     try:
         mcp.run(show_banner=False, **extra)
