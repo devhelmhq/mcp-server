@@ -78,8 +78,12 @@ mcp = FastMCP(
         "Use these tools to manage uptime monitors, incidents, alert channels, "
         "notification policies, environments, secrets, tags, resource groups, "
         "webhooks, API keys, service dependencies, deploy locks, maintenance "
-        "windows, status pages, and view dashboard status. All operations "
-        "require a valid DevHelm API token."
+        "windows, status pages, and view dashboard status. "
+        "Authentication is handled at the transport layer: "
+        "`Authorization: Bearer <token>` for the hosted endpoint "
+        "(https://mcp.devhelm.io/mcp/), or the `DEVHELM_API_TOKEN` environment "
+        "variable when running over stdio (e.g. `uvx devhelm-mcp-server`). "
+        "Do not pass tokens in tool arguments — tool schemas no longer accept them."
     ),
 )
 
