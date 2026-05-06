@@ -25,13 +25,18 @@ from devhelm import DevhelmApiError, DevhelmTransportError
 from fastmcp import Client
 from starlette.testclient import TestClient
 
-from devhelm_mcp.server import _package_version, app, mcp
+from devhelm_mcp.server import _package_version, _strip_internal_schema_fields, app, mcp
 
 RegisteredTools = dict[str, Any]
 
 
 @pytest.fixture(scope="module")
 def registered_tools() -> RegisteredTools:
+    # The schema strip now runs only inside the Starlette lifespan (HTTP)
+    # or before ``mcp.run()`` (stdio) — see v0.7.2 hotfix. Tests that
+    # inspect the registered tool schemas have to perform the strip
+    # explicitly, otherwise they see the raw FastMCP-generated schema.
+    asyncio.run(_strip_internal_schema_fields())
     tools = asyncio.run(mcp.list_tools())
     return {t.name: t for t in tools}
 
@@ -398,3 +403,48 @@ class TestTrailingSlashNormalization:
             resp = client.get("/health")
         assert resp.status_code == 200
         assert resp.json()["status"] == "healthy"
+
+
+# --------------------------------------------------------------------------- #
+# v0.7.2 hotfix — module import + lifespan must work from a running loop
+# --------------------------------------------------------------------------- #
+
+
+class TestImportFromRunningLoopDoesNotCrash:
+    """v0.7.1 regressed by calling ``asyncio.run()`` at module import time.
+
+    Uvicorn imports the user app from inside ``asyncio.run(self.serve(...))``,
+    so by the time ``devhelm_mcp.server`` ran its top-level
+    ``_strip_internal_schema_fields()`` it was already inside a running
+    event loop and Python raised ``RuntimeError: asyncio.run() cannot be
+    called from a running event loop``. Cluster pods crashed in a tight
+    restart loop until the deployment was reverted.
+
+    The fix moved the strip into the Starlette lifespan (HTTP) and into
+    ``_run_stdio()`` (stdio). This test pins both halves: importing the
+    module from inside a running loop must succeed, and the lifespan
+    must perform the strip on entry.
+    """
+
+    def test_lifespan_entry_strips_internal_fields(self) -> None:
+        async def go() -> None:
+            # Re-import inside the running loop — this is what Uvicorn does.
+            import importlib
+
+            import devhelm_mcp.server as srv
+
+            srv = importlib.reload(srv)
+
+            async with srv.app.router.lifespan_context(srv.app):
+                tools = await srv.mcp.list_tools(run_middleware=False)
+                api_token_leaks = [
+                    t.name
+                    for t in tools
+                    if isinstance(t.parameters, dict)
+                    and "api_token" in (t.parameters.get("properties") or {})
+                ]
+                assert not api_token_leaks, (
+                    f"lifespan must strip api_token from {api_token_leaks!r}"
+                )
+
+        asyncio.run(go())
