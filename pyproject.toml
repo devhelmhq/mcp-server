@@ -1,6 +1,6 @@
 [project]
 name = "devhelm-mcp-server"
-version = "0.8.3"
+version = "1.0.0"
 description = "DevHelm MCP server — AI agent access to monitors, incidents, alerting, and more"
 authors = [{ name = "DevHelm", email = "hello@devhelm.io" }]
 license = "MIT"
