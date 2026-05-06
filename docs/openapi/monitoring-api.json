@@ -166,8 +166,52 @@
           "Alert Channels"
         ],
         "summary": "List active alert channels for the authenticated org",
+        "description": "Supports filtering by `type` (channel integration), `managedBy` (creating surface), and `search` (case-insensitive contains on name). Unrecognised query parameters are silently ignored — pin to the documented set above.",
         "operationId": "list_14",
         "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter by channel integration type (e.g. SLACK, WEBHOOK, EMAIL)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "email",
+                "webhook",
+                "slack",
+                "pagerduty",
+                "opsgenie",
+                "teams",
+                "discord"
+              ]
+            }
+          },
+          {
+            "name": "managedBy",
+            "in": "query",
+            "description": "Filter by managed-by source (DASHBOARD, CLI, TERRAFORM, MCP, API)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DASHBOARD",
+                "CLI",
+                "TERRAFORM",
+                "MCP",
+                "API"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Case-insensitive contains-match on the channel name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "pageable",
             "in": "query",
@@ -6374,15 +6418,25 @@
           "Monitors"
         ],
         "summary": "List monitors for the authenticated org",
+        "description": "Supports filtering by `enabled`, `status` (alias active|paused for enabled), `type`, `managedBy`, `tag` / `tags`, `search`, and `environmentId`. Unrecognised query parameters are silently ignored (Spring's default binding behaviour) — pin to the documented set above.",
         "operationId": "list_8",
         "parameters": [
           {
             "name": "enabled",
             "in": "query",
-            "description": "Filter by enabled state",
+            "description": "Filter by enabled state (true/false)",
             "required": false,
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Lifecycle status alias: 'active' (enabled=true) or 'paused' (enabled=false). Ignored when ?enabled is also supplied.",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -6421,7 +6475,16 @@
           {
             "name": "tags",
             "in": "query",
-            "description": "Filter by tag names, comma-separated (e.g. prod,critical)",
+            "description": "Filter by tag names, comma-separated (e.g. prod,critical); OR semantics",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "Filter by a single tag name (alias for ?tags=); merged with ?tags using OR semantics",
             "required": false,
             "schema": {
               "type": "string"
@@ -21729,6 +21792,18 @@
             "description": "SHA-256 hash of the channel config; use for change detection",
             "nullable": true
           },
+          "managedBy": {
+            "type": "string",
+            "description": "Source that created/owns this channel: DASHBOARD, CLI, TERRAFORM, MCP, or API. Null on channels created before this attribution column existed.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
+          },
           "lastDeliveryAt": {
             "type": "string",
             "description": "Timestamp of the most recent delivery attempt",
@@ -22929,6 +23004,18 @@
                 "$ref": "#/components/schemas/WebhookChannelConfig"
               }
             ]
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "Source creating this channel: DASHBOARD, CLI, TERRAFORM, MCP, or API. Defaults to API when omitted.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
           }
         }
       },
@@ -23189,12 +23276,14 @@
             "maxLength": 100,
             "minLength": 0,
             "type": "string",
-            "description": "iCal RRULE for recurring windows (max 100 chars); null for one-time",
+            "description": "Reserved: iCal RRULE for recurring windows (stored but not yet honored)",
             "nullable": true
           },
           "reason": {
+            "maxLength": 500,
+            "minLength": 0,
             "type": "string",
-            "description": "Human-readable reason for the maintenance",
+            "description": "Human-readable reason for the maintenance (max 500 chars)",
             "nullable": true
           },
           "suppressAlerts": {
@@ -23241,7 +23330,6 @@
       "CreateMonitorRequest": {
         "required": [
           "config",
-          "managedBy",
           "name",
           "type"
         ],
@@ -23309,7 +23397,8 @@
           },
           "managedBy": {
             "type": "string",
-            "description": "Source that created/owns this monitor: DASHBOARD, CLI, TERRAFORM, MCP, or API. Use the value matching your surface so audit logs, drift detection, and analytics attribute correctly.",
+            "description": "Source that created/owns this monitor: DASHBOARD, CLI, TERRAFORM, MCP, or API. Defaults to API when omitted; set to your surface so audit logs, drift detection, and analytics attribute correctly.",
+            "nullable": true,
             "enum": [
               "DASHBOARD",
               "CLI",
@@ -23510,6 +23599,18 @@
             "description": "Recovery cooldown in minutes after group incident resolves (0–60)",
             "format": "int32",
             "nullable": true
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "Source creating this group: DASHBOARD, CLI, TERRAFORM, MCP, or API. Defaults to API when omitted.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
           }
         },
         "description": "Request body for creating a resource group"
@@ -23810,6 +23911,18 @@
               "MANUAL",
               "REVIEW",
               "AUTOMATIC"
+            ]
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "Source creating this page: DASHBOARD, CLI, TERRAFORM, MCP, or API. Defaults to API when omitted.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
             ]
           }
         }
@@ -26436,7 +26549,7 @@
           },
           "repeatRule": {
             "type": "string",
-            "description": "iCal RRULE for recurring windows; null for one-time",
+            "description": "Reserved: iCal RRULE for recurring windows (stored but not yet honored)",
             "nullable": true
           },
           "reason": {
@@ -27271,6 +27384,18 @@
               "description": "Alert channel IDs linked to this monitor; populated on single-monitor responses",
               "format": "uuid"
             }
+          },
+          "currentStatus": {
+            "type": "string",
+            "description": "Current operational state — UP, DOWN, DEGRADED, PAUSED, or UNKNOWN if no probe data yet",
+            "nullable": true,
+            "enum": [
+              "up",
+              "degraded",
+              "down",
+              "paused",
+              "unknown"
+            ]
           }
         },
         "description": "Full monitor representation"
@@ -28461,6 +28586,18 @@
               "$ref": "#/components/schemas/ResourceGroupMemberDto"
             }
           },
+          "managedBy": {
+            "type": "string",
+            "description": "Source that created/owns this group: DASHBOARD, CLI, TERRAFORM, MCP, or API. Null on groups created before this attribution column existed.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
+          },
           "createdAt": {
             "type": "string",
             "description": "Timestamp when the group was created",
@@ -28721,6 +28858,7 @@
               "up",
               "degraded",
               "down",
+              "paused",
               "unknown"
             ]
           },
@@ -31056,6 +31194,18 @@
               "UNDER_MAINTENANCE"
             ]
           },
+          "managedBy": {
+            "type": "string",
+            "description": "Source that created/owns this status page: DASHBOARD, CLI, TERRAFORM, MCP, or API. Null on pages created before this attribution column existed.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -32999,6 +33149,18 @@
                 "$ref": "#/components/schemas/WebhookChannelConfig"
               }
             ]
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "New attribution source: DASHBOARD, CLI, TERRAFORM, MCP, or API; null preserves current value.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
           }
         }
       },
@@ -33239,7 +33401,7 @@
         "properties": {
           "monitorId": {
             "type": "string",
-            "description": "Monitor to attach this maintenance window to; null preserves current",
+            "description": "Monitor this window applies to; null switches the window to org-wide",
             "format": "uuid",
             "nullable": true
           },
@@ -33257,17 +33419,19 @@
             "maxLength": 100,
             "minLength": 0,
             "type": "string",
-            "description": "Updated iCal RRULE; null clears the repeat rule",
+            "description": "Reserved: iCal RRULE for recurring windows (stored but not yet honored); null clears it",
             "nullable": true
           },
           "reason": {
+            "maxLength": 500,
+            "minLength": 0,
             "type": "string",
-            "description": "Updated reason; null clears the existing reason",
+            "description": "Updated reason (max 500 chars); null clears the existing reason",
             "nullable": true
           },
           "suppressAlerts": {
             "type": "boolean",
-            "description": "Whether to suppress alerts; null preserves current",
+            "description": "Whether to suppress alerts during this window; null defaults to true",
             "nullable": true
           }
         }
@@ -33605,6 +33769,18 @@
             "description": "Recovery cooldown in minutes; null clears",
             "format": "int32",
             "nullable": true
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "New attribution source: DASHBOARD, CLI, TERRAFORM, MCP, or API; null preserves current value.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
+            ]
           }
         },
         "description": "Request body for updating a resource group"
@@ -33808,6 +33984,18 @@
               "MANUAL",
               "REVIEW",
               "AUTOMATIC"
+            ]
+          },
+          "managedBy": {
+            "type": "string",
+            "description": "New attribution source: DASHBOARD, CLI, TERRAFORM, MCP, or API; null preserves current value.",
+            "nullable": true,
+            "enum": [
+              "DASHBOARD",
+              "CLI",
+              "TERRAFORM",
+              "MCP",
+              "API"
             ]
           }
         }
