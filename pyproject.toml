@@ -19,11 +19,14 @@ classifiers = [
 ]
 
 dependencies = [
-    # Floor bumped to 0.7.2: required for `managedBy` field on resource DTOs
-    # and for the new monitor validation contract (frequencySeconds bounds,
-    # dynamic region whitelist). Older devhelm versions raise Pydantic
-    # `extra_forbidden` errors when the API returns `managedBy`.
-    "devhelm>=0.7.2",
+    # Floor bumped to 1.0.0: aligns with the GA release of the Python SDK
+    # cut alongside this server's 1.0.0. The 1.0.0 SDK includes every
+    # contract the server currently relies on (`managedBy` on resource
+    # DTOs, the monitor validation contract — frequencySeconds bounds,
+    # dynamic region whitelist) and commits to semver going forward, so
+    # `>=1.0.0` lets us pull in compatible patch/minor bumps without
+    # explicit floor bumps each time.
+    "devhelm>=1.0.0",
     "fastmcp>=2.0.0",
 ]
 

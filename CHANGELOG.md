@@ -4,6 +4,39 @@ All notable changes to `devhelm-mcp-server` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] — 2026-05-06
+
+First GA release. Cut alongside the `1.0.0` GA of the `devhelm` Python
+SDK, the `devhelm` CLI, and the `@devhelm/sdk` JS/TS SDK. The schema
+and tool surface that `0.8.3` shipped is the GA contract — no
+behavioral changes from `0.8.3`, only the version bump and the SDK
+floor change below.
+
+### Changed
+
+- Bump `devhelm` Python SDK floor to `>=1.0.0`. Aligns with the GA
+  release of the SDK; future patch/minor SDK bumps will be picked up
+  automatically without an explicit floor change here.
+
+### Compatibility
+
+- All tool input schemas, tool names, and response shapes are
+  unchanged from `0.8.3`. Existing clients keep working without
+  modification.
+
+## [0.8.3] — 2026-05-06
+
+### Changed
+
+- Rewrite `initialize.instructions` to point at transport-layer auth
+  (`Authorization: Bearer ...` for hosted, `DEVHELM_API_TOKEN` env for
+  stdio) and explicitly note that tool schemas no longer accept
+  `api_token` arguments. The previous wording ("All operations require
+  a valid DevHelm API token") contradicted the 0.7.0 schema change and
+  caused LLMs to attempt to thread tokens into tool args.
+- Add `CHANGELOG.md` retroactively covering 0.6.0 → 0.8.x. Going
+  forward, every release lands with a corresponding stanza.
+
 ## [0.8.2] — 2026-05-06
 
 ### Changed
