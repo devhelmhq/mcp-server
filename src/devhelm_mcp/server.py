@@ -35,6 +35,7 @@ from devhelm_mcp.tools import (
     environments,
     forensics,
     incidents,
+    maintenance_windows,
     monitors,
     notification_policies,
     resource_groups,
@@ -76,8 +77,9 @@ mcp = FastMCP(
         "DevHelm MCP server for monitoring infrastructure. "
         "Use these tools to manage uptime monitors, incidents, alert channels, "
         "notification policies, environments, secrets, tags, resource groups, "
-        "webhooks, API keys, service dependencies, deploy locks, status pages, "
-        "and view dashboard status. All operations require a valid DevHelm API token."
+        "webhooks, API keys, service dependencies, deploy locks, maintenance "
+        "windows, status pages, and view dashboard status. All operations "
+        "require a valid DevHelm API token."
     ),
 )
 
@@ -95,6 +97,7 @@ ALL_TOOL_MODULES = [
     api_keys,
     dependencies,
     deploy_lock,
+    maintenance_windows,
     status,
     status_pages,
 ]
