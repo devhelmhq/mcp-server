@@ -23376,8 +23376,10 @@
             ]
           },
           "frequencySeconds": {
+            "maximum": 86400,
+            "minimum": 10,
             "type": "integer",
-            "description": "Check frequency in seconds (30–86400); null defaults to plan minimum (60s on most paid plans)",
+            "description": "Check frequency in seconds (10–86400); null defaults to plan minimum (60s on most paid plans)",
             "format": "int32",
             "nullable": true
           },
@@ -23388,11 +23390,11 @@
           },
           "regions": {
             "type": "array",
-            "description": "Probe regions to run checks from, e.g. us-east, eu-west",
+            "description": "Probe regions to run checks from. Allowed values are deployment-dependent; production: us-east, us-west, eu-west, ap-south.",
             "nullable": true,
             "items": {
               "type": "string",
-              "description": "Probe regions to run checks from, e.g. us-east, eu-west"
+              "description": "Probe regions to run checks from. Allowed values are deployment-dependent; production: us-east, us-west, eu-west, ap-south."
             }
           },
           "managedBy": {
@@ -33494,8 +33496,10 @@
             ]
           },
           "frequencySeconds": {
+            "maximum": 86400,
+            "minimum": 10,
             "type": "integer",
-            "description": "New check frequency in seconds (30–86400); null preserves current",
+            "description": "New check frequency in seconds (10–86400); null preserves current",
             "format": "int32",
             "nullable": true
           },
@@ -33506,11 +33510,11 @@
           },
           "regions": {
             "type": "array",
-            "description": "New probe regions; null preserves current",
+            "description": "New probe regions; null preserves current. Allowed values are deployment-dependent.",
             "nullable": true,
             "items": {
               "type": "string",
-              "description": "New probe regions; null preserves current"
+              "description": "New probe regions; null preserves current. Allowed values are deployment-dependent."
             }
           },
           "managedBy": {
