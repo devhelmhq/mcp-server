@@ -5187,7 +5187,7 @@
           "Invites"
         ],
         "summary": "Resend invite",
-        "operationId": "resend",
+        "operationId": "resend_1",
         "parameters": [
           {
             "name": "inviteId",
