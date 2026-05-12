@@ -1,5 +1,7 @@
 # DevHelm MCP Server
 
+<!-- mcp-name: io.github.devhelmhq/mcp-server -->
+
 [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server for [DevHelm](https://devhelm.io) — gives AI coding assistants (Cursor, Claude Desktop, Windsurf, etc.) access to your uptime monitors, incidents, alerting, and more.
 
 ## Quick Start
