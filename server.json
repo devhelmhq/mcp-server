@@ -1,17 +1,20 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.devhelmhq/mcp-server",
+  "title": "DevHelm MCP Server",
   "description": "Monitor uptime, manage incidents, configure alerting, and query dependency status via DevHelm",
+  "websiteUrl": "https://docs.devhelm.io/mcp-server",
   "repository": {
     "url": "https://github.com/devhelmhq/mcp-server",
     "source": "github"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "devhelm-mcp-server",
-      "version": "1.0.1",
+      "version": "1.0.2",
+      "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
       },
