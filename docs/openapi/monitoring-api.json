@@ -5187,7 +5187,7 @@
           "Invites"
         ],
         "summary": "Resend invite",
-        "operationId": "resend",
+        "operationId": "resend_1",
         "parameters": [
           {
             "name": "inviteId",
@@ -13234,7 +13234,7 @@
           "Service Subscriptions"
         ],
         "summary": "Update alert sensitivity for a subscription",
-        "description": "Controls which external incidents trigger alerts: ALL (any status change), INCIDENTS_ONLY (real vendor incidents, default), MAJOR_ONLY (only DOWN-level incidents).",
+        "description": "Controls which external incidents trigger alerts and whether they page anyone: ALL (any status change, paged), INCIDENTS_ONLY (real vendor incidents, paged), MAJOR_ONLY (only DOWN-level incidents, paged), AWARENESS (real vendor incidents tracked silently — visible on the dashboard but no alert channels fire; default for new subscriptions).",
         "operationId": "updateAlertSensitivity",
         "parameters": [
           {
@@ -13357,7 +13357,7 @@
           "Service Subscriptions"
         ],
         "summary": "Subscribe to a service or a component of a service",
-        "description": "Idempotent — returns the existing subscription if an identical one exists. Omit the request body or set componentId to null for a whole-service subscription. Free tier: max 10 subscriptions. Paid tier: unlimited.",
+        "description": "Idempotent — returns the existing subscription if an identical one exists. Omit the request body or set componentId to null for a whole-service subscription. When alertSensitivity is omitted, new subscriptions default to AWARENESS (silent tracking — the incident appears on the dashboard but no alert channels fire). PATCH /alert-sensitivity to opt in to paging. Free tier: max 10 subscriptions. Paid tier: unlimited.",
         "operationId": "subscribe_1",
         "parameters": [
           {
@@ -24873,6 +24873,33 @@
         },
         "description": "Environment with variable substitutions for monitor configs"
       },
+      "ErrorEntry": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Stable machine-readable code; see ValidationErrorCode for the registry",
+            "example": "MONITOR_HEARTBEAT_GRACE_EXCEEDS_INTERVAL"
+          },
+          "field": {
+            "type": "string",
+            "description": "JSON-pointer-like path to the offending field, or null for request-wide errors",
+            "nullable": true,
+            "example": "config.gracePeriod"
+          },
+          "message": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Human-readable message; safe to surface to end users"
+          }
+        },
+        "description": "One structured validation rejection"
+      },
       "ErrorResponse": {
         "required": [
           "code",
@@ -24909,6 +24936,19 @@
             "description": "Opaque per-request id; same value as the X-Request-Id response header. Use in support tickets.",
             "nullable": true,
             "example": "5b6f7a8c-1234-4d5e-9f0a-1b2c3d4e5f6a"
+          },
+          "errors": {
+            "type": "array",
+            "description": "Structured per-field rejections; populated for validation errors, null otherwise",
+            "nullable": true,
+            "items": {
+              "nullable": true,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorEntry"
+                }
+              ]
+            }
           }
         },
         "description": "Uniform error envelope returned for every non-2xx response",
@@ -29880,8 +29920,9 @@
             "nullable": true
           },
           "alertSensitivity": {
+            "pattern": "ALL|AWARENESS|INCIDENTS_ONLY|MAJOR_ONLY",
             "type": "string",
-            "description": "Alert sensitivity level. Defaults to INCIDENTS_ONLY when not provided.",
+            "description": "Alert sensitivity: ALL (any status change), INCIDENTS_ONLY (real vendor incidents, page on every one), MAJOR_ONLY (only DOWN-level incidents), AWARENESS (track silently — show on dashboard, never send alerts). Defaults to AWARENESS when not provided — silent tracking is the friendliest first-run choice; switch to one of the paging modes to opt in to alert-channel fan-out.",
             "nullable": true
           }
         },
@@ -29965,9 +30006,10 @@
           "alertSensitivity": {
             "minLength": 1,
             "type": "string",
-            "description": "Alert sensitivity: ALL (synthetic + real incidents), INCIDENTS_ONLY (real vendor incidents, default), MAJOR_ONLY (real + DOWN severity)",
+            "description": "Alert sensitivity: ALL (synthetic + real incidents, paged), INCIDENTS_ONLY (real vendor incidents, paged), MAJOR_ONLY (real + DOWN severity, paged), AWARENESS (real vendor incidents tracked silently — visible on dashboard, never paged; default for new subscriptions)",
             "enum": [
               "ALL",
+              "AWARENESS",
               "INCIDENTS_ONLY",
               "MAJOR_ONLY"
             ]
@@ -33174,9 +33216,9 @@
         "properties": {
           "alertSensitivity": {
             "minLength": 1,
-            "pattern": "ALL|INCIDENTS_ONLY|MAJOR_ONLY",
+            "pattern": "ALL|AWARENESS|INCIDENTS_ONLY|MAJOR_ONLY",
             "type": "string",
-            "description": "Alert sensitivity: ALL (any status change), INCIDENTS_ONLY (real vendor incidents, default), MAJOR_ONLY (only DOWN-level incidents)"
+            "description": "Alert sensitivity: ALL (any status change), INCIDENTS_ONLY (real vendor incidents, page on every one), MAJOR_ONLY (only DOWN-level incidents), AWARENESS (track silently — show on dashboard, never send alerts; default for new subscriptions)"
           }
         },
         "description": "Request body for updating alert sensitivity on a service subscription"
