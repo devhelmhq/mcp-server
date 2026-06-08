@@ -1,4 +1,4 @@
-"""Alert channel tools — Slack, email, webhook, and other notification channels."""
+"""Alert channel tools — Slack, email, PagerDuty, and 17 more."""
 
 from __future__ import annotations
 
@@ -40,8 +40,10 @@ def register(mcp: FastMCP) -> None:
         """Create a new alert channel.
 
         Required: name, type, config (type-specific).
-        Types: SLACK, EMAIL, WEBHOOK, PAGERDUTY, OPSGENIE,
-        TELEGRAM, DISCORD, MSTEAMS.
+        Types: EMAIL, WEBHOOK, SLACK, PAGERDUTY, OPSGENIE, TEAMS,
+        DISCORD, TELEGRAM, GOOGLE_CHAT, PUSHOVER, MATTERMOST,
+        SPLUNK_ONCALL, PUSHBULLET, LINEAR, INCIDENT_IO, ROOTLY,
+        ZAPIER, DATADOG, JIRA, GITLAB.
         """
         try:
             return serialize(
@@ -56,7 +58,11 @@ def register(mcp: FastMCP) -> None:
         body: UpdateAlertChannelRequest,
         api_token: str | None = None,
     ) -> ToolResult:
-        """Update an existing alert channel."""
+        """Update an existing alert channel.
+
+        Updatable fields: name, type, config (type-specific).
+        See create_alert_channel for supported types.
+        """
         try:
             return serialize(
                 get_client(api_token).alert_channels.update(
