@@ -183,7 +183,20 @@
                 "pagerduty",
                 "opsgenie",
                 "teams",
-                "discord"
+                "discord",
+                "telegram",
+                "google_chat",
+                "pushover",
+                "mattermost",
+                "splunk_oncall",
+                "pushbullet",
+                "linear",
+                "incident_io",
+                "rootly",
+                "zapier",
+                "datadog",
+                "jira",
+                "gitlab"
               ]
             }
           },
@@ -5187,7 +5200,7 @@
           "Invites"
         ],
         "summary": "Resend invite",
-        "operationId": "resend",
+        "operationId": "resend_1",
         "parameters": [
           {
             "name": "inviteId",
@@ -13234,7 +13247,7 @@
           "Service Subscriptions"
         ],
         "summary": "Update alert sensitivity for a subscription",
-        "description": "Controls which external incidents trigger alerts: ALL (any status change), INCIDENTS_ONLY (real vendor incidents, default), MAJOR_ONLY (only DOWN-level incidents).",
+        "description": "Controls which external incidents trigger alerts and whether they page anyone: ALL (any status change, paged), INCIDENTS_ONLY (real vendor incidents, paged), MAJOR_ONLY (only DOWN-level incidents, paged), AWARENESS (real vendor incidents tracked silently — visible on the dashboard but no alert channels fire; default for new subscriptions).",
         "operationId": "updateAlertSensitivity",
         "parameters": [
           {
@@ -13357,7 +13370,7 @@
           "Service Subscriptions"
         ],
         "summary": "Subscribe to a service or a component of a service",
-        "description": "Idempotent — returns the existing subscription if an identical one exists. Omit the request body or set componentId to null for a whole-service subscription. Free tier: max 10 subscriptions. Paid tier: unlimited.",
+        "description": "Idempotent — returns the existing subscription if an identical one exists. Omit the request body or set componentId to null for a whole-service subscription. When alertSensitivity is omitted, new subscriptions default to AWARENESS (silent tracking — the incident appears on the dashboard but no alert channels fire). PATCH /alert-sensitivity to opt in to paging. Free tier: max 10 subscriptions. Paid tier: unlimited.",
         "operationId": "subscribe_1",
         "parameters": [
           {
@@ -21733,6 +21746,56 @@
             },
             "description": "Custom HTTP headers for webhook requests",
             "nullable": true
+          },
+          "chatId": {
+            "type": "string",
+            "description": "Telegram chat ID",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "description": "Pushover notification priority override",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "description": "Mattermost channel override",
+            "nullable": true
+          },
+          "routingKey": {
+            "type": "string",
+            "description": "Splunk On-Call routing key",
+            "nullable": true
+          },
+          "deviceIden": {
+            "type": "string",
+            "description": "Pushbullet target device identifier",
+            "nullable": true
+          },
+          "teamId": {
+            "type": "string",
+            "description": "Linear team ID for issue creation",
+            "nullable": true
+          },
+          "visibility": {
+            "type": "string",
+            "description": "incident.io incident visibility",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string",
+            "description": "Rootly incident severity slug",
+            "nullable": true
+          },
+          "site": {
+            "type": "string",
+            "description": "Datadog site region",
+            "nullable": true
+          },
+          "projectKey": {
+            "type": "string",
+            "description": "Jira project key",
+            "nullable": true
           }
         },
         "description": "Non-sensitive alert channel configuration metadata"
@@ -21766,7 +21829,20 @@
               "pagerduty",
               "opsgenie",
               "teams",
-              "discord"
+              "discord",
+              "telegram",
+              "google_chat",
+              "pushover",
+              "mattermost",
+              "splunk_oncall",
+              "pushbullet",
+              "linear",
+              "incident_io",
+              "rootly",
+              "zapier",
+              "datadog",
+              "jira",
+              "gitlab"
             ]
           },
           "displayConfig": {
@@ -22983,10 +23059,31 @@
           "config": {
             "oneOf": [
               {
+                "$ref": "#/components/schemas/DatadogChannelConfig"
+              },
+              {
                 "$ref": "#/components/schemas/DiscordChannelConfig"
               },
               {
                 "$ref": "#/components/schemas/EmailChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/GitLabChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/GoogleChatChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/IncidentIoChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/JiraChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/LinearChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/MattermostChannelConfig"
               },
               {
                 "$ref": "#/components/schemas/OpsGenieChannelConfig"
@@ -22995,13 +23092,31 @@
                 "$ref": "#/components/schemas/PagerDutyChannelConfig"
               },
               {
+                "$ref": "#/components/schemas/PushbulletChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/PushoverChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/RootlyChannelConfig"
+              },
+              {
                 "$ref": "#/components/schemas/SlackChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/SplunkOnCallChannelConfig"
               },
               {
                 "$ref": "#/components/schemas/TeamsChannelConfig"
               },
               {
+                "$ref": "#/components/schemas/TelegramChannelConfig"
+              },
+              {
                 "$ref": "#/components/schemas/WebhookChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/ZapierChannelConfig"
               }
             ]
           },
@@ -24102,6 +24217,36 @@
         },
         "description": "Combined dashboard overview for monitors and incidents"
       },
+      "DatadogChannelConfig": {
+        "required": [
+          "channelType",
+          "apiKey"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "datadog"
+            ]
+          },
+          "apiKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Datadog API key"
+          },
+          "site": {
+            "type": "string",
+            "description": "Datadog site region (e.g. datadoghq.com, datadoghq.eu, us3.datadoghq.com)",
+            "nullable": true
+          },
+          "tags": {
+            "type": "string",
+            "description": "Comma-separated tags to attach to events",
+            "nullable": true
+          }
+        }
+      },
       "DayIncident": {
         "required": [
           "affectedComponentNames",
@@ -24873,6 +25018,33 @@
         },
         "description": "Environment with variable substitutions for monitor configs"
       },
+      "ErrorEntry": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Stable machine-readable code; see ValidationErrorCode for the registry",
+            "example": "MONITOR_HEARTBEAT_GRACE_EXCEEDS_INTERVAL"
+          },
+          "field": {
+            "type": "string",
+            "description": "JSON-pointer-like path to the offending field, or null for request-wide errors",
+            "nullable": true,
+            "example": "config.gracePeriod"
+          },
+          "message": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Human-readable message; safe to surface to end users"
+          }
+        },
+        "description": "One structured validation rejection"
+      },
       "ErrorResponse": {
         "required": [
           "code",
@@ -24909,6 +25081,19 @@
             "description": "Opaque per-request id; same value as the X-Request-Id response header. Use in support tickets.",
             "nullable": true,
             "example": "5b6f7a8c-1234-4d5e-9f0a-1b2c3d4e5f6a"
+          },
+          "errors": {
+            "type": "array",
+            "description": "Structured per-field rejections; populated for validation errors, null otherwise",
+            "nullable": true,
+            "items": {
+              "nullable": true,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorEntry"
+                }
+              ]
+            }
           }
         },
         "description": "Uniform error envelope returned for every non-2xx response",
@@ -25004,6 +25189,32 @@
         },
         "description": "Details about a single monitor that failed the bulk action"
       },
+      "GitLabChannelConfig": {
+        "required": [
+          "channelType",
+          "endpointUrl",
+          "authorizationKey"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "gitlab"
+            ]
+          },
+          "endpointUrl": {
+            "minLength": 1,
+            "type": "string",
+            "description": "GitLab alert integration endpoint URL"
+          },
+          "authorizationKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Authorization key from GitLab alert integration settings"
+          }
+        }
+      },
       "GlobalStatusSummaryDto": {
         "required": [
           "servicesWithIssues",
@@ -25067,6 +25278,26 @@
           }
         },
         "description": "Global status summary across all subscribed vendor services"
+      },
+      "GoogleChatChannelConfig": {
+        "required": [
+          "channelType",
+          "webhookUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "google_chat"
+            ]
+          },
+          "webhookUrl": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Google Chat space webhook URL"
+          }
+        }
       },
       "GroupComponentOrder": {
         "required": [
@@ -25872,6 +26103,36 @@
           "size"
         ]
       },
+      "IncidentIoChannelConfig": {
+        "required": [
+          "channelType",
+          "apiKey"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "incident_io"
+            ]
+          },
+          "apiKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "incident.io API key with 'Create incidents' permission"
+          },
+          "severityId": {
+            "type": "string",
+            "description": "Severity ID for created incidents (from List Severities API)",
+            "nullable": true
+          },
+          "visibility": {
+            "type": "string",
+            "description": "Incident visibility: public or private (default: public)",
+            "nullable": true
+          }
+        }
+      },
       "IncidentPolicyDto": {
         "required": [
           "confirmation",
@@ -26324,6 +26585,49 @@
         },
         "description": "Organization invite sent to an email address"
       },
+      "JiraChannelConfig": {
+        "required": [
+          "channelType",
+          "domain",
+          "email",
+          "apiToken",
+          "projectKey"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "jira"
+            ]
+          },
+          "domain": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Atlassian instance domain (e.g. yourteam.atlassian.net)"
+          },
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Atlassian account email for API authentication"
+          },
+          "apiToken": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Atlassian API token"
+          },
+          "projectKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Jira project key where issues are created (e.g. OPS)"
+          },
+          "issueType": {
+            "type": "string",
+            "description": "Issue type name (e.g. Bug, Task, Incident)",
+            "nullable": true
+          }
+        }
+      },
       "JsonPathAssertion": {
         "required": [
           "type",
@@ -26399,6 +26703,37 @@
           }
         },
         "description": "API key metadata"
+      },
+      "LinearChannelConfig": {
+        "required": [
+          "channelType",
+          "apiKey",
+          "teamId"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "linear"
+            ]
+          },
+          "apiKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Linear API key"
+          },
+          "teamId": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Team ID to create issues in"
+          },
+          "labelId": {
+            "type": "string",
+            "description": "Label ID to attach to created issues",
+            "nullable": true
+          }
+        }
       },
       "LinkedStatusPageIncidentDto": {
         "required": [
@@ -26627,6 +26962,36 @@
           }
         },
         "description": "Match rules to evaluate (all must pass; omit or empty for catch-all)"
+      },
+      "MattermostChannelConfig": {
+        "required": [
+          "channelType",
+          "webhookUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "mattermost"
+            ]
+          },
+          "webhookUrl": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Mattermost incoming webhook URL"
+          },
+          "channel": {
+            "type": "string",
+            "description": "Override channel (if webhook allows)",
+            "nullable": true
+          },
+          "iconUrl": {
+            "type": "string",
+            "description": "Custom bot icon URL",
+            "nullable": true
+          }
+        }
       },
       "McpConnectsAssertion": {
         "type": "object",
@@ -28230,6 +28595,67 @@
           }
         }
       },
+      "PushbulletChannelConfig": {
+        "required": [
+          "channelType",
+          "accessToken"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "pushbullet"
+            ]
+          },
+          "accessToken": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Pushbullet access token"
+          },
+          "deviceIden": {
+            "type": "string",
+            "description": "Target device identifier (broadcasts to all if empty)",
+            "nullable": true
+          }
+        }
+      },
+      "PushoverChannelConfig": {
+        "required": [
+          "channelType",
+          "userKey",
+          "appToken"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "pushover"
+            ]
+          },
+          "userKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Pushover user or group key"
+          },
+          "appToken": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Pushover application API token"
+          },
+          "priority": {
+            "type": "string",
+            "description": "Notification priority override (-2 to 2)",
+            "nullable": true
+          },
+          "sound": {
+            "type": "string",
+            "description": "Notification sound override",
+            "nullable": true
+          }
+        }
+      },
       "RateLimitInfo": {
         "type": "object",
         "properties": {
@@ -28920,6 +29346,31 @@
         },
         "description": "Default retry strategy for member monitors; null clears"
       },
+      "RootlyChannelConfig": {
+        "required": [
+          "channelType",
+          "apiKey"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "rootly"
+            ]
+          },
+          "apiKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Rootly API token with incident creation permission"
+          },
+          "severity": {
+            "type": "string",
+            "description": "Severity slug override (e.g. sev0, sev1)",
+            "nullable": true
+          }
+        }
+      },
       "RuleEvaluationDto": {
         "required": [
           "checkId",
@@ -29175,6 +29626,7 @@
           "createdAt",
           "dataCompleteness",
           "id",
+          "lifecycleStatus",
           "name",
           "slug",
           "updatedAt",
@@ -29218,6 +29670,16 @@
           "pollingIntervalSeconds": {
             "type": "integer",
             "format": "int32"
+          },
+          "lifecycleStatus": {
+            "type": "string",
+            "description": "Service lifecycle state: ACTIVE, DEGRADED, DEPRECATED, or RETIRED",
+            "enum": [
+              "ACTIVE",
+              "DEGRADED",
+              "DEPRECATED",
+              "RETIRED"
+            ]
           },
           "enabled": {
             "type": "boolean"
@@ -29439,6 +29901,7 @@
           "createdAt",
           "dataCompleteness",
           "id",
+          "lifecycleStatus",
           "name",
           "recentIncidents",
           "slug",
@@ -29480,6 +29943,16 @@
           "pollingIntervalSeconds": {
             "type": "integer",
             "format": "int32"
+          },
+          "lifecycleStatus": {
+            "type": "string",
+            "description": "Service lifecycle state: ACTIVE, DEGRADED, DEPRECATED, or RETIRED",
+            "enum": [
+              "ACTIVE",
+              "DEGRADED",
+              "DEPRECATED",
+              "RETIRED"
+            ]
           },
           "enabled": {
             "type": "boolean"
@@ -29880,8 +30353,9 @@
             "nullable": true
           },
           "alertSensitivity": {
+            "pattern": "ALL|AWARENESS|INCIDENTS_ONLY|MAJOR_ONLY",
             "type": "string",
-            "description": "Alert sensitivity level. Defaults to INCIDENTS_ONLY when not provided.",
+            "description": "Alert sensitivity: ALL (any status change), INCIDENTS_ONLY (real vendor incidents, page on every one), MAJOR_ONLY (only DOWN-level incidents), AWARENESS (track silently — show on dashboard, never send alerts). Defaults to AWARENESS when not provided — silent tracking is the friendliest first-run choice; switch to one of the paging modes to opt in to alert-channel fan-out.",
             "nullable": true
           }
         },
@@ -29965,9 +30439,10 @@
           "alertSensitivity": {
             "minLength": 1,
             "type": "string",
-            "description": "Alert sensitivity: ALL (synthetic + real incidents), INCIDENTS_ONLY (real vendor incidents, default), MAJOR_ONLY (real + DOWN severity)",
+            "description": "Alert sensitivity: ALL (synthetic + real incidents, paged), INCIDENTS_ONLY (real vendor incidents, paged), MAJOR_ONLY (real + DOWN severity, paged), AWARENESS (real vendor incidents tracked silently — visible on dashboard, never paged; default for new subscriptions)",
             "enum": [
               "ALL",
+              "AWARENESS",
               "INCIDENTS_ONLY",
               "MAJOR_ONLY"
             ]
@@ -30709,6 +31184,32 @@
           }
         }
       },
+      "SplunkOnCallChannelConfig": {
+        "required": [
+          "channelType",
+          "apiKey",
+          "routingKey"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "splunk_oncall"
+            ]
+          },
+          "apiKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Splunk On-Call REST API key"
+          },
+          "routingKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Routing key for alert routing"
+          }
+        }
+      },
       "SslExpiryAssertion": {
         "type": "object",
         "properties": {
@@ -30864,6 +31365,11 @@
             "type": "boolean",
             "description": "Whether to hide the 'Powered by DevHelm' footer badge (default: false)",
             "default": false
+          },
+          "showSubscribeButton": {
+            "type": "boolean",
+            "description": "Whether to show the 'Subscribe' button in the header (default: true)",
+            "default": true
           },
           "customCss": {
             "maxLength": 50000,
@@ -32788,6 +33294,32 @@
           }
         }
       },
+      "TelegramChannelConfig": {
+        "required": [
+          "channelType",
+          "botToken",
+          "chatId"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "telegram"
+            ]
+          },
+          "botToken": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Telegram bot token from @BotFather"
+          },
+          "chatId": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Chat, group, or channel ID to send alerts to"
+          }
+        }
+      },
       "TestAlertChannelRequest": {
         "required": [
           "config"
@@ -32797,10 +33329,31 @@
           "config": {
             "oneOf": [
               {
+                "$ref": "#/components/schemas/DatadogChannelConfig"
+              },
+              {
                 "$ref": "#/components/schemas/DiscordChannelConfig"
               },
               {
                 "$ref": "#/components/schemas/EmailChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/GitLabChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/GoogleChatChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/IncidentIoChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/JiraChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/LinearChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/MattermostChannelConfig"
               },
               {
                 "$ref": "#/components/schemas/OpsGenieChannelConfig"
@@ -32809,13 +33362,31 @@
                 "$ref": "#/components/schemas/PagerDutyChannelConfig"
               },
               {
+                "$ref": "#/components/schemas/PushbulletChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/PushoverChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/RootlyChannelConfig"
+              },
+              {
                 "$ref": "#/components/schemas/SlackChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/SplunkOnCallChannelConfig"
               },
               {
                 "$ref": "#/components/schemas/TeamsChannelConfig"
               },
               {
+                "$ref": "#/components/schemas/TelegramChannelConfig"
+              },
+              {
                 "$ref": "#/components/schemas/WebhookChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/ZapierChannelConfig"
               }
             ]
           }
@@ -33130,10 +33701,31 @@
           "config": {
             "oneOf": [
               {
+                "$ref": "#/components/schemas/DatadogChannelConfig"
+              },
+              {
                 "$ref": "#/components/schemas/DiscordChannelConfig"
               },
               {
                 "$ref": "#/components/schemas/EmailChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/GitLabChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/GoogleChatChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/IncidentIoChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/JiraChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/LinearChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/MattermostChannelConfig"
               },
               {
                 "$ref": "#/components/schemas/OpsGenieChannelConfig"
@@ -33142,13 +33734,31 @@
                 "$ref": "#/components/schemas/PagerDutyChannelConfig"
               },
               {
+                "$ref": "#/components/schemas/PushbulletChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/PushoverChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/RootlyChannelConfig"
+              },
+              {
                 "$ref": "#/components/schemas/SlackChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/SplunkOnCallChannelConfig"
               },
               {
                 "$ref": "#/components/schemas/TeamsChannelConfig"
               },
               {
+                "$ref": "#/components/schemas/TelegramChannelConfig"
+              },
+              {
                 "$ref": "#/components/schemas/WebhookChannelConfig"
+              },
+              {
+                "$ref": "#/components/schemas/ZapierChannelConfig"
               }
             ]
           },
@@ -33174,9 +33784,9 @@
         "properties": {
           "alertSensitivity": {
             "minLength": 1,
-            "pattern": "ALL|INCIDENTS_ONLY|MAJOR_ONLY",
+            "pattern": "ALL|AWARENESS|INCIDENTS_ONLY|MAJOR_ONLY",
             "type": "string",
-            "description": "Alert sensitivity: ALL (any status change), INCIDENTS_ONLY (real vendor incidents, default), MAJOR_ONLY (only DOWN-level incidents)"
+            "description": "Alert sensitivity: ALL (any status change), INCIDENTS_ONLY (real vendor incidents, page on every one), MAJOR_ONLY (only DOWN-level incidents), AWARENESS (track silently — show on dashboard, never send alerts; default for new subscriptions)"
           }
         },
         "description": "Request body for updating alert sensitivity on a service subscription"
@@ -34445,6 +35055,26 @@
           }
         },
         "description": "Workspace within an organization"
+      },
+      "ZapierChannelConfig": {
+        "required": [
+          "channelType",
+          "webhookUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "zapier"
+            ]
+          },
+          "webhookUrl": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Zapier/n8n/Make catch webhook URL"
+          }
+        }
       }
     },
     "securitySchemes": {
