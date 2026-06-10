@@ -388,20 +388,20 @@ wheels = [
 
 [[package]]
 name = "devhelm"
-version = "1.1.0"
+version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic", extra = ["email"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bb/dc/b333a18a6077a3e80b4c9dfa15cda3b806b1bd7505514daab9f74febe449/devhelm-1.1.0.tar.gz", hash = "sha256:519ea146ac35bba37514984261d7f8edfff02e31c0849360a5a56c84b2991c87", size = 250122, upload-time = "2026-05-11T20:03:43.238Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ec/3c/b4e19c194d98541417f2c05f77d51fce97a63ae078185735f247b31bf9fa/devhelm-1.2.0.tar.gz", hash = "sha256:951120604f572ec0500f1c6287d597193a956eaed665c6da014ac1f6adfb8023", size = 255347, upload-time = "2026-06-08T19:20:33.452Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/64/63/fbe3bddafc8feb743378a47f9426631ff4def731320c37dbf35a31e8aefe/devhelm-1.1.0-py3-none-any.whl", hash = "sha256:45fcf3e31424bb87e8d56784deeb862b7015dbd84af8cdcb1852fdfd3130ee7b", size = 81109, upload-time = "2026-05-11T20:03:41.927Z" },
+    { url = "https://files.pythonhosted.org/packages/80/f7/d784eb8de8165902d57f7ea4f885ab5f207e9039d93356df9de9c1efb6a1/devhelm-1.2.0-py3-none-any.whl", hash = "sha256:f54429f887cd0cb24c1df80da844accae2519c15e3cbfeeb9957c0f4208e242a", size = 83746, upload-time = "2026-06-08T19:20:32.117Z" },
 ]
 
 [[package]]
 name = "devhelm-mcp-server"
-version = "1.0.2"
+version = "1.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "devhelm" },

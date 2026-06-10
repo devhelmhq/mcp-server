@@ -13521,6 +13521,15 @@
             }
           },
           {
+            "name": "search",
+            "in": "query",
+            "description": "Case-insensitive substring match on service name or slug",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "cursor",
             "in": "query",
             "description": "Opaque cursor from a previous response",
