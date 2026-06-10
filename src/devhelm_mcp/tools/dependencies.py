@@ -2,25 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
-
 from devhelm import DevhelmError
 from fastmcp import FastMCP
 
 from devhelm_mcp.client import ToolResult, get_client, raise_tool_error, serialize
-
-
-def _dependencies(api_token: str | None) -> Any:
-    """Resolve the SDK's ``dependencies`` resource for the given token.
-
-    The extended ``track(slug, component_id=, alert_sensitivity=)`` and the
-    new ``update_alert_sensitivity`` ship in the parallel devhelm SDK
-    release; until the pinned SDK includes them, the resource type is erased
-    here (single seam) so ``mypy --strict`` accepts the agreed call
-    signatures. The wire contract is pinned by ``tests/test_services.py``,
-    and the SDK bump will make this cast a no-op.
-    """
-    return cast(Any, get_client(api_token)).dependencies
 
 
 def register(mcp: FastMCP) -> None:
@@ -54,7 +39,7 @@ def register(mcp: FastMCP) -> None:
         (silent tracking, default), INCIDENTS_ONLY, MAJOR_ONLY, or ALL."""
         try:
             return serialize(
-                _dependencies(api_token).track(
+                get_client(api_token).dependencies.track(
                     slug,
                     component_id=component_id,
                     alert_sensitivity=alert_sensitivity,
@@ -77,7 +62,7 @@ def register(mcp: FastMCP) -> None:
         ALL (every status change, including maintenance)."""
         try:
             return serialize(
-                _dependencies(api_token).update_alert_sensitivity(
+                get_client(api_token).dependencies.update_alert_sensitivity(
                     subscription_id, alert_sensitivity
                 )
             )
