@@ -40,6 +40,7 @@ from devhelm_mcp.tools import (
     notification_policies,
     resource_groups,
     secrets,
+    services,
     status,
     status_pages,
     tags,
@@ -77,8 +78,9 @@ mcp = FastMCP(
         "DevHelm MCP server for monitoring infrastructure. "
         "Use these tools to manage uptime monitors, incidents, alert channels, "
         "notification policies, environments, secrets, tags, resource groups, "
-        "webhooks, API keys, service dependencies, deploy locks, maintenance "
-        "windows, status pages, and view dashboard status. "
+        "webhooks, API keys, service dependencies, the third-party service "
+        "catalog (search services, live status, uptime, incidents), deploy "
+        "locks, maintenance windows, status pages, and view dashboard status. "
         "Authentication is handled at the transport layer: "
         "`Authorization: Bearer <token>` for the hosted endpoint "
         "(https://mcp.devhelm.io/mcp/), or the `DEVHELM_API_TOKEN` environment "
@@ -100,6 +102,7 @@ ALL_TOOL_MODULES = [
     webhooks,
     api_keys,
     dependencies,
+    services,
     deploy_lock,
     maintenance_windows,
     status,

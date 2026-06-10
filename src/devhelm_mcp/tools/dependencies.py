@@ -26,10 +26,46 @@ def register(mcp: FastMCP) -> None:
             raise_tool_error(e)
 
     @mcp.tool()
-    def track_dependency(slug: str, api_token: str | None = None) -> ToolResult:
-        """Start tracking a service dependency by its slug (e.g. 'github', 'aws')."""
+    def track_dependency(
+        slug: str,
+        component_id: str | None = None,
+        alert_sensitivity: str | None = None,
+        api_token: str | None = None,
+    ) -> ToolResult:
+        """Start tracking a service dependency by its slug (e.g. 'github', 'aws').
+
+        Optionally track a single component via `component_id` (see
+        list_service_components) and set `alert_sensitivity`: AWARENESS
+        (silent tracking, default), INCIDENTS_ONLY, MAJOR_ONLY, or ALL."""
         try:
-            return serialize(get_client(api_token).dependencies.track(slug))
+            return serialize(
+                get_client(api_token).dependencies.track(
+                    slug,
+                    component_id=component_id,
+                    alert_sensitivity=alert_sensitivity,
+                )
+            )
+        except DevhelmError as e:
+            raise_tool_error(e)
+
+    @mcp.tool()
+    def update_dependency_alert_sensitivity(
+        subscription_id: str,
+        alert_sensitivity: str,
+        api_token: str | None = None,
+    ) -> ToolResult:
+        """Change how loudly a tracked dependency alerts you.
+
+        Levels: AWARENESS (silent tracking, default — status visible on the
+        dashboard but no notifications), INCIDENTS_ONLY (notify on any
+        incident), MAJOR_ONLY (notify only on major/critical incidents), and
+        ALL (every status change, including maintenance)."""
+        try:
+            return serialize(
+                get_client(api_token).dependencies.update_alert_sensitivity(
+                    subscription_id, alert_sensitivity
+                )
+            )
         except DevhelmError as e:
             raise_tool_error(e)
 

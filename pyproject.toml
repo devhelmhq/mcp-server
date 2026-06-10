@@ -19,14 +19,11 @@ classifiers = [
 ]
 
 dependencies = [
-    # Floor bumped to 1.0.0: aligns with the GA release of the Python SDK
-    # cut alongside this server's 1.0.0. The 1.0.0 SDK includes every
-    # contract the server currently relies on (`managedBy` on resource
-    # DTOs, the monitor validation contract — frequencySeconds bounds,
-    # dynamic region whitelist) and commits to semver going forward, so
-    # `>=1.0.0` lets us pull in compatible patch/minor bumps without
-    # explicit floor bumps each time.
-    "devhelm>=1.0.0",
+    # Floor bumped to 1.3.0: first SDK release with the full
+    # `client.services` catalog resource and the extended
+    # `client.dependencies` (component-level track + alert sensitivity)
+    # that the services/dependencies tool modules call directly.
+    "devhelm>=1.3.0",
     "fastmcp>=2.0.0",
 ]
 
