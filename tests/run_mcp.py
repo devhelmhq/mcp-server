@@ -71,6 +71,15 @@ def main() -> None:
     kwargs = extract_kwargs(args)
     kwargs["api_token"] = token
 
+    # The harness contract is "error JSON on stderr, nothing else" — the
+    # monorepo surface tests json.loads() the stream. fastmcp >= 3 logs
+    # tool-call exceptions to stderr as Rich tracebacks, which silently
+    # degraded every parsed error payload to a raw string. Kill all
+    # library logging before the server is imported.
+    import logging
+
+    logging.disable(logging.CRITICAL)
+
     import asyncio
 
     from devhelm_mcp.server import mcp  # noqa: E402

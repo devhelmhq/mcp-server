@@ -24,7 +24,7 @@ dependencies = [
     # `client.dependencies` (component-level track + alert sensitivity)
     # that the services/dependencies tool modules call directly.
     "devhelm>=1.3.0",
-    "fastmcp>=2.0.0",
+    "fastmcp>=3.2.3,<4",
 ]
 
 [project.urls]
