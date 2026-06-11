@@ -11,7 +11,7 @@ from typing import Any
 
 import pytest
 
-from devhelm_mcp.server import mcp
+from devhelm_mcp.server import _strip_internal_schema_fields, mcp
 
 RegisteredTools = dict[str, Any]
 
@@ -142,7 +142,16 @@ EXPECTED_TOOLS = [
 
 @pytest.fixture(scope="module")
 def registered_tools() -> RegisteredTools:
-    tools = asyncio.run(mcp.list_tools())
+    # Mirror production startup: the schema strip (api_token / managedBy) is
+    # applied in the HTTP lifespan and stdio entrypoint, NOT at import time
+    # (that was moved out in the v0.7.2 hotfix to avoid an asyncio.run() crash
+    # under Uvicorn). The fixture must apply it too, otherwise it asserts
+    # against the pre-strip schema and the hidden-field tests fail.
+    async def _build() -> list[Any]:
+        await _strip_internal_schema_fields()
+        return await mcp.list_tools()
+
+    tools = asyncio.run(_build())
     return {t.name: t for t in tools}
 
 
