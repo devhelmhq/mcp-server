@@ -25,6 +25,14 @@ def register(mcp: FastMCP) -> None:
             raise_tool_error(e)
 
     @mcp.tool()
+    def get_api_key(key_id: str, api_token: str | None = None) -> ToolResult:
+        """Get a single API key's metadata by id. The secret value is never returned."""
+        try:
+            return serialize(get_client(api_token).api_keys.get(key_id))
+        except DevhelmError as e:
+            raise_tool_error(e)
+
+    @mcp.tool()
     def create_api_key(
         body: CreateApiKeyRequest, api_token: str | None = None
     ) -> ToolResult:
