@@ -149,7 +149,7 @@ def registered_tools() -> RegisteredTools:
     # against the pre-strip schema and the hidden-field tests fail.
     async def _build() -> list[Any]:
         await _strip_internal_schema_fields()
-        return await mcp.list_tools()
+        return list(await mcp.list_tools())
 
     tools = asyncio.run(_build())
     return {t.name: t for t in tools}
