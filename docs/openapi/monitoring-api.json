@@ -2274,6 +2274,18 @@
         ],
         "summary": "List categories with service counts",
         "operationId": "listCategories",
+        "parameters": [
+          {
+            "name": "publishedOnly",
+            "in": "query",
+            "description": "Count only published services (curated public pSEO set); default false",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -13521,6 +13533,24 @@
             }
           },
           {
+            "name": "search",
+            "in": "query",
+            "description": "Case-insensitive substring match on service name or slug",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Result ordering: 'recent' (default, newest first) or 'curated' (curated/recognizable first)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "cursor",
             "in": "query",
             "description": "Opaque cursor from a previous response",
@@ -13656,6 +13686,16 @@
             "name": "summary",
             "in": "query",
             "description": "Return a curated subset of components (groups + showcase + impacted + ungrouped) and a componentsSummary block; default false",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "publishedOnly",
+            "in": "query",
+            "description": "Resolve only published services (curated public pSEO set); 404 otherwise. Default false",
             "required": false,
             "schema": {
               "type": "boolean",
@@ -15358,6 +15398,18 @@
         "summary": "Global status summary across all services",
         "description": "Returns aggregate counts of services by status and a list of services currently experiencing issues.",
         "operationId": "getGlobalStatusSummary",
+        "parameters": [
+          {
+            "name": "publishedOnly",
+            "in": "query",
+            "description": "Aggregate only published services (curated public pSEO set); default false",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
