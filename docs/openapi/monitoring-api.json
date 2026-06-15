@@ -34612,6 +34612,13 @@
             "description": "New name; null preserves current",
             "nullable": true
           },
+          "slug": {
+            "maxLength": 63,
+            "minLength": 3,
+            "type": "string",
+            "description": "URL-safe slug used in the public URL; null preserves current",
+            "nullable": true
+          },
           "description": {
             "maxLength": 500,
             "minLength": 0,
