@@ -13803,7 +13803,7 @@
           "Status Data"
         ],
         "summary": "List active components for a service with current status and inline uptime",
-        "description": "When ``groupId`` is supplied, only direct children of that group are returned — used by the pSEO renderer to lazy-load the leaves under a group that summary mode trimmed. Without ``groupId`` the response includes every active component for the service.",
+        "description": "When ``groupId`` is supplied, only direct children of that group are returned — used by the pSEO renderer to lazy-load the leaves under a group that summary mode trimmed. Without ``groupId`` the response includes every active component for the service. Supports pagination via ``page``/``size`` and case-insensitive name search via ``search``.",
         "operationId": "getComponents",
         "parameters": [
           {
@@ -13822,6 +13822,35 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Case-insensitive substring match on component name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Page size (default 25, max 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -30128,6 +30157,13 @@
               "type": "string"
             }
           },
+          "affectedRegions": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
           "updates": {
             "type": "array",
             "items": {
@@ -30203,6 +30239,13 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "affectedRegions": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
