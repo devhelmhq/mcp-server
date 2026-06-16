@@ -891,6 +891,128 @@
         }
       }
     },
+    "/api/v1/alert-channels/{id}/enabled": {
+      "patch": {
+        "tags": [
+          "Alert Channels"
+        ],
+        "summary": "Enable or disable an alert channel without re-uploading config",
+        "operationId": "setEnabled",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetEnabledRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseAlertChannelDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/alert-channels/{id}/test": {
       "post": {
         "tags": [
@@ -13803,7 +13925,7 @@
           "Status Data"
         ],
         "summary": "List active components for a service with current status and inline uptime",
-        "description": "When ``groupId`` is supplied, only direct children of that group are returned — used by the pSEO renderer to lazy-load the leaves under a group that summary mode trimmed. Without ``groupId`` the response includes every active component for the service.",
+        "description": "When ``groupId`` is supplied, only direct children of that group are returned — used by the pSEO renderer to lazy-load the leaves under a group that summary mode trimmed. Without ``groupId`` the response includes every active component for the service. Supports pagination via ``page``/``size`` and case-insensitive name search via ``search``.",
         "operationId": "getComponents",
         "parameters": [
           {
@@ -13822,6 +13944,35 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Case-insensitive substring match on component name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Page size (default 25, max 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -21856,6 +22007,7 @@
         "required": [
           "channelType",
           "createdAt",
+          "enabled",
           "id",
           "name",
           "updatedAt"
@@ -21904,6 +22056,10 @@
                 "$ref": "#/components/schemas/AlertChannelDisplayConfig"
               }
             ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this channel is enabled and will receive alerts"
           },
           "createdAt": {
             "type": "string",
@@ -30128,6 +30284,13 @@
               "type": "string"
             }
           },
+          "affectedRegions": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
           "updates": {
             "type": "array",
             "items": {
@@ -30203,6 +30366,13 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "affectedRegions": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -30565,6 +30735,19 @@
           }
         },
         "description": "Replace the alert channels linked to a monitor"
+      },
+      "SetEnabledRequest": {
+        "required": [
+          "enabled"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the resource should be enabled"
+          }
+        },
+        "description": "Request body for toggling a resource's enabled state"
       },
       "SetMonitorAuthRequest": {
         "required": [
@@ -33825,6 +34008,11 @@
               "MCP",
               "API"
             ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this channel is enabled (default: true); null preserves current value",
+            "nullable": true
           }
         }
       },
