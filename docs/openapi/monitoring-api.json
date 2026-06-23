@@ -891,6 +891,128 @@
         }
       }
     },
+    "/api/v1/alert-channels/{id}/enabled": {
+      "patch": {
+        "tags": [
+          "Alert Channels"
+        ],
+        "summary": "Enable or disable an alert channel without re-uploading config",
+        "operationId": "setEnabled",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetEnabledRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseAlertChannelDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/alert-channels/{id}/test": {
       "post": {
         "tags": [
@@ -7718,6 +7840,119 @@
         }
       }
     },
+    "/api/v1/monitors/{id}/status-pages": {
+      "get": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "List status pages that contain this monitor as a component",
+        "description": "Returns all status pages where this monitor appears as a component, enabling the detail page to show 'Appears On' cross-links.",
+        "operationId": "listStatusPagesForMonitor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableValueResultStatusPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/monitors/{id}/tags": {
       "get": {
         "tags": [
@@ -8089,6 +8324,129 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SingleValueResponseMonitorTestResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/test-notifications": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Send test notifications through the monitor's alert channels",
+        "description": "Sends a test alert to all specified channel IDs (must be channels attached to this monitor). If no channelIds are provided, tests all attached channels. Returns per-channel results.",
+        "operationId": "testNotifications",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestMonitorNotificationsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableValueResultTestChannelResult"
                 }
               }
             }
@@ -13533,6 +13891,15 @@
             }
           },
           {
+            "name": "slaPublished",
+            "in": "query",
+            "description": "Filter by SLA page publication status",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "search",
             "in": "query",
             "description": "Case-insensitive substring match on service name or slug",
@@ -13803,7 +14170,7 @@
           "Status Data"
         ],
         "summary": "List active components for a service with current status and inline uptime",
-        "description": "When ``groupId`` is supplied, only direct children of that group are returned — used by the pSEO renderer to lazy-load the leaves under a group that summary mode trimmed. Without ``groupId`` the response includes every active component for the service.",
+        "description": "When ``groupId`` is supplied, only direct children of that group are returned — used by the pSEO renderer to lazy-load the leaves under a group that summary mode trimmed. Without ``groupId`` the response includes every active component for the service. Supports pagination via ``page``/``size`` and case-insensitive name search via ``search``.",
         "operationId": "getComponents",
         "parameters": [
           {
@@ -13822,6 +14189,35 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Case-insensitive substring match on component name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Page size (default 25, max 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -21856,6 +22252,7 @@
         "required": [
           "channelType",
           "createdAt",
+          "enabled",
           "id",
           "name",
           "updatedAt"
@@ -21904,6 +22301,10 @@
                 "$ref": "#/components/schemas/AlertChannelDisplayConfig"
               }
             ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this channel is enabled and will receive alerts"
           },
           "createdAt": {
             "type": "string",
@@ -24174,6 +24575,62 @@
           }
         },
         "description": "Create a new workspace within the organization"
+      },
+      "CreditPolicy": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string",
+            "description": "Brief summary of credit policy",
+            "nullable": true
+          },
+          "maxCreditPercent": {
+            "type": "integer",
+            "description": "Max credit as percent of monthly fee",
+            "format": "int32",
+            "nullable": true
+          },
+          "claimWindowDays": {
+            "type": "integer",
+            "description": "Days to submit a credit claim after eligibility",
+            "format": "int32",
+            "nullable": true
+          },
+          "creditApplicationDays": {
+            "type": "integer",
+            "description": "Days for credit to be applied after approval",
+            "format": "int32",
+            "nullable": true
+          },
+          "tiers": {
+            "type": "array",
+            "description": "Credit tiers by uptime threshold",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/CreditTier"
+            }
+          }
+        },
+        "description": "Service credit policy for SLA violations"
+      },
+      "CreditTier": {
+        "required": [
+          "creditPercent",
+          "uptimeRange"
+        ],
+        "type": "object",
+        "properties": {
+          "uptimeRange": {
+            "type": "string",
+            "description": "Uptime range, e.g. '99.1% – 99.98%'"
+          },
+          "creditPercent": {
+            "type": "integer",
+            "description": "Credit percent of monthly fee",
+            "format": "int32"
+          }
+        },
+        "description": "Credit tiers by uptime threshold"
       },
       "CursorPageCheckResultDto": {
         "required": [
@@ -28087,6 +28544,32 @@
         },
         "description": "Inline tag creation — creates the tag if it does not already exist"
       },
+      "NoSlaContext": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Reason no SLA is published",
+            "nullable": true
+          },
+          "historicalClaim": {
+            "type": "string",
+            "description": "Non-binding historical uptime claim",
+            "nullable": true
+          },
+          "supportSla": {
+            "type": "string",
+            "description": "Support response time SLA if different from uptime SLA",
+            "nullable": true
+          },
+          "enterpriseNote": {
+            "type": "string",
+            "description": "Note about enterprise/custom SLA availability",
+            "nullable": true
+          }
+        },
+        "description": "Context for vendors with no public SLA"
+      },
       "NotificationDispatchDto": {
         "required": [
           "createdAt",
@@ -28301,6 +28784,46 @@
           }
         },
         "description": "Org-level notification policy with match rules and escalation chain"
+      },
+      "OfficialSla": {
+        "type": "object",
+        "properties": {
+          "percentage": {
+            "type": "string",
+            "description": "Advertised uptime percentage, e.g. '99.99%'",
+            "nullable": true
+          },
+          "scope": {
+            "type": "string",
+            "description": "Scope of the SLA, e.g. 'Monthly uptime per region'",
+            "nullable": true
+          },
+          "measurement": {
+            "type": "string",
+            "description": "How the vendor measures uptime for SLA purposes",
+            "nullable": true
+          },
+          "exclusions": {
+            "type": "string",
+            "description": "Summary of exclusions from SLA calculation",
+            "nullable": true
+          },
+          "appliesToPlans": {
+            "type": "array",
+            "description": "Plan names this SLA applies to, e.g. ['Enterprise']",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Plan names this SLA applies to, e.g. ['Enterprise']"
+            }
+          },
+          "notCovered": {
+            "type": "string",
+            "description": "Services/components NOT covered by the SLA",
+            "nullable": true
+          }
+        },
+        "description": "The vendor's officially advertised SLA commitment"
       },
       "OpsGenieChannelConfig": {
         "required": [
@@ -28594,6 +29117,29 @@
           }
         },
         "description": "Aggregated poll metrics for a time bucket"
+      },
+      "PricingTier": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Tier name, e.g. 'Free', 'Pro', 'Enterprise'"
+          },
+          "slaPercentage": {
+            "type": "string",
+            "description": "SLA percentage for this tier, e.g. '99.9%'",
+            "nullable": true
+          },
+          "priceFrom": {
+            "type": "string",
+            "description": "Starting price, e.g. '$0', '$25/mo', 'Custom'",
+            "nullable": true
+          }
+        },
+        "description": "Pricing tiers with associated SLA levels"
       },
       "PublishStatusPageIncidentRequest": {
         "type": "object",
@@ -29672,6 +30218,34 @@
         },
         "description": "Admin-editable SEO metadata for pSEO pages"
       },
+      "ServiceBreakdown": {
+        "required": [
+          "service"
+        ],
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string",
+            "description": "Sub-service name, e.g. 'EC2', 'S3'"
+          },
+          "slaPercentage": {
+            "type": "string",
+            "description": "SLA percentage for this sub-service",
+            "nullable": true
+          },
+          "scope": {
+            "type": "string",
+            "description": "Scope qualifier, e.g. 'Region (Multi-AZ)'",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes on measurement or conditions",
+            "nullable": true
+          }
+        },
+        "description": "Per-service breakdown for vendors with per_service SLA type"
+      },
       "ServiceCatalogDto": {
         "required": [
           "adapterType",
@@ -29685,6 +30259,7 @@
           "pollingIntervalSeconds",
           "enabled",
           "published",
+          "slaPublished",
           "componentCount",
           "activeIncidentCount"
         ],
@@ -29738,6 +30313,10 @@
           },
           "published": {
             "type": "boolean"
+          },
+          "slaPublished": {
+            "type": "boolean",
+            "description": "Whether the service's SLA page is publicly visible"
           },
           "overallStatus": {
             "type": "string",
@@ -29959,7 +30538,8 @@
           "slug",
           "updatedAt",
           "pollingIntervalSeconds",
-          "enabled"
+          "enabled",
+          "slaPublished"
         ],
         "type": "object",
         "properties": {
@@ -30062,11 +30642,23 @@
           "dataCompleteness": {
             "type": "string"
           },
+          "slaPublished": {
+            "type": "boolean",
+            "description": "Whether the service's SLA page is publicly visible"
+          },
           "seoMetadata": {
             "nullable": true,
             "allOf": [
               {
                 "$ref": "#/components/schemas/SeoMetadataDto"
+              }
+            ]
+          },
+          "slaData": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SlaDataDto"
               }
             ]
           },
@@ -30122,6 +30714,13 @@
             "nullable": true
           },
           "affectedComponents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "affectedRegions": {
             "type": "array",
             "nullable": true,
             "items": {
@@ -30203,6 +30802,13 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "affectedRegions": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -30565,6 +31171,19 @@
           }
         },
         "description": "Replace the alert channels linked to a monitor"
+      },
+      "SetEnabledRequest": {
+        "required": [
+          "enabled"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the resource should be enabled"
+          }
+        },
+        "description": "Request body for toggling a resource's enabled state"
       },
       "SetMonitorAuthRequest": {
         "required": [
@@ -31235,6 +31854,106 @@
             "nullable": true
           }
         }
+      },
+      "SlaDataDto": {
+        "type": "object",
+        "properties": {
+          "slaType": {
+            "type": "string",
+            "description": "SLA pattern: plan_gated, per_service, no_public_sla, or universal",
+            "nullable": true
+          },
+          "officialSla": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OfficialSla"
+              }
+            ]
+          },
+          "serviceBreakdown": {
+            "type": "array",
+            "description": "Per-service breakdown for vendors with per_service SLA type",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ServiceBreakdown"
+            }
+          },
+          "pricingTiers": {
+            "type": "array",
+            "description": "Pricing tiers with associated SLA levels",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PricingTier"
+            }
+          },
+          "creditPolicy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CreditPolicy"
+              }
+            ]
+          },
+          "noSlaContext": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NoSlaContext"
+              }
+            ]
+          },
+          "sourceUrls": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SourceUrls"
+              }
+            ]
+          },
+          "lastResearched": {
+            "type": "string",
+            "description": "ISO date when this data was last manually researched",
+            "nullable": true
+          },
+          "researchNotes": {
+            "type": "string",
+            "description": "Freeform operator notes about the research",
+            "nullable": true
+          }
+        },
+        "description": "Researched vendor SLA/pricing data for pSEO SLA report pages"
+      },
+      "SourceUrls": {
+        "type": "object",
+        "properties": {
+          "slaPage": {
+            "type": "string",
+            "description": "URL to vendor's SLA page",
+            "nullable": true
+          },
+          "pricingPage": {
+            "type": "string",
+            "description": "URL to vendor's pricing page",
+            "nullable": true
+          },
+          "tosPage": {
+            "type": "string",
+            "description": "URL to vendor's Terms of Service",
+            "nullable": true
+          },
+          "statusPage": {
+            "type": "string",
+            "description": "URL to vendor's status page",
+            "nullable": true
+          },
+          "allSlasPage": {
+            "type": "string",
+            "description": "URL to vendor's all-services SLA listing",
+            "nullable": true
+          }
+        },
+        "description": "Source URLs for SLA, pricing, and ToS pages"
       },
       "SplunkOnCallChannelConfig": {
         "required": [
@@ -33072,6 +33791,38 @@
           }
         }
       },
+      "TableValueResultTestChannelResult": {
+        "required": [
+          "data",
+          "hasNext",
+          "hasPrev"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestChannelResult"
+            }
+          },
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrev": {
+            "type": "boolean"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
       "TableValueResultWebhookDeliveryDto": {
         "required": [
           "data",
@@ -33491,6 +34242,29 @@
         },
         "description": "Result of a dry-run match evaluation against a notification policy"
       },
+      "TestMonitorNotificationsRequest": {
+        "type": "object",
+        "properties": {
+          "channelIds": {
+            "type": "array",
+            "description": "Channel IDs to test; null or empty tests all channels attached to the monitor",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Channel IDs to test; null or empty tests all channels attached to the monitor",
+              "format": "uuid"
+            }
+          },
+          "includeResolved": {
+            "type": "boolean",
+            "description": "Whether to include a resolved notification in the test (default: false)"
+          }
+        },
+        "description": "Request to send test notifications through a monitor's alert channels",
+        "required": [
+          "includeResolved"
+        ]
+      },
       "TestNotificationPolicyRequest": {
         "type": "object",
         "properties": {
@@ -33753,64 +34527,64 @@
           "config": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DatadogChannelConfig"
+                "$ref": "#/components/schemas/UpdateDatadogChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/DiscordChannelConfig"
+                "$ref": "#/components/schemas/UpdateDiscordChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/EmailChannelConfig"
+                "$ref": "#/components/schemas/UpdateEmailChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/GitLabChannelConfig"
+                "$ref": "#/components/schemas/UpdateGitLabChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/GoogleChatChannelConfig"
+                "$ref": "#/components/schemas/UpdateGoogleChatChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/IncidentIoChannelConfig"
+                "$ref": "#/components/schemas/UpdateIncidentIoChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/JiraChannelConfig"
+                "$ref": "#/components/schemas/UpdateJiraChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/LinearChannelConfig"
+                "$ref": "#/components/schemas/UpdateLinearChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/MattermostChannelConfig"
+                "$ref": "#/components/schemas/UpdateMattermostChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/OpsGenieChannelConfig"
+                "$ref": "#/components/schemas/UpdateOpsGenieChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/PagerDutyChannelConfig"
+                "$ref": "#/components/schemas/UpdatePagerDutyChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/PushbulletChannelConfig"
+                "$ref": "#/components/schemas/UpdatePushbulletChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/PushoverChannelConfig"
+                "$ref": "#/components/schemas/UpdatePushoverChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/RootlyChannelConfig"
+                "$ref": "#/components/schemas/UpdateRootlyChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/SlackChannelConfig"
+                "$ref": "#/components/schemas/UpdateSlackChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/SplunkOnCallChannelConfig"
+                "$ref": "#/components/schemas/UpdateSplunkOnCallChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/TeamsChannelConfig"
+                "$ref": "#/components/schemas/UpdateTeamsChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/TelegramChannelConfig"
+                "$ref": "#/components/schemas/UpdateTelegramChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/WebhookChannelConfig"
+                "$ref": "#/components/schemas/UpdateWebhookChannelConfig"
               },
               {
-                "$ref": "#/components/schemas/ZapierChannelConfig"
+                "$ref": "#/components/schemas/UpdateZapierChannelConfig"
               }
             ]
           },
@@ -33825,6 +34599,11 @@
               "MCP",
               "API"
             ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this channel is enabled (default: true); null preserves current value",
+            "nullable": true
           }
         }
       },
@@ -34004,6 +34783,84 @@
           }
         }
       },
+      "UpdateDatadogChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "datadog"
+            ]
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "Datadog API key",
+            "nullable": true
+          },
+          "site": {
+            "type": "string",
+            "description": "Datadog site region (e.g. datadoghq.com, datadoghq.eu, us3.datadoghq.com)",
+            "nullable": true
+          },
+          "tags": {
+            "type": "string",
+            "description": "Comma-separated tags to attach to events",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
+      },
+      "UpdateDiscordChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "discord"
+            ]
+          },
+          "webhookUrl": {
+            "type": "string",
+            "description": "Discord webhook URL",
+            "nullable": true
+          },
+          "mentionRoleId": {
+            "type": "string",
+            "description": "Optional Discord role ID to mention in notifications",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
+      },
+      "UpdateEmailChannelConfig": {
+        "required": [
+          "channelType",
+          "recipients"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "email"
+            ]
+          },
+          "recipients": {
+            "minItems": 1,
+            "type": "array",
+            "description": "Email addresses to send notifications to",
+            "items": {
+              "type": "string",
+              "description": "Email addresses to send notifications to",
+              "format": "email"
+            }
+          }
+        }
+      },
       "UpdateEnvironmentRequest": {
         "type": "object",
         "properties": {
@@ -34031,6 +34888,79 @@
           }
         }
       },
+      "UpdateGitLabChannelConfig": {
+        "required": [
+          "channelType",
+          "endpointUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "gitlab"
+            ]
+          },
+          "endpointUrl": {
+            "minLength": 1,
+            "type": "string",
+            "description": "GitLab alert integration endpoint URL"
+          },
+          "authorizationKey": {
+            "type": "string",
+            "description": "Authorization key from GitLab alert integration settings",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateGoogleChatChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "google_chat"
+            ]
+          },
+          "webhookUrl": {
+            "type": "string",
+            "description": "Google Chat space webhook URL",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
+      },
+      "UpdateIncidentIoChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "incident_io"
+            ]
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "incident.io API key with 'Create incidents' permission",
+            "nullable": true
+          },
+          "severityId": {
+            "type": "string",
+            "description": "Severity ID for created incidents (from List Severities API)",
+            "nullable": true
+          },
+          "visibility": {
+            "type": "string",
+            "description": "Incident visibility: public or private (default: public)",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
+      },
       "UpdateIncidentPolicyRequest": {
         "required": [
           "confirmation",
@@ -34055,6 +34985,78 @@
           }
         },
         "description": "Request body for updating an incident policy"
+      },
+      "UpdateJiraChannelConfig": {
+        "required": [
+          "channelType",
+          "domain",
+          "email",
+          "projectKey"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "jira"
+            ]
+          },
+          "domain": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Atlassian instance domain (e.g. yourteam.atlassian.net)"
+          },
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Atlassian account email for API authentication"
+          },
+          "apiToken": {
+            "type": "string",
+            "description": "Atlassian API token",
+            "nullable": true
+          },
+          "projectKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Jira project key where issues are created (e.g. OPS)"
+          },
+          "issueType": {
+            "type": "string",
+            "description": "Issue type name (e.g. Bug, Task, Incident)",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateLinearChannelConfig": {
+        "required": [
+          "channelType",
+          "teamId"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "linear"
+            ]
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "Linear API key",
+            "nullable": true
+          },
+          "teamId": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Team ID to create issues in"
+          },
+          "labelId": {
+            "type": "string",
+            "description": "Label ID to attach to created issues",
+            "nullable": true
+          }
+        }
       },
       "UpdateMaintenanceWindowRequest": {
         "required": [
@@ -34099,6 +35101,35 @@
             "nullable": true
           }
         }
+      },
+      "UpdateMattermostChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "mattermost"
+            ]
+          },
+          "webhookUrl": {
+            "type": "string",
+            "description": "Mattermost incoming webhook URL",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "description": "Override channel (if webhook allows)",
+            "nullable": true
+          },
+          "iconUrl": {
+            "type": "string",
+            "description": "Custom bot icon URL",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
       },
       "UpdateMonitorAuthRequest": {
         "required": [
@@ -34291,6 +35322,30 @@
         },
         "description": "Request body for updating a notification policy (null fields are preserved)"
       },
+      "UpdateOpsGenieChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "opsgenie"
+            ]
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "OpsGenie API key for alert creation",
+            "nullable": true
+          },
+          "region": {
+            "type": "string",
+            "description": "OpsGenie API region: us or eu",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
+      },
       "UpdateOrgDetailsRequest": {
         "required": [
           "email",
@@ -34332,6 +35387,88 @@
             "nullable": true
           }
         }
+      },
+      "UpdatePagerDutyChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "pagerduty"
+            ]
+          },
+          "routingKey": {
+            "type": "string",
+            "description": "PagerDuty Events API v2 routing (integration) key",
+            "nullable": true
+          },
+          "severityOverride": {
+            "type": "string",
+            "description": "Override PagerDuty severity mapping",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
+      },
+      "UpdatePushbulletChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "pushbullet"
+            ]
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "Pushbullet access token",
+            "nullable": true
+          },
+          "deviceIden": {
+            "type": "string",
+            "description": "Target device identifier (broadcasts to all if empty)",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
+      },
+      "UpdatePushoverChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "pushover"
+            ]
+          },
+          "userKey": {
+            "type": "string",
+            "description": "Pushover user or group key",
+            "nullable": true
+          },
+          "appToken": {
+            "type": "string",
+            "description": "Pushover application API token",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "description": "Notification priority override (-2 to 2)",
+            "nullable": true
+          },
+          "sound": {
+            "type": "string",
+            "description": "Notification sound override",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
       },
       "UpdateResourceGroupRequest": {
         "required": [
@@ -34451,6 +35588,30 @@
         },
         "description": "Request body for updating a resource group"
       },
+      "UpdateRootlyChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "rootly"
+            ]
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "Rootly API token with incident creation permission",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string",
+            "description": "Severity slug override (e.g. sev0, sev1)",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
+      },
       "UpdateSecretRequest": {
         "required": [
           "value"
@@ -34462,6 +35623,55 @@
             "minLength": 0,
             "type": "string",
             "description": "New secret value, stored encrypted (max 32KB)"
+          }
+        }
+      },
+      "UpdateSlackChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "slack"
+            ]
+          },
+          "webhookUrl": {
+            "type": "string",
+            "description": "Slack incoming webhook URL",
+            "nullable": true
+          },
+          "mentionText": {
+            "type": "string",
+            "description": "Optional mention text included in notifications, e.g. @channel",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
+      },
+      "UpdateSplunkOnCallChannelConfig": {
+        "required": [
+          "channelType",
+          "routingKey"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "splunk_oncall"
+            ]
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "Splunk On-Call REST API key",
+            "nullable": true
+          },
+          "routingKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Routing key for alert routing"
           }
         }
       },
@@ -34685,6 +35895,84 @@
         },
         "description": "Request body for updating a tag; null fields are left unchanged"
       },
+      "UpdateTeamsChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "teams"
+            ]
+          },
+          "webhookUrl": {
+            "type": "string",
+            "description": "Microsoft Teams incoming webhook URL",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
+      },
+      "UpdateTelegramChannelConfig": {
+        "required": [
+          "channelType",
+          "chatId"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "telegram"
+            ]
+          },
+          "botToken": {
+            "type": "string",
+            "description": "Telegram bot token from @BotFather",
+            "nullable": true
+          },
+          "chatId": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Chat, group, or channel ID to send alerts to"
+          }
+        }
+      },
+      "UpdateWebhookChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "webhook"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "Webhook endpoint URL that receives alert payloads",
+            "nullable": true
+          },
+          "signingSecret": {
+            "type": "string",
+            "description": "HMAC secret for X-DevHelm-Signature header; omit for unsigned delivery",
+            "nullable": true
+          },
+          "customHeaders": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Additional HTTP headers to include in webhook requests",
+              "nullable": true
+            },
+            "description": "Additional HTTP headers to include in webhook requests",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
+      },
       "UpdateWebhookEndpointRequest": {
         "type": "object",
         "properties": {
@@ -34744,6 +36032,25 @@
           }
         },
         "description": "Update workspace details"
+      },
+      "UpdateZapierChannelConfig": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "zapier"
+            ]
+          },
+          "webhookUrl": {
+            "type": "string",
+            "description": "Zapier/n8n/Make catch webhook URL",
+            "nullable": true
+          }
+        },
+        "required": [
+          "channelType"
+        ]
       },
       "UptimeBucketDto": {
         "required": [
@@ -34809,12 +36116,26 @@
             "format": "double",
             "nullable": true,
             "example": 312
+          },
+          "p50LatencyMs": {
+            "type": "number",
+            "description": "50th-percentile (median) latency in milliseconds; null when no data",
+            "format": "double",
+            "nullable": true,
+            "example": 128
+          },
+          "incidentCount": {
+            "type": "integer",
+            "description": "Number of incidents that started within the requested window",
+            "format": "int64",
+            "example": 2
           }
         },
         "description": "Uptime statistics aggregated from continuous aggregates",
         "required": [
           "totalChecks",
-          "passedChecks"
+          "passedChecks",
+          "incidentCount"
         ]
       },
       "WebhookChannelConfig": {
@@ -34837,7 +36158,7 @@
           },
           "signingSecret": {
             "type": "string",
-            "description": "Optional HMAC signing secret for payload verification",
+            "description": "HMAC secret for X-DevHelm-Signature header; omit for unsigned delivery",
             "nullable": true
           },
           "customHeaders": {
