@@ -38,7 +38,10 @@ devhelm-mcp-server = "devhelm_mcp.server:main"
 devhelm-mcp = "devhelm_mcp.server:main"
 
 [build-system]
-requires = ["hatchling"]
+# hatchling 1.30+ emits Metadata-Version 2.5, which released twine and
+# PyPI still reject. Cap until twine ships 2.5 support and warehouse
+# accepts it (pypa/twine#1317, pypi/warehouse#19083).
+requires = ["hatchling>=1.27,<1.30"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
