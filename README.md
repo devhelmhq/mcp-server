@@ -67,6 +67,7 @@ Add to your MCP config:
 | **Dependencies** | list, get, track, delete |
 | **Deploy Lock** | acquire, current, release, force-release |
 | **Status** | overview |
+| **Status Pages** | pages, components, groups, incidents, maintenance, subscribers, domains |
 
 ## Development
 

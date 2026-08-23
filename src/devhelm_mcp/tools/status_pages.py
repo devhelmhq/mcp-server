@@ -16,7 +16,6 @@ from devhelm.types import (
     AdminAddSubscriberRequest,
     CreateStatusPageComponentGroupRequest,
     CreateStatusPageComponentRequest,
-    CreateStatusPageIncidentRequest,
     CreateStatusPageIncidentUpdateRequest,
     CreateStatusPageRequest,
     ReorderComponentsRequest,
@@ -24,7 +23,6 @@ from devhelm.types import (
     StatusPageIncidentDto,
     UpdateStatusPageComponentGroupRequest,
     UpdateStatusPageComponentRequest,
-    UpdateStatusPageIncidentRequest,
     UpdateStatusPageRequest,
 )
 from fastmcp import FastMCP
@@ -55,6 +53,53 @@ def _raw(api_token: str | None) -> httpx.Client:
     return cast(httpx.Client, _sp(api_token)._client)
 
 
+class CreateStatusPageIncidentRequest(BaseModel):
+    """Create body for ``POST /status-pages/{id}/incidents``.
+
+    Local so the LLM schema cannot advertise schedule fields. The pinned
+    SDK still carries those on incident create; maintenance is the only
+    authoring path for a window.
+    """
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    title: str = Field(description="Customer-facing incident title", max_length=500)
+    impact: Literal["NONE", "MINOR", "MAJOR", "CRITICAL"] = Field(
+        description="Impact level: NONE, MINOR, MAJOR, or CRITICAL"
+    )
+    body: str = Field(description="Initial update body in markdown", min_length=1)
+    status: Literal["INVESTIGATING", "IDENTIFIED", "MONITORING", "RESOLVED"] | None = (
+        Field(default=None, description="Initial status (default: INVESTIGATING)")
+    )
+    notifySubscribers: bool | None = Field(
+        default=None,
+        description="Whether to email confirmed subscribers (default: true)",
+    )
+    affectedComponents: list[dict[str, str]] | None = Field(
+        default=None, description="Component IDs affected by this incident"
+    )
+
+
+class UpdateStatusPageIncidentRequest(BaseModel):
+    """Update body for an incident (no schedule fields)."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    title: str | None = Field(
+        default=None, description="New title; omit to preserve current", max_length=500
+    )
+    impact: Literal["NONE", "MINOR", "MAJOR", "CRITICAL"] | None = Field(
+        default=None, description="New impact; omit to preserve current"
+    )
+    status: Literal["INVESTIGATING", "IDENTIFIED", "MONITORING", "RESOLVED"] | None = (
+        Field(default=None, description="New status; omit to preserve current")
+    )
+    affectedComponents: list[dict[str, str]] | None = Field(
+        default=None,
+        description="Updated affected components; omit to preserve current",
+    )
+
+
 class CreateStatusPageMaintenanceRequest(BaseModel):
     """Create body for ``POST /status-pages/{id}/maintenance``.
 
@@ -63,7 +108,7 @@ class CreateStatusPageMaintenanceRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
-    title: str = Field(description="Customer-facing maintenance title")
+    title: str = Field(description="Customer-facing maintenance title", max_length=500)
     impact: Literal["NONE", "MINOR", "MAJOR", "CRITICAL"] = Field(
         description="Impact level: NONE, MINOR, MAJOR, or CRITICAL"
     )
@@ -86,6 +131,35 @@ class CreateStatusPageMaintenanceRequest(BaseModel):
     )
     affectedComponents: list[dict[str, str]] | None = Field(
         default=None, description="Component IDs affected by this window"
+    )
+
+
+class UpdateStatusPageMaintenanceRequest(BaseModel):
+    """Update body for a maintenance window, including schedule fields."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    title: str | None = Field(
+        default=None, description="New title; omit to preserve current", max_length=500
+    )
+    impact: Literal["NONE", "MINOR", "MAJOR", "CRITICAL"] | None = Field(
+        default=None, description="New impact; omit to preserve current"
+    )
+    status: Literal["INVESTIGATING", "IDENTIFIED", "MONITORING", "RESOLVED"] | None = (
+        Field(default=None, description="New status; omit to preserve current")
+    )
+    scheduledFor: datetime | None = Field(
+        default=None, description="New start time; omit to preserve current"
+    )
+    scheduledUntil: datetime | None = Field(
+        default=None, description="New end time; omit to preserve current"
+    )
+    autoResolve: bool | None = Field(
+        default=None, description="Auto-resolve at scheduledUntil; omit to preserve"
+    )
+    affectedComponents: list[dict[str, str]] | None = Field(
+        default=None,
+        description="Updated affected components; omit to preserve current",
     )
 
 
@@ -336,9 +410,11 @@ def register(mcp: FastMCP) -> None:
     ) -> ToolResult:
         """Create an incident on a status page.
 
-        Required fields: title, impact (NONE/MINOR/MAJOR/CRITICAL).
-        Optional: body, status (INVESTIGATING/IDENTIFIED/MONITORING/RESOLVED),
-        affectedComponents (list of {componentId, status}).
+        Required fields: title, impact (NONE/MINOR/MAJOR/CRITICAL), body.
+        Optional: status (INVESTIGATING/IDENTIFIED/MONITORING/RESOLVED),
+        affectedComponents (list of {componentId, status}), notifySubscribers.
+
+        To schedule a maintenance window, use create_status_page_maintenance.
         """
         try:
             return serialize(_sp(api_token).incidents.create(page_id, as_payload(body)))
@@ -352,7 +428,10 @@ def register(mcp: FastMCP) -> None:
         body: UpdateStatusPageIncidentRequest,
         api_token: str | None = None,
     ) -> ToolResult:
-        """Update a status page incident's title, impact, or status."""
+        """Update a status page incident's title, impact, status, or components.
+
+        Schedule fields belong on update_status_page_maintenance.
+        """
         try:
             return serialize(
                 _sp(api_token).incidents.update(page_id, incident_id, as_payload(body))
@@ -480,13 +559,15 @@ def register(mcp: FastMCP) -> None:
         status, affectedComponents, notifySubscribers.
         """
         try:
+            # Pass the validated Pydantic model straight to ``api_post``;
+            # the SDK's ``_serialize_body`` rejects raw dicts.
             return serialize(
                 parse_single(
                     StatusPageIncidentDto,
                     api_post(
                         _raw(api_token),
                         f"/api/v1/status-pages/{path_param(page_id)}/maintenance",
-                        as_payload(body),
+                        body,
                     ),
                     f"POST /api/v1/status-pages/{page_id}/maintenance",
                 )
@@ -498,7 +579,7 @@ def register(mcp: FastMCP) -> None:
     def update_status_page_maintenance(
         page_id: str,
         window_id: str,
-        body: UpdateStatusPageIncidentRequest,
+        body: UpdateStatusPageMaintenanceRequest,
         api_token: str | None = None,
     ) -> ToolResult:
         """Update a maintenance window's title, impact, status, or schedule."""
@@ -509,7 +590,7 @@ def register(mcp: FastMCP) -> None:
                     api_put(
                         _raw(api_token),
                         f"/api/v1/status-pages/{path_param(page_id)}/maintenance/{path_param(window_id)}",
-                        as_payload(body),
+                        body,
                     ),
                     f"PUT /api/v1/status-pages/{page_id}/maintenance/{window_id}",
                 )
@@ -537,9 +618,12 @@ def register(mcp: FastMCP) -> None:
                     api_post(
                         _raw(api_token),
                         f"/api/v1/status-pages/{path_param(page_id)}/maintenance/{path_param(window_id)}/updates",
-                        as_payload(body),
+                        body,
                     ),
-                    f"POST /status-pages/{page_id}/maintenance/{window_id}/updates",
+                    (
+                        "POST /api/v1/status-pages/"
+                        f"{page_id}/maintenance/{window_id}/updates"
+                    ),
                 )
             )
         except DevhelmError as e:
@@ -560,7 +644,10 @@ def register(mcp: FastMCP) -> None:
                         _raw(api_token),
                         f"/api/v1/status-pages/{path_param(page_id)}/maintenance/{path_param(window_id)}/publish",
                     ),
-                    f"POST /status-pages/{page_id}/maintenance/{window_id}/publish",
+                    (
+                        "POST /api/v1/status-pages/"
+                        f"{page_id}/maintenance/{window_id}/publish"
+                    ),
                 )
             )
         except DevhelmError as e:

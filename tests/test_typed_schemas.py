@@ -69,6 +69,7 @@ class TestTypedBodySchemas:
                 {"title", "impact", "body", "scheduledFor"},
             ),
             ("post_status_page_incident_update", {"status", "body"}),
+            ("post_status_page_maintenance_update", {"status", "body"}),
             ("add_status_page_subscriber", {"email"}),
             ("add_status_page_domain", {"hostname"}),
             ("acquire_deploy_lock", {"lockedBy"}),
@@ -127,6 +128,7 @@ class TestTypedBodySchemas:
             "create_status_page_incident",
             "create_status_page_maintenance",
             "post_status_page_incident_update",
+            "post_status_page_maintenance_update",
             "add_status_page_subscriber",
             "add_status_page_domain",
         ]:
@@ -157,3 +159,34 @@ class TestTypedBodySchemas:
         tool = registered_tools["publish_status_page_incident"]
         required = tool.parameters.get("required", [])
         assert "body" not in required
+
+    def test_incident_create_schema_omits_schedule_fields(
+        self, registered_tools: RegisteredTools
+    ) -> None:
+        """Incident create must not advertise maintenance schedule fields."""
+        schema = _body_schema(registered_tools, "create_status_page_incident")
+        leaked = {"scheduled", "scheduledFor", "scheduledUntil", "autoResolve"}
+        assert leaked.isdisjoint(schema["properties"]), (
+            "create_status_page_incident leaked schedule fields "
+            f"{sorted(leaked & set(schema['properties']))}; "
+            "use create_status_page_maintenance"
+        )
+
+    def test_incident_update_schema_omits_schedule_fields(
+        self, registered_tools: RegisteredTools
+    ) -> None:
+        schema = _body_schema(registered_tools, "update_status_page_incident")
+        leaked = {"scheduled", "scheduledFor", "scheduledUntil", "autoResolve"}
+        assert leaked.isdisjoint(schema["properties"]), (
+            "update_status_page_incident leaked schedule fields "
+            f"{sorted(leaked & set(schema['properties']))}"
+        )
+
+    def test_maintenance_update_schema_includes_schedule_fields(
+        self, registered_tools: RegisteredTools
+    ) -> None:
+        schema = _body_schema(registered_tools, "update_status_page_maintenance")
+        for field in ("scheduledFor", "scheduledUntil", "autoResolve"):
+            assert field in schema["properties"], (
+                f"update_status_page_maintenance missing {field}"
+            )
