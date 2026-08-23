@@ -19,9 +19,8 @@ classifiers = [
 ]
 
 dependencies = [
-    # Floor bumped to 1.7.0: first SDK release with
-    # ``status_pages.maintenance`` and CreateStatusPageMaintenanceRequest.
-    "devhelm>=1.7.0",
+    # Floor bumped to 1.8.0: offset list envelopes accept nextCursor.
+    "devhelm>=1.8.0",
     "fastmcp>=3.2.3,<4",
 ]
 
