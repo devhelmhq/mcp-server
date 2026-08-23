@@ -64,6 +64,10 @@ class TestTypedBodySchemas:
             ("create_status_page_component", {"name", "type"}),
             ("create_status_page_group", {"name"}),
             ("create_status_page_incident", {"title", "impact", "body"}),
+            (
+                "create_status_page_maintenance",
+                {"title", "impact", "body", "scheduledFor"},
+            ),
             ("post_status_page_incident_update", {"status", "body"}),
             ("add_status_page_subscriber", {"email"}),
             ("add_status_page_domain", {"hostname"}),
@@ -121,6 +125,7 @@ class TestTypedBodySchemas:
             "create_status_page_component",
             "create_status_page_group",
             "create_status_page_incident",
+            "create_status_page_maintenance",
             "post_status_page_incident_update",
             "add_status_page_subscriber",
             "add_status_page_domain",
