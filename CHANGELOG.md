@@ -10,9 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Status-page maintenance tools (`list` / `get` / `create` / `update` /
   `delete` / `publish` / `dismiss` / `post_status_page_maintenance_update`)
-  against `/api/v1/status-pages/{id}/maintenance`. Local request models
-  keep schedule fields off incident create/update until the next
-  `devhelm` SDK MINOR ships `status_pages.maintenance`.
+  via `client.status_pages.maintenance`.
+
+### Changed
+
+- Bump `devhelm` Python SDK floor to `>=1.7.0`.
 
 ## [1.0.0] — 2026-05-06
 

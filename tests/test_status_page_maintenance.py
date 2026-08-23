@@ -1,12 +1,6 @@
-"""HTTP-path tests for status-page maintenance MCP tools.
+"""SDK-call tests for status-page maintenance MCP tools.
 
-The published ``devhelm`` SDK does not yet expose
-``status_pages.maintenance``; these tools call ``api_get`` / ``api_post``
-/ ``api_put`` / ``api_delete`` on the SDK HTTP layer. Patch those
-helpers in the tool module and assert path + body shape.
-
-Create / update / post-update must hand a Pydantic model to ``api_post``
-/ ``api_put``. Raw dicts are rejected by ``_serialize_body``.
+Tools delegate to ``client.status_pages.maintenance`` (sdk-python >= 1.7).
 """
 
 from __future__ import annotations
@@ -14,8 +8,6 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 from unittest.mock import MagicMock, patch
-
-from pydantic import BaseModel
 
 from devhelm_mcp.server import mcp
 
@@ -30,14 +22,8 @@ _SAMPLE_WINDOW: dict[str, Any] = {
     "impact": "MINOR",
     "scheduled": True,
     "scheduledFor": "2026-08-24T02:00:00Z",
-    "scheduledUntil": "2026-08-24T04:00:00Z",
     "autoResolve": False,
-    "startedAt": "2026-08-24T02:00:00Z",
-    "createdAt": "2026-08-23T10:00:00Z",
-    "updatedAt": "2026-08-23T10:00:00Z",
 }
-
-_SAMPLE_ENVELOPE: dict[str, Any] = {"data": _SAMPLE_WINDOW}
 
 
 def _call_tool(tool_name: str, arguments: dict[str, Any]) -> Any:
@@ -46,38 +32,23 @@ def _call_tool(tool_name: str, arguments: dict[str, Any]) -> Any:
 
 def _stub_sdk_client() -> MagicMock:
     mock = MagicMock()
-    mock.status_pages._client = MagicMock(name="httpx.Client")
+    mock.status_pages.maintenance.list.return_value = MagicMock(
+        data=[_SAMPLE_WINDOW], has_next=False
+    )
+    mock.status_pages.maintenance.get.return_value = _SAMPLE_WINDOW
+    mock.status_pages.maintenance.create.return_value = _SAMPLE_WINDOW
+    mock.status_pages.maintenance.update.return_value = _SAMPLE_WINDOW
+    mock.status_pages.maintenance.post_update.return_value = _SAMPLE_WINDOW
+    mock.status_pages.maintenance.publish.return_value = _SAMPLE_WINDOW
+    mock.status_pages.maintenance.dismiss.return_value = None
+    mock.status_pages.maintenance.delete.return_value = None
     return mock
 
 
-def _wire_body(captured_body: Any) -> dict[str, Any]:
-    assert isinstance(captured_body, BaseModel), (
-        "create/update/post-update tools must hand a validated Pydantic "
-        "model to api_post/api_put, not a raw dict (raw dicts are "
-        "rejected by the SDK's _serialize_body)."
-    )
-    return captured_body.model_dump(mode="json", by_alias=True, exclude_none=True)
-
-
-class TestCreateStatusPageMaintenanceHttpContract:
-    def test_posts_pydantic_body_to_maintenance_collection(self) -> None:
-        captured: dict[str, Any] = {}
-
-        def fake_api_post(client: Any, path: str, body: Any) -> dict[str, Any]:
-            captured["path"] = path
-            captured["body"] = body
-            return _SAMPLE_ENVELOPE
-
-        with (
-            patch(
-                "devhelm_mcp.tools.status_pages.get_client",
-                return_value=_stub_sdk_client(),
-            ),
-            patch(
-                "devhelm_mcp.tools.status_pages.api_post",
-                side_effect=fake_api_post,
-            ),
-        ):
+class TestStatusPageMaintenanceSdkCalls:
+    def test_create_forwards_payload(self) -> None:
+        client = _stub_sdk_client()
+        with patch("devhelm_mcp.tools.status_pages.get_client", return_value=client):
             _call_tool(
                 "create_status_page_maintenance",
                 {
@@ -87,206 +58,72 @@ class TestCreateStatusPageMaintenanceHttpContract:
                         "impact": "MINOR",
                         "body": "Upgrading primary.",
                         "scheduledFor": "2026-08-24T02:00:00Z",
-                        "scheduledUntil": "2026-08-24T04:00:00Z",
-                        "autoResolve": True,
                     },
                 },
             )
+        client.status_pages.maintenance.create.assert_called_once()
+        args = client.status_pages.maintenance.create.call_args.args
+        assert args[0] == _PAGE_ID
+        assert args[1]["title"] == "Database upgrade"
+        assert args[1]["scheduledFor"].isoformat().startswith("2026-08-24T02:00:00")
 
-        assert captured["path"] == f"/api/v1/status-pages/{_PAGE_ID}/maintenance"
-        wire = _wire_body(captured["body"])
-        assert wire["title"] == "Database upgrade"
-        assert wire["impact"] == "MINOR"
-        assert wire["body"] == "Upgrading primary."
-        assert wire["scheduledFor"] == "2026-08-24T02:00:00Z"
-        assert wire["scheduledUntil"] == "2026-08-24T04:00:00Z"
-        assert wire["autoResolve"] is True
-
-
-class TestUpdateStatusPageMaintenanceHttpContract:
-    def test_puts_pydantic_body_including_schedule(self) -> None:
-        captured: dict[str, Any] = {}
-
-        def fake_api_put(client: Any, path: str, body: Any) -> dict[str, Any]:
-            captured["path"] = path
-            captured["body"] = body
-            return _SAMPLE_ENVELOPE
-
-        with (
-            patch(
-                "devhelm_mcp.tools.status_pages.get_client",
-                return_value=_stub_sdk_client(),
-            ),
-            patch(
-                "devhelm_mcp.tools.status_pages.api_put",
-                side_effect=fake_api_put,
-            ),
-        ):
+    def test_update_forwards_schedule(self) -> None:
+        client = _stub_sdk_client()
+        with patch("devhelm_mcp.tools.status_pages.get_client", return_value=client):
             _call_tool(
                 "update_status_page_maintenance",
                 {
                     "page_id": _PAGE_ID,
                     "window_id": _WINDOW_ID,
-                    "body": {
-                        "title": "Extended window",
-                        "scheduledFor": "2026-08-24T03:00:00Z",
-                    },
+                    "body": {"scheduledFor": "2026-08-24T03:00:00Z"},
                 },
             )
+        args = client.status_pages.maintenance.update.call_args.args
+        assert args[0] == _PAGE_ID
+        assert args[1] == _WINDOW_ID
+        assert args[2]["scheduledFor"].isoformat().startswith("2026-08-24T03:00:00")
 
-        assert (
-            captured["path"]
-            == f"/api/v1/status-pages/{_PAGE_ID}/maintenance/{_WINDOW_ID}"
-        )
-        wire = _wire_body(captured["body"])
-        assert wire["title"] == "Extended window"
-        assert wire["scheduledFor"] == "2026-08-24T03:00:00Z"
-
-
-class TestPostStatusPageMaintenanceUpdateHttpContract:
-    def test_posts_pydantic_body_to_updates(self) -> None:
-        captured: dict[str, Any] = {}
-
-        def fake_api_post(client: Any, path: str, body: Any) -> dict[str, Any]:
-            captured["path"] = path
-            captured["body"] = body
-            return _SAMPLE_ENVELOPE
-
-        with (
-            patch(
-                "devhelm_mcp.tools.status_pages.get_client",
-                return_value=_stub_sdk_client(),
-            ),
-            patch(
-                "devhelm_mcp.tools.status_pages.api_post",
-                side_effect=fake_api_post,
-            ),
-        ):
+    def test_post_update_forwards_body(self) -> None:
+        client = _stub_sdk_client()
+        with patch("devhelm_mcp.tools.status_pages.get_client", return_value=client):
             _call_tool(
                 "post_status_page_maintenance_update",
                 {
                     "page_id": _PAGE_ID,
                     "window_id": _WINDOW_ID,
-                    "body": {
-                        "status": "MONITORING",
-                        "body": "Halfway through the upgrade.",
-                    },
+                    "body": {"status": "MONITORING", "body": "Halfway."},
                 },
             )
+        client.status_pages.maintenance.post_update.assert_called_once()
 
-        assert (
-            captured["path"]
-            == f"/api/v1/status-pages/{_PAGE_ID}/maintenance/{_WINDOW_ID}/updates"
-        )
-        wire = _wire_body(captured["body"])
-        assert wire["status"] == "MONITORING"
-        assert wire["body"] == "Halfway through the upgrade."
-
-
-class TestGetPublishDismissDeleteHttpContract:
-    def test_get_path(self) -> None:
-        captured: dict[str, Any] = {}
-
-        def fake_api_get(client: Any, path: str, params: Any = None) -> dict[str, Any]:
-            captured["path"] = path
-            return _SAMPLE_ENVELOPE
-
-        with (
-            patch(
-                "devhelm_mcp.tools.status_pages.get_client",
-                return_value=_stub_sdk_client(),
-            ),
-            patch(
-                "devhelm_mcp.tools.status_pages.api_get",
-                side_effect=fake_api_get,
-            ),
-        ):
+    def test_get_publish_dismiss_delete(self) -> None:
+        client = _stub_sdk_client()
+        with patch("devhelm_mcp.tools.status_pages.get_client", return_value=client):
             _call_tool(
                 "get_status_page_maintenance",
                 {"page_id": _PAGE_ID, "window_id": _WINDOW_ID},
             )
-
-        assert (
-            captured["path"]
-            == f"/api/v1/status-pages/{_PAGE_ID}/maintenance/{_WINDOW_ID}"
-        )
-
-    def test_publish_path(self) -> None:
-        captured: dict[str, Any] = {}
-
-        def fake_api_post(client: Any, path: str, body: Any = None) -> dict[str, Any]:
-            captured["path"] = path
-            return _SAMPLE_ENVELOPE
-
-        with (
-            patch(
-                "devhelm_mcp.tools.status_pages.get_client",
-                return_value=_stub_sdk_client(),
-            ),
-            patch(
-                "devhelm_mcp.tools.status_pages.api_post",
-                side_effect=fake_api_post,
-            ),
-        ):
             _call_tool(
                 "publish_status_page_maintenance",
                 {"page_id": _PAGE_ID, "window_id": _WINDOW_ID},
             )
-
-        assert (
-            captured["path"]
-            == f"/api/v1/status-pages/{_PAGE_ID}/maintenance/{_WINDOW_ID}/publish"
-        )
-
-    def test_dismiss_path(self) -> None:
-        captured: dict[str, Any] = {}
-
-        def fake_api_post(client: Any, path: str, body: Any = None) -> dict[str, Any]:
-            captured["path"] = path
-            return _SAMPLE_ENVELOPE
-
-        with (
-            patch(
-                "devhelm_mcp.tools.status_pages.get_client",
-                return_value=_stub_sdk_client(),
-            ),
-            patch(
-                "devhelm_mcp.tools.status_pages.api_post",
-                side_effect=fake_api_post,
-            ),
-        ):
             _call_tool(
                 "dismiss_status_page_maintenance",
                 {"page_id": _PAGE_ID, "window_id": _WINDOW_ID},
             )
-
-        assert (
-            captured["path"]
-            == f"/api/v1/status-pages/{_PAGE_ID}/maintenance/{_WINDOW_ID}/dismiss"
-        )
-
-    def test_delete_path(self) -> None:
-        captured: dict[str, Any] = {}
-
-        def fake_api_delete(client: Any, path: str) -> None:
-            captured["path"] = path
-
-        with (
-            patch(
-                "devhelm_mcp.tools.status_pages.get_client",
-                return_value=_stub_sdk_client(),
-            ),
-            patch(
-                "devhelm_mcp.tools.status_pages.api_delete",
-                side_effect=fake_api_delete,
-            ),
-        ):
             _call_tool(
                 "delete_status_page_maintenance",
                 {"page_id": _PAGE_ID, "window_id": _WINDOW_ID},
             )
-
-        assert (
-            captured["path"]
-            == f"/api/v1/status-pages/{_PAGE_ID}/maintenance/{_WINDOW_ID}"
+        client.status_pages.maintenance.get.assert_called_once_with(
+            _PAGE_ID, _WINDOW_ID
+        )
+        client.status_pages.maintenance.publish.assert_called_once_with(
+            _PAGE_ID, _WINDOW_ID
+        )
+        client.status_pages.maintenance.dismiss.assert_called_once_with(
+            _PAGE_ID, _WINDOW_ID
+        )
+        client.status_pages.maintenance.delete.assert_called_once_with(
+            _PAGE_ID, _WINDOW_ID
         )

@@ -3,24 +3,21 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal, cast
+from typing import Literal
 
-import httpx
 from devhelm import DevhelmError
-from devhelm._http import api_delete, api_get, api_post, api_put, path_param
-from devhelm._pagination import fetch_page
-from devhelm._validation import parse_single
 from devhelm.resources.status_pages import StatusPages
 from devhelm.types import (
     AddCustomDomainRequest,
     AdminAddSubscriberRequest,
     CreateStatusPageComponentGroupRequest,
     CreateStatusPageComponentRequest,
+    CreateStatusPageIncidentRequest,
     CreateStatusPageIncidentUpdateRequest,
+    CreateStatusPageMaintenanceRequest,
     CreateStatusPageRequest,
     ReorderComponentsRequest,
     ReorderPageLayoutRequest,
-    StatusPageIncidentDto,
     UpdateStatusPageComponentGroupRequest,
     UpdateStatusPageComponentRequest,
     UpdateStatusPageRequest,
@@ -42,44 +39,6 @@ def _sp(api_token: str | None) -> StatusPages:
     return get_client(api_token).status_pages
 
 
-def _raw(api_token: str | None) -> httpx.Client:
-    """HTTP client for /maintenance routes.
-
-    These methods live on the Python SDK as ``status_pages.maintenance``
-    starting with the next MINOR. Until that release is published, the
-    MCP server talks to the same paths through the SDK's HTTP layer so
-    the tools work against the live API now.
-    """
-    return cast(httpx.Client, _sp(api_token)._client)
-
-
-class CreateStatusPageIncidentRequest(BaseModel):
-    """Create body for ``POST /status-pages/{id}/incidents``.
-
-    Local so the LLM schema cannot advertise schedule fields. The pinned
-    SDK still carries those on incident create; maintenance is the only
-    authoring path for a window.
-    """
-
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
-
-    title: str = Field(description="Customer-facing incident title", max_length=500)
-    impact: Literal["NONE", "MINOR", "MAJOR", "CRITICAL"] = Field(
-        description="Impact level: NONE, MINOR, MAJOR, or CRITICAL"
-    )
-    body: str = Field(description="Initial update body in markdown", min_length=1)
-    status: Literal["INVESTIGATING", "IDENTIFIED", "MONITORING", "RESOLVED"] | None = (
-        Field(default=None, description="Initial status (default: INVESTIGATING)")
-    )
-    notifySubscribers: bool | None = Field(
-        default=None,
-        description="Whether to email confirmed subscribers (default: true)",
-    )
-    affectedComponents: list[dict[str, str]] | None = Field(
-        default=None, description="Component IDs affected by this incident"
-    )
-
-
 class UpdateStatusPageIncidentRequest(BaseModel):
     """Update body for an incident (no schedule fields)."""
 
@@ -97,40 +56,6 @@ class UpdateStatusPageIncidentRequest(BaseModel):
     affectedComponents: list[dict[str, str]] | None = Field(
         default=None,
         description="Updated affected components; omit to preserve current",
-    )
-
-
-class CreateStatusPageMaintenanceRequest(BaseModel):
-    """Create body for ``POST /status-pages/{id}/maintenance``.
-
-    Local until the published ``devhelm`` SDK exports this type.
-    """
-
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
-
-    title: str = Field(description="Customer-facing maintenance title", max_length=500)
-    impact: Literal["NONE", "MINOR", "MAJOR", "CRITICAL"] = Field(
-        description="Impact level: NONE, MINOR, MAJOR, or CRITICAL"
-    )
-    body: str = Field(description="Initial update body in markdown", min_length=1)
-    scheduledFor: datetime = Field(description="Maintenance start time")
-    status: Literal["INVESTIGATING", "IDENTIFIED", "MONITORING", "RESOLVED"] | None = (
-        Field(default=None, description="Initial status (default: INVESTIGATING)")
-    )
-    scheduledUntil: datetime | None = Field(
-        default=None, description="Maintenance end time"
-    )
-    autoResolve: bool | None = Field(
-        default=None, description="Auto-resolve at scheduledUntil (default: false)"
-    )
-    notifySubscribers: bool | None = Field(
-        default=None,
-        description=(
-            "Whether to email confirmed subscribers about this window (default: true)"
-        ),
-    )
-    affectedComponents: list[dict[str, str]] | None = Field(
-        default=None, description="Component IDs affected by this window"
     )
 
 
@@ -514,13 +439,7 @@ def register(mcp: FastMCP) -> None:
     ) -> ToolResult:
         """List maintenance windows on a status page (paginated)."""
         try:
-            result = fetch_page(
-                _raw(api_token),
-                f"/api/v1/status-pages/{path_param(page_id)}/maintenance",
-                StatusPageIncidentDto,
-                page,
-                size,
-            )
+            result = _sp(api_token).maintenance.list(page_id, page=page, size=size)
             return serialize({"data": result.data, "hasNext": result.has_next})
         except DevhelmError as e:
             raise_tool_error(e)
@@ -533,16 +452,7 @@ def register(mcp: FastMCP) -> None:
     ) -> ToolResult:
         """Get a status page maintenance window with its full timeline of updates."""
         try:
-            return serialize(
-                parse_single(
-                    StatusPageIncidentDto,
-                    api_get(
-                        _raw(api_token),
-                        f"/api/v1/status-pages/{path_param(page_id)}/maintenance/{path_param(window_id)}",
-                    ),
-                    f"GET /api/v1/status-pages/{page_id}/maintenance/{window_id}",
-                )
-            )
+            return serialize(_sp(api_token).maintenance.get(page_id, window_id))
         except DevhelmError as e:
             raise_tool_error(e)
 
@@ -559,18 +469,8 @@ def register(mcp: FastMCP) -> None:
         status, affectedComponents, notifySubscribers.
         """
         try:
-            # Pass the validated Pydantic model straight to ``api_post``;
-            # the SDK's ``_serialize_body`` rejects raw dicts.
             return serialize(
-                parse_single(
-                    StatusPageIncidentDto,
-                    api_post(
-                        _raw(api_token),
-                        f"/api/v1/status-pages/{path_param(page_id)}/maintenance",
-                        body,
-                    ),
-                    f"POST /api/v1/status-pages/{page_id}/maintenance",
-                )
+                _sp(api_token).maintenance.create(page_id, as_payload(body))
             )
         except DevhelmError as e:
             raise_tool_error(e)
@@ -585,15 +485,7 @@ def register(mcp: FastMCP) -> None:
         """Update a maintenance window's title, impact, status, or schedule."""
         try:
             return serialize(
-                parse_single(
-                    StatusPageIncidentDto,
-                    api_put(
-                        _raw(api_token),
-                        f"/api/v1/status-pages/{path_param(page_id)}/maintenance/{path_param(window_id)}",
-                        body,
-                    ),
-                    f"PUT /api/v1/status-pages/{page_id}/maintenance/{window_id}",
-                )
+                _sp(api_token).maintenance.update(page_id, window_id, as_payload(body))
             )
         except DevhelmError as e:
             raise_tool_error(e)
@@ -613,17 +505,8 @@ def register(mcp: FastMCP) -> None:
         """
         try:
             return serialize(
-                parse_single(
-                    StatusPageIncidentDto,
-                    api_post(
-                        _raw(api_token),
-                        f"/api/v1/status-pages/{path_param(page_id)}/maintenance/{path_param(window_id)}/updates",
-                        body,
-                    ),
-                    (
-                        "POST /api/v1/status-pages/"
-                        f"{page_id}/maintenance/{window_id}/updates"
-                    ),
+                _sp(api_token).maintenance.post_update(
+                    page_id, window_id, as_payload(body)
                 )
             )
         except DevhelmError as e:
@@ -637,19 +520,7 @@ def register(mcp: FastMCP) -> None:
     ) -> ToolResult:
         """Publish a draft maintenance window (sets it live, notifies subscribers)."""
         try:
-            return serialize(
-                parse_single(
-                    StatusPageIncidentDto,
-                    api_post(
-                        _raw(api_token),
-                        f"/api/v1/status-pages/{path_param(page_id)}/maintenance/{path_param(window_id)}/publish",
-                    ),
-                    (
-                        "POST /api/v1/status-pages/"
-                        f"{page_id}/maintenance/{window_id}/publish"
-                    ),
-                )
-            )
+            return serialize(_sp(api_token).maintenance.publish(page_id, window_id))
         except DevhelmError as e:
             raise_tool_error(e)
 
@@ -661,10 +532,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Dismiss a draft maintenance window (deletes it without publishing)."""
         try:
-            api_post(
-                _raw(api_token),
-                f"/api/v1/status-pages/{path_param(page_id)}/maintenance/{path_param(window_id)}/dismiss",
-            )
+            _sp(api_token).maintenance.dismiss(page_id, window_id)
             return "Draft maintenance window dismissed successfully."
         except DevhelmError as e:
             raise_tool_error(e)
@@ -677,10 +545,7 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Delete a status page maintenance window permanently."""
         try:
-            api_delete(
-                _raw(api_token),
-                f"/api/v1/status-pages/{path_param(page_id)}/maintenance/{path_param(window_id)}",
-            )
+            _sp(api_token).maintenance.delete(page_id, window_id)
             return "Status page maintenance window deleted successfully."
         except DevhelmError as e:
             raise_tool_error(e)
@@ -709,7 +574,8 @@ def register(mcp: FastMCP) -> None:
     ) -> ToolResult:
         """Add a subscriber to a status page (admin).
 
-        Required fields: email.
+        Optional: email (legacy EMAIL), channel, destination,
+        componentIds, requireConfirmation.
         """
         try:
             return serialize(_sp(api_token).subscribers.add(page_id, as_payload(body)))

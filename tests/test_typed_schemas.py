@@ -70,7 +70,7 @@ class TestTypedBodySchemas:
             ),
             ("post_status_page_incident_update", {"status", "body"}),
             ("post_status_page_maintenance_update", {"status", "body"}),
-            ("add_status_page_subscriber", {"email"}),
+            ("add_status_page_subscriber", set()),
             ("add_status_page_domain", {"hostname"}),
             ("acquire_deploy_lock", {"lockedBy"}),
             ("create_incident", {"title", "severity"}),
