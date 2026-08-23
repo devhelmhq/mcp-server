@@ -130,6 +130,14 @@ EXPECTED_TOOLS = [
     "publish_status_page_incident",
     "dismiss_status_page_incident",
     "delete_status_page_incident",
+    "list_status_page_maintenance",
+    "get_status_page_maintenance",
+    "create_status_page_maintenance",
+    "update_status_page_maintenance",
+    "post_status_page_maintenance_update",
+    "publish_status_page_maintenance",
+    "dismiss_status_page_maintenance",
+    "delete_status_page_maintenance",
     "list_status_page_subscribers",
     "add_status_page_subscriber",
     "remove_status_page_subscriber",
@@ -221,6 +229,17 @@ STATUS_PAGE_INCIDENT_TOOLS = [
     "delete_status_page_incident",
 ]
 
+STATUS_PAGE_MAINTENANCE_TOOLS = [
+    "list_status_page_maintenance",
+    "get_status_page_maintenance",
+    "create_status_page_maintenance",
+    "update_status_page_maintenance",
+    "post_status_page_maintenance_update",
+    "publish_status_page_maintenance",
+    "dismiss_status_page_maintenance",
+    "delete_status_page_maintenance",
+]
+
 STATUS_PAGE_SUBSCRIBER_TOOLS = [
     "list_status_page_subscribers",
     "add_status_page_subscriber",
@@ -254,6 +273,10 @@ class TestStatusPageToolCompleteness:
         for name in STATUS_PAGE_INCIDENT_TOOLS:
             assert name in registered_tools, f"Missing incident tool: {name}"
 
+    def test_maintenance_tools_present(self, registered_tools: RegisteredTools) -> None:
+        for name in STATUS_PAGE_MAINTENANCE_TOOLS:
+            assert name in registered_tools, f"Missing maintenance tool: {name}"
+
     def test_subscriber_tools_present(self, registered_tools: RegisteredTools) -> None:
         for name in STATUS_PAGE_SUBSCRIBER_TOOLS:
             assert name in registered_tools, f"Missing subscriber tool: {name}"
@@ -270,6 +293,7 @@ class TestStatusPageToolCompleteness:
             + len(STATUS_PAGE_COMPONENT_TOOLS)
             + len(STATUS_PAGE_GROUP_TOOLS)
             + len(STATUS_PAGE_INCIDENT_TOOLS)
+            + len(STATUS_PAGE_MAINTENANCE_TOOLS)
             + len(STATUS_PAGE_SUBSCRIBER_TOOLS)
             + len(STATUS_PAGE_DOMAIN_TOOLS)
         )
@@ -325,6 +349,7 @@ class TestStatusPageToolSchemas:
             STATUS_PAGE_COMPONENT_TOOLS
             + STATUS_PAGE_GROUP_TOOLS
             + STATUS_PAGE_INCIDENT_TOOLS
+            + STATUS_PAGE_MAINTENANCE_TOOLS
             + STATUS_PAGE_SUBSCRIBER_TOOLS
             + STATUS_PAGE_DOMAIN_TOOLS
             + ["get_status_page", "update_status_page", "delete_status_page"]
@@ -346,6 +371,9 @@ class TestStatusPageToolSchemas:
             "create_status_page_incident",
             "update_status_page_incident",
             "post_status_page_incident_update",
+            "create_status_page_maintenance",
+            "update_status_page_maintenance",
+            "post_status_page_maintenance_update",
             "add_status_page_subscriber",
             "add_status_page_domain",
         ]:
@@ -380,6 +408,20 @@ class TestStatusPageToolSchemas:
             params = self._params(registered_tools, name)
             assert "incident_id" in params, f"{name} missing incident_id"
 
+    def test_window_id_on_maintenance_operations(
+        self, registered_tools: RegisteredTools
+    ) -> None:
+        for name in [
+            "get_status_page_maintenance",
+            "update_status_page_maintenance",
+            "post_status_page_maintenance_update",
+            "publish_status_page_maintenance",
+            "dismiss_status_page_maintenance",
+            "delete_status_page_maintenance",
+        ]:
+            params = self._params(registered_tools, name)
+            assert "window_id" in params, f"{name} missing window_id"
+
     def test_subscriber_id_on_remove(self, registered_tools: RegisteredTools) -> None:
         params = self._params(registered_tools, "remove_status_page_subscriber")
         assert "subscriber_id" in params
@@ -395,6 +437,13 @@ class TestStatusPageToolSchemas:
         self, registered_tools: RegisteredTools
     ) -> None:
         params = self._params(registered_tools, "list_status_page_incidents")
+        assert "page" in params
+        assert "size" in params
+
+    def test_list_maintenance_has_pagination_params(
+        self, registered_tools: RegisteredTools
+    ) -> None:
+        params = self._params(registered_tools, "list_status_page_maintenance")
         assert "page" in params
         assert "size" in params
 
@@ -415,6 +464,7 @@ class TestStatusPageToolSchemas:
             "delete_status_page_component",
             "delete_status_page_group",
             "delete_status_page_incident",
+            "delete_status_page_maintenance",
         ]:
             params = self._params(registered_tools, name)
             assert "body" not in params, f"{name} should not accept a body"
