@@ -11919,7 +11919,7 @@
           "Notification Policies"
         ],
         "summary": "List dispatches (firing history) for a notification policy",
-        "description": "Additive optional query params: since/until/cursor/limit. When all are omitted, returns the full history (legacy). When any is set, defaults to a 30-day window and limit 50, and may include nextCursor. Response remains TableValueResult — no CursorPage swap.",
+        "description": "Optional query params: since/until/cursor/limit. When all are omitted, returns the full history (legacy). When any is set, defaults to a 30-day window and limit 50. Response is CursorPage (hasMore + nextCursor), the same wrapper used by other append-only history endpoints.",
         "operationId": "listDispatches",
         "parameters": [
           {
@@ -11977,7 +11977,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/TableValueResultNotificationDispatchDto"
+                  "$ref": "#/components/schemas/CursorPageNotificationDispatchDto"
                 }
               }
             }
@@ -28219,6 +28219,32 @@
         },
         "description": "Cursor-paginated response for time-series and append-only data"
       },
+      "CursorPageNotificationDispatchDto": {
+        "required": [
+          "data",
+          "hasMore"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "description": "Items on this page",
+            "items": {
+              "$ref": "#/components/schemas/NotificationDispatchDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "description": "Opaque cursor for the next page; null when there are no more results",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "Whether more results exist beyond this page"
+          }
+        },
+        "description": "Cursor-paginated response for time-series and append-only data"
+      },
       "CursorPageServiceCatalogDto": {
         "required": [
           "data",
@@ -28966,6 +28992,10 @@
         ]
       },
       "DnsTtlLowAssertion": {
+        "required": [
+          "type",
+          "minTtl"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -28979,11 +29009,7 @@
             "description": "Minimum acceptable TTL in seconds before a warning is raised",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "minTtl"
-        ]
+        }
       },
       "DnsTxtContainsAssertion": {
         "required": [
@@ -29783,6 +29809,10 @@
         }
       },
       "IcmpPacketLossAssertion": {
+        "required": [
+          "type",
+          "maxPercent"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -29800,11 +29830,7 @@
             "description": "Maximum allowed packet loss percentage before the check fails (0–100)",
             "format": "double"
           }
-        },
-        "required": [
-          "type",
-          "maxPercent"
-        ]
+        }
       },
       "IcmpReachableAssertion": {
         "type": "object",
@@ -31657,6 +31683,10 @@
         }
       },
       "McpMinToolsAssertion": {
+        "required": [
+          "type",
+          "min"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -31670,11 +31700,7 @@
             "description": "Minimum number of tools the server must expose",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "min"
-        ]
+        }
       },
       "McpProtocolVersionAssertion": {
         "required": [
@@ -31843,6 +31869,10 @@
         }
       },
       "McpToolCountChangedAssertion": {
+        "required": [
+          "type",
+          "expectedCount"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -31856,11 +31886,7 @@
             "description": "Expected tool count; warns when the live count differs",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "expectedCount"
-        ]
+        }
       },
       "MemberDto": {
         "required": [
@@ -33658,6 +33684,10 @@
         ]
       },
       "RedirectCountAssertion": {
+        "required": [
+          "type",
+          "maxCount"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -33671,11 +33701,7 @@
             "description": "Maximum number of HTTP redirects allowed before the check fails",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "maxCount"
-        ]
+        }
       },
       "RedirectTargetAssertion": {
         "required": [
@@ -36658,6 +36684,10 @@
         }
       },
       "SslExpiryAssertion": {
+        "required": [
+          "type",
+          "minDaysRemaining"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -36671,11 +36701,7 @@
             "description": "Minimum days before TLS certificate expiry; fails or warns below this threshold",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "minDaysRemaining"
-        ]
+        }
       },
       "StateTransitionDetails": {
         "required": [
@@ -37822,10 +37848,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -37857,10 +37879,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -37894,10 +37912,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -37929,10 +37943,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -37966,10 +37976,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38001,10 +38007,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38038,10 +38040,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38073,10 +38071,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38110,10 +38104,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38145,10 +38135,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38182,10 +38168,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38217,10 +38199,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38254,10 +38232,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38289,10 +38263,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38326,10 +38296,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38361,10 +38327,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38398,10 +38360,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38433,10 +38391,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38470,10 +38424,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38505,10 +38455,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38542,10 +38488,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38577,10 +38519,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38614,10 +38552,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38649,10 +38583,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38686,10 +38616,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38721,10 +38647,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38758,10 +38680,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38793,10 +38711,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38830,10 +38744,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38865,10 +38775,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38902,10 +38808,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38937,10 +38839,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38974,10 +38872,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39009,10 +38903,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -39046,10 +38936,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39081,10 +38967,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -39118,10 +39000,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39154,10 +39032,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39189,10 +39063,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
