@@ -7921,13 +7921,377 @@
         }
       }
     },
+    "/api/v1/monitors/{id}/mute": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Mute alert delivery without flipping enabled",
+        "operationId": "mute",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorOverlayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/monitors/{id}/pause": {
       "post": {
         "tags": [
           "Monitors"
         ],
-        "summary": "Pause a monitor (set enabled=false)",
+        "summary": "Pause a monitor",
         "operationId": "pause",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorOverlayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/quarantine": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Quarantine a monitor",
+        "operationId": "quarantine",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuarantineMonitorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/release-quarantine": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Release quarantine",
+        "operationId": "releaseQuarantine",
         "parameters": [
           {
             "name": "id",
@@ -8338,7 +8702,7 @@
         "tags": [
           "Monitors"
         ],
-        "summary": "Resume a monitor (set enabled=true)",
+        "summary": "Resume a paused monitor",
         "operationId": "resume",
         "parameters": [
           {
@@ -9165,6 +9529,118 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/TableValueResultTestChannelResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/unmute": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Clear mute overlay",
+        "operationId": "unmute",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorDto"
                 }
               }
             }
@@ -10803,6 +11279,118 @@
         }
       }
     },
+    "/api/v1/monitors/package-uploads": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Mint a signed package upload URL",
+        "description": "Dashboard helper for upload-first create. Not a customer resource.",
+        "operationId": "createPackageUpload",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePackageUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponsePackageUploadDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/monitors/test": {
       "post": {
         "tags": [
@@ -11919,7 +12507,7 @@
           "Notification Policies"
         ],
         "summary": "List dispatches (firing history) for a notification policy",
-        "description": "Additive optional query params: since/until/cursor/limit. When all are omitted, returns the full history (legacy). When any is set, defaults to a 30-day window and limit 50, and may include nextCursor. Response remains TableValueResult — no CursorPage swap.",
+        "description": "Optional query params: since/until/cursor/limit. When all are omitted, returns the full history (legacy). When any is set, defaults to a 30-day window and limit 50. Response is CursorPage (hasMore + nextCursor), the same wrapper used by other append-only history endpoints.",
         "operationId": "listDispatches",
         "parameters": [
           {
@@ -11977,7 +12565,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/TableValueResultNotificationDispatchDto"
+                  "$ref": "#/components/schemas/CursorPageNotificationDispatchDto"
                 }
               }
             }
@@ -27345,7 +27933,6 @@
       },
       "CreateMonitorRequest": {
         "required": [
-          "config",
           "name",
           "type"
         ],
@@ -27372,6 +27959,7 @@
             ]
           },
           "config": {
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DnsMonitorConfig"
@@ -27432,7 +28020,7 @@
           },
           "environmentId": {
             "type": "string",
-            "description": "Environment to associate with this monitor",
+            "description": "Environment to associate with this monitor; required for code types",
             "format": "uuid",
             "nullable": true
           },
@@ -27475,6 +28063,37 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddMonitorTagsRequest"
+              }
+            ]
+          },
+          "capturePolicy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CapturePolicy"
+              }
+            ],
+            "description": "When to capture screenshots, traces, and video. Omit for probe monitors"
+          },
+          "fastRetryMaxAttempts": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer",
+            "description": "Fast-retry attempts after failure; null/0 disables",
+            "format": "int32",
+            "nullable": true
+          },
+          "definitionId": {
+            "type": "string",
+            "description": "Existing definition to reuse for a sibling monitor. Do not send together with package",
+            "format": "uuid",
+            "nullable": true
+          },
+          "package": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MonitorPackageSpec"
               }
             ]
           }
@@ -27526,6 +28145,20 @@
           }
         },
         "description": "Request body for creating a notification policy"
+      },
+      "CreatePackageUploadRequest": {
+        "required": [
+          "digest"
+        ],
+        "type": "object",
+        "properties": {
+          "digest": {
+            "maxLength": 64,
+            "minLength": 64,
+            "type": "string",
+            "description": "SHA-256 hex digest of the package zip to upload (64 chars)"
+          }
+        }
       },
       "CreateResourceGroupRequest": {
         "required": [
@@ -28205,6 +28838,32 @@
             "description": "Items on this page",
             "items": {
               "$ref": "#/components/schemas/IncidentActivityEventDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "description": "Opaque cursor for the next page; null when there are no more results",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "Whether more results exist beyond this page"
+          }
+        },
+        "description": "Cursor-paginated response for time-series and append-only data"
+      },
+      "CursorPageNotificationDispatchDto": {
+        "required": [
+          "data",
+          "hasMore"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "description": "Items on this page",
+            "items": {
+              "$ref": "#/components/schemas/NotificationDispatchDto"
             }
           },
           "nextCursor": {
@@ -28966,6 +29625,10 @@
         ]
       },
       "DnsTtlLowAssertion": {
+        "required": [
+          "type",
+          "minTtl"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -28979,11 +29642,7 @@
             "description": "Minimum acceptable TTL in seconds before a warning is raised",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "minTtl"
-        ]
+        }
       },
       "DnsTxtContainsAssertion": {
         "required": [
@@ -29783,6 +30442,10 @@
         }
       },
       "IcmpPacketLossAssertion": {
+        "required": [
+          "type",
+          "maxPercent"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -29800,11 +30463,7 @@
             "description": "Maximum allowed packet loss percentage before the check fails (0–100)",
             "format": "double"
           }
-        },
-        "required": [
-          "type",
-          "maxPercent"
-        ]
+        }
       },
       "IcmpReachableAssertion": {
         "type": "object",
@@ -31657,6 +32316,10 @@
         }
       },
       "McpMinToolsAssertion": {
+        "required": [
+          "type",
+          "min"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -31670,11 +32333,7 @@
             "description": "Minimum number of tools the server must expose",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "min"
-        ]
+        }
       },
       "McpProtocolVersionAssertion": {
         "required": [
@@ -31843,6 +32502,10 @@
         }
       },
       "McpToolCountChangedAssertion": {
+        "required": [
+          "type",
+          "expectedCount"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -31856,11 +32519,7 @@
             "description": "Expected tool count; warns when the live count differs",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "expectedCount"
-        ]
+        }
       },
       "MemberDto": {
         "required": [
@@ -32236,7 +32895,8 @@
           "updatedAt",
           "organizationId",
           "frequencySeconds",
-          "enabled"
+          "enabled",
+          "muted"
         ],
         "type": "object",
         "properties": {
@@ -32388,7 +33048,7 @@
           },
           "currentStatus": {
             "type": "string",
-            "description": "Current operational state — UP, DOWN, DEGRADED, PAUSED, or UNKNOWN if no probe data yet",
+            "description": "Current operational state. One of UP, DOWN, DEGRADED, PAUSED, or UNKNOWN",
             "nullable": true,
             "enum": [
               "up",
@@ -32397,9 +33057,201 @@
               "paused",
               "unknown"
             ]
+          },
+          "definitionId": {
+            "type": "string",
+            "description": "Definition id for a browser or multi-step monitor. Null on probe monitors",
+            "format": "uuid",
+            "nullable": true
+          },
+          "capturePolicy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CapturePolicy"
+              }
+            ],
+            "description": "When screenshots, traces, and video are captured"
+          },
+          "fastRetryMaxAttempts": {
+            "type": "integer",
+            "description": "Fast-retry max attempts; null/0 = off",
+            "format": "int32",
+            "nullable": true
+          },
+          "muted": {
+            "type": "boolean",
+            "description": "Whether alert delivery is muted"
+          },
+          "mutedUntil": {
+            "type": "string",
+            "description": "Mute expiry; null means indefinite while muted",
+            "format": "date-time",
+            "nullable": true
+          },
+          "muteReason": {
+            "type": "string",
+            "description": "Optional mute reason",
+            "nullable": true
+          },
+          "pausedAt": {
+            "type": "string",
+            "description": "When the monitor was paused",
+            "format": "date-time",
+            "nullable": true
+          },
+          "pauseReason": {
+            "type": "string",
+            "description": "Optional pause reason",
+            "nullable": true
+          },
+          "pauseExpiresAt": {
+            "type": "string",
+            "description": "Pause expiry",
+            "format": "date-time",
+            "nullable": true
+          },
+          "quarantineOwnerId": {
+            "type": "string",
+            "description": "Quarantine person owner id",
+            "nullable": true
+          },
+          "quarantineUntil": {
+            "type": "string",
+            "description": "Quarantine expiry; non-null means quarantined",
+            "format": "date-time",
+            "nullable": true
+          },
+          "quarantineReason": {
+            "type": "string",
+            "description": "Quarantine reason",
+            "nullable": true
+          },
+          "upload": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PackageUploadDto"
+              }
+            ]
           }
         },
         "description": "Full monitor representation"
+      },
+      "MonitorOverlayRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 280,
+            "minLength": 0,
+            "type": "string",
+            "description": "Optional human-readable reason (max 280)",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "Optional expiry; sweeper clears the overlay after this time",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "CapturePolicy": {
+        "type": "object",
+        "description": "When to capture screenshots, traces, and video during a code run",
+        "properties": {
+          "screenshots": {
+            "type": "string",
+            "description": "When to capture screenshots",
+            "enum": ["always", "on_failure", "off"],
+            "nullable": true
+          },
+          "trace": {
+            "type": "string",
+            "description": "When to capture a Playwright trace",
+            "enum": ["always", "on_failure", "off"],
+            "nullable": true
+          },
+          "video": {
+            "type": "string",
+            "description": "When to capture video",
+            "enum": ["always", "on_failure", "off"],
+            "nullable": true
+          }
+        }
+      },
+      "MonitorPackageSpec": {
+        "required": [
+          "digest",
+          "entrypoint",
+          "files"
+        ],
+        "type": "object",
+        "properties": {
+          "digest": {
+            "maxLength": 64,
+            "minLength": 64,
+            "type": "string",
+            "description": "SHA-256 hex digest of the package zip (64 characters)"
+          },
+          "entrypoint": {
+            "maxLength": 512,
+            "minLength": 0,
+            "type": "string",
+            "description": "Entrypoint path inside the zip, e.g. tests/login.spec.ts"
+          },
+          "files": {
+            "minItems": 1,
+            "type": "array",
+            "description": "Relative file paths included in the zip",
+            "items": {
+              "maxLength": 512,
+              "minLength": 0,
+              "type": "string",
+              "description": "Relative file paths included in the zip"
+            }
+          },
+          "keys": {
+            "type": "array",
+            "description": "Secret names the zip demanded. PUT: null preserves, [] clears",
+            "nullable": true,
+            "items": {
+              "maxLength": 255,
+              "minLength": 0,
+              "type": "string",
+              "description": "Secret names the zip demanded. PUT: null preserves, [] clears"
+            }
+          },
+          "gitSha": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "Commit SHA from the repo that produced this zip. Client-supplied provenance only",
+            "nullable": true
+          },
+          "gitMessage": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string",
+            "description": "Commit message from the repo that produced this zip",
+            "nullable": true
+          },
+          "gitFile": {
+            "maxLength": 512,
+            "minLength": 0,
+            "type": "string",
+            "description": "Path of the declaring file in that repo",
+            "nullable": true
+          },
+          "authoredBy": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "Author attribution supplied with the package",
+            "nullable": true
+          }
+        },
+        "description": "New package zip metadata. Bytes upload through the signed putUrl"
       },
       "MonitorReference": {
         "required": [
@@ -33215,6 +34067,34 @@
         },
         "description": "Organization the key belongs to"
       },
+      "PackageUploadDto": {
+        "required": [
+          "expiresAt",
+          "putUrl",
+          "requiredHeaders"
+        ],
+        "type": "object",
+        "properties": {
+          "putUrl": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Presigned PUT URL for the zip bytes"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the signed URL expires",
+            "format": "date-time"
+          },
+          "requiredHeaders": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Must send Content-Type: application/zip and If-None-Match: *"
+          }
+        },
+        "description": "Signed package upload target"
+      },
       "Pageable": {
         "type": "object",
         "properties": {
@@ -33605,6 +34485,26 @@
           }
         }
       },
+      "QuarantineMonitorRequest": {
+        "required": [
+          "expiresAt",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 280,
+            "minLength": 0,
+            "type": "string",
+            "description": "Reason for this hold (max 280)"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the hold expires",
+            "format": "date-time"
+          }
+        }
+      },
       "RateLimitInfo": {
         "type": "object",
         "properties": {
@@ -33658,6 +34558,10 @@
         ]
       },
       "RedirectCountAssertion": {
+        "required": [
+          "type",
+          "maxCount"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -33671,11 +34575,7 @@
             "description": "Maximum number of HTTP redirects allowed before the check fails",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "maxCount"
-        ]
+        }
       },
       "RedirectTargetAssertion": {
         "required": [
@@ -34642,16 +35542,15 @@
         "description": "A scheduled maintenance window from a vendor status page"
       },
       "ScriptMonitorConfig": {
-        "required": [
-          "script"
-        ],
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "script": {
             "maxLength": 65536,
-            "minLength": 1,
+            "minLength": 0,
             "type": "string",
-            "description": "Playwright test script source code"
+            "description": "Legacy inline script on existing rows",
+            "nullable": true
           },
           "timeoutSeconds": {
             "maximum": 120,
@@ -36092,6 +36991,17 @@
           }
         }
       },
+      "SingleValueResponsePackageUploadDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PackageUploadDto"
+          }
+        }
+      },
       "SingleValueResponsePolicySnapshotDto": {
         "required": [
           "data"
@@ -36658,6 +37568,10 @@
         }
       },
       "SslExpiryAssertion": {
+        "required": [
+          "type",
+          "minDaysRemaining"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -36671,11 +37585,7 @@
             "description": "Minimum days before TLS certificate expiry; fails or warns below this threshold",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "minDaysRemaining"
-        ]
+        }
       },
       "StateTransitionDetails": {
         "required": [
@@ -37822,10 +38732,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -37857,10 +38763,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -37894,10 +38796,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -37929,10 +38827,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -37966,10 +38860,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38001,10 +38891,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38038,10 +38924,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38073,10 +38955,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38110,10 +38988,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38145,10 +39019,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38182,10 +39052,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38217,10 +39083,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38254,10 +39116,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38289,10 +39147,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38326,10 +39180,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38361,10 +39211,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38398,10 +39244,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38433,10 +39275,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38470,10 +39308,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38505,10 +39339,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38542,10 +39372,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38577,10 +39403,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38614,10 +39436,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38649,10 +39467,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38686,10 +39500,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38721,10 +39531,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38758,10 +39564,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38793,10 +39595,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38830,10 +39628,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38865,10 +39659,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38902,10 +39692,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38937,10 +39723,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38974,10 +39756,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39009,10 +39787,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -39046,10 +39820,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39081,10 +39851,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -39118,10 +39884,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39154,10 +39916,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39189,10 +39947,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -40513,7 +41267,7 @@
           },
           "enabled": {
             "type": "boolean",
-            "description": "Enable or disable the monitor; null preserves current",
+            "description": "Enable or disable the monitor (pause/resume alias); null preserves current",
             "nullable": true
           },
           "regions": {
@@ -40545,7 +41299,7 @@
           },
           "clearEnvironmentId": {
             "type": "boolean",
-            "description": "Set to true to remove the environment association",
+            "description": "Set to true to remove the environment association; 409 on code types",
             "nullable": true
           },
           "assertions": {
@@ -40592,6 +41346,31 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddMonitorTagsRequest"
+              }
+            ]
+          },
+          "capturePolicy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CapturePolicy"
+              }
+            ],
+            "description": "When to capture screenshots, traces, and video. Null preserves current"
+          },
+          "fastRetryMaxAttempts": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer",
+            "description": "Fast-retry attempts after failure; null preserves; 0 disables",
+            "format": "int32",
+            "nullable": true
+          },
+          "package": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MonitorPackageSpec"
               }
             ]
           }
