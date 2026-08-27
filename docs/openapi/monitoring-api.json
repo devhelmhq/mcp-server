@@ -103,6 +103,14 @@
       "description": "Manage authentication configuration for a monitor"
     },
     {
+      "name": "Monitor secret requests",
+      "description": "Secret keys a monitor requires and how they are fulfilled"
+    },
+    {
+      "name": "Monitor session",
+      "description": "Cached sign-in session for a monitor"
+    },
+    {
       "name": "Monitors",
       "description": "Monitor CRUD and lifecycle management"
     },
@@ -2129,7 +2137,7 @@
           "Audit Log"
         ],
         "summary": "List audit events for the current organization",
-        "operationId": "list_20",
+        "operationId": "list_21",
         "parameters": [
           {
             "name": "action",
@@ -5637,7 +5645,7 @@
         ],
         "summary": "List all supported integration types",
         "description": "Returns the full static catalog of supported alert channel integration types with their metadata and config field schemas. Used by the frontend to dynamically render the 'Add Alert Channel' form.",
-        "operationId": "list_19",
+        "operationId": "list_20",
         "responses": {
           "200": {
             "description": "OK",
@@ -6835,7 +6843,7 @@
           "Members"
         ],
         "summary": "List organization members",
-        "operationId": "list_18",
+        "operationId": "list_19",
         "parameters": [
           {
             "name": "pageable",
@@ -7921,13 +7929,377 @@
         }
       }
     },
+    "/api/v1/monitors/{id}/mute": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Mute alert delivery without flipping enabled",
+        "operationId": "mute",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorOverlayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/monitors/{id}/pause": {
       "post": {
         "tags": [
           "Monitors"
         ],
-        "summary": "Pause a monitor (set enabled=false)",
+        "summary": "Pause a monitor",
         "operationId": "pause",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorOverlayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/quarantine": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Quarantine a monitor",
+        "operationId": "quarantine",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuarantineMonitorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/release-quarantine": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Release quarantine",
+        "operationId": "releaseQuarantine",
         "parameters": [
           {
             "name": "id",
@@ -8338,7 +8710,7 @@
         "tags": [
           "Monitors"
         ],
-        "summary": "Resume a monitor (set enabled=true)",
+        "summary": "Resume a paused monitor",
         "operationId": "resume",
         "parameters": [
           {
@@ -8471,6 +8843,816 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SingleValueResponseMonitorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/secret-requests": {
+      "get": {
+        "tags": [
+          "Monitor secret requests"
+        ],
+        "summary": "List secret requests for a monitor",
+        "operationId": "list_18",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorSecretRequestsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/secret-requests/{key}": {
+      "put": {
+        "tags": [
+          "Monitor secret requests"
+        ],
+        "summary": "Attach or clear a remapped secret for a key",
+        "operationId": "remap",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemapSecretRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorSecretRequestsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/secret-requests/rescan": {
+      "post": {
+        "tags": [
+          "Monitor secret requests"
+        ],
+        "summary": "Rescan secret requests from the active package",
+        "operationId": "rescan",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorSecretRequestsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/session": {
+      "get": {
+        "tags": [
+          "Monitor session"
+        ],
+        "summary": "Get the monitor session",
+        "operationId": "getSession",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorSessionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Monitor session"
+        ],
+        "summary": "Create or update the monitor session",
+        "operationId": "putSession",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertMonitorSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorSessionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/session/renew": {
+      "post": {
+        "tags": [
+          "Monitor session"
+        ],
+        "summary": "Renew the monitor session",
+        "operationId": "renewSession",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseRunDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/session/revoke": {
+      "post": {
+        "tags": [
+          "Monitor session"
+        ],
+        "summary": "Revoke the monitor session",
+        "operationId": "revokeSession",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorSessionDto"
                 }
               }
             }
@@ -9165,6 +10347,118 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/TableValueResultTestChannelResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/unmute": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Clear mute overlay",
+        "operationId": "unmute",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorDto"
                 }
               }
             }
@@ -10803,6 +12097,117 @@
         }
       }
     },
+    "/api/v1/monitors/package-uploads": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Mint a signed package upload URL",
+        "operationId": "createPackageUpload",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePackageUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponsePackageUploadDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/monitors/test": {
       "post": {
         "tags": [
@@ -11919,7 +13324,7 @@
           "Notification Policies"
         ],
         "summary": "List dispatches (firing history) for a notification policy",
-        "description": "Additive optional query params: since/until/cursor/limit. When all are omitted, returns the full history (legacy). When any is set, defaults to a 30-day window and limit 50, and may include nextCursor. Response remains TableValueResult — no CursorPage swap.",
+        "description": "Optional query params: since/until/cursor/limit. When all are omitted, returns the full history (legacy). When any is set, defaults to a 30-day window and limit 50. Response is CursorPage (hasMore + nextCursor), the same wrapper used by other append-only history endpoints.",
         "operationId": "listDispatches",
         "parameters": [
           {
@@ -11977,7 +13382,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/TableValueResultNotificationDispatchDto"
+                  "$ref": "#/components/schemas/CursorPageNotificationDispatchDto"
                 }
               }
             }
@@ -13850,7 +15255,7 @@
         "tags": [
           "Secrets"
         ],
-        "summary": "List secrets",
+        "summary": "List organization secrets",
         "operationId": "list_5",
         "responses": {
           "200": {
@@ -14194,6 +15599,351 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{key}/audit": {
+      "get": {
+        "tags": [
+          "Secrets"
+        ],
+        "summary": "Last update metadata for a secret",
+        "operationId": "audit",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseSecretAuditDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{key}/environments/{environmentId}": {
+      "put": {
+        "tags": [
+          "Secrets"
+        ],
+        "summary": "Write a secret value for one environment",
+        "operationId": "writeEnvironmentValue",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "environmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WriteSecretEnvironmentValueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{key}/usage": {
+      "get": {
+        "tags": [
+          "Secrets"
+        ],
+        "summary": "Secret usage across monitors",
+        "operationId": "usage",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseSecretUsageDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request — the payload failed validation",
@@ -26247,6 +27997,42 @@
         },
         "description": "Result of a bulk monitor action, including partial-success details"
       },
+      "CapturePolicy": {
+        "type": "object",
+        "properties": {
+          "screenshots": {
+            "type": "string",
+            "description": "When to capture screenshots",
+            "nullable": true,
+            "enum": [
+              "always",
+              "on_failure",
+              "off"
+            ]
+          },
+          "trace": {
+            "type": "string",
+            "description": "When to capture a Playwright trace",
+            "nullable": true,
+            "enum": [
+              "always",
+              "on_failure",
+              "off"
+            ]
+          },
+          "video": {
+            "type": "string",
+            "description": "When to capture video",
+            "nullable": true,
+            "enum": [
+              "always",
+              "on_failure",
+              "off"
+            ]
+          }
+        },
+        "description": "When to capture screenshots, traces, and video during a code run"
+      },
       "CategoryDto": {
         "required": [
           "category",
@@ -27189,7 +28975,7 @@
             ]
           }
         },
-        "description": "Replace all assertions; null preserves current"
+        "description": "Replace all assertions. Null preserves current"
       },
       "CreateEnvironmentRequest": {
         "required": [
@@ -27345,7 +29131,6 @@
       },
       "CreateMonitorRequest": {
         "required": [
-          "config",
           "name",
           "type"
         ],
@@ -27372,6 +29157,7 @@
             ]
           },
           "config": {
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DnsMonitorConfig"
@@ -27400,7 +29186,7 @@
             "maximum": 86400,
             "minimum": 10,
             "type": "integer",
-            "description": "Check frequency in seconds (10–86400); null defaults to plan minimum (60s on most paid plans)",
+            "description": "Check frequency in seconds (10–86400). Null defaults to the plan minimum",
             "format": "int32",
             "nullable": true
           },
@@ -27411,16 +29197,16 @@
           },
           "regions": {
             "type": "array",
-            "description": "Probe regions to run checks from. Allowed values are deployment-dependent; production: us-east, us-west, eu-west, ap-south.",
+            "description": "Probe regions to run checks from. Allowed values are deployment-dependent. Production: us-east, us-west, eu-west, ap-south",
             "nullable": true,
             "items": {
               "type": "string",
-              "description": "Probe regions to run checks from. Allowed values are deployment-dependent; production: us-east, us-west, eu-west, ap-south."
+              "description": "Probe regions to run checks from. Allowed values are deployment-dependent. Production: us-east, us-west, eu-west, ap-south"
             }
           },
           "managedBy": {
             "type": "string",
-            "description": "Source that created/owns this monitor: DASHBOARD, CLI, TERRAFORM, MCP, or API. Defaults to API when omitted; set to your surface so audit logs, drift detection, and analytics attribute correctly.",
+            "description": "Source that created this monitor: DASHBOARD, CLI, TERRAFORM, MCP, or API. Defaults to API",
             "nullable": true,
             "enum": [
               "DASHBOARD",
@@ -27432,7 +29218,7 @@
           },
           "environmentId": {
             "type": "string",
-            "description": "Environment to associate with this monitor",
+            "description": "Environment to associate with this monitor. Required for browser and multi-step monitors",
             "format": "uuid",
             "nullable": true
           },
@@ -27475,6 +29261,36 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddMonitorTagsRequest"
+              }
+            ]
+          },
+          "capturePolicy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CapturePolicy"
+              }
+            ]
+          },
+          "fastRetryMaxAttempts": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer",
+            "description": "Fast-retry attempts after failure. Null or 0 disables",
+            "format": "int32",
+            "nullable": true
+          },
+          "definitionId": {
+            "type": "string",
+            "description": "Existing definition to reuse for a sibling monitor",
+            "format": "uuid",
+            "nullable": true
+          },
+          "package": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MonitorPackageSpec"
               }
             ]
           }
@@ -27526,6 +29342,20 @@
           }
         },
         "description": "Request body for creating a notification policy"
+      },
+      "CreatePackageUploadRequest": {
+        "required": [
+          "digest"
+        ],
+        "type": "object",
+        "properties": {
+          "digest": {
+            "maxLength": 64,
+            "minLength": 64,
+            "type": "string",
+            "description": "SHA-256 hex digest of the package zip to upload (64 chars)"
+          }
+        }
       },
       "CreateResourceGroupRequest": {
         "required": [
@@ -28205,6 +30035,32 @@
             "description": "Items on this page",
             "items": {
               "$ref": "#/components/schemas/IncidentActivityEventDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "description": "Opaque cursor for the next page; null when there are no more results",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "Whether more results exist beyond this page"
+          }
+        },
+        "description": "Cursor-paginated response for time-series and append-only data"
+      },
+      "CursorPageNotificationDispatchDto": {
+        "required": [
+          "data",
+          "hasMore"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "description": "Items on this page",
+            "items": {
+              "$ref": "#/components/schemas/NotificationDispatchDto"
             }
           },
           "nextCursor": {
@@ -28966,6 +30822,10 @@
         ]
       },
       "DnsTtlLowAssertion": {
+        "required": [
+          "type",
+          "minTtl"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -28979,11 +30839,7 @@
             "description": "Minimum acceptable TTL in seconds before a warning is raised",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "minTtl"
-        ]
+        }
       },
       "DnsTxtContainsAssertion": {
         "required": [
@@ -29783,6 +31639,10 @@
         }
       },
       "IcmpPacketLossAssertion": {
+        "required": [
+          "type",
+          "maxPercent"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -29800,11 +31660,7 @@
             "description": "Maximum allowed packet loss percentage before the check fails (0–100)",
             "format": "double"
           }
-        },
-        "required": [
-          "type",
-          "maxPercent"
-        ]
+        }
       },
       "IcmpReachableAssertion": {
         "type": "object",
@@ -31657,6 +33513,10 @@
         }
       },
       "McpMinToolsAssertion": {
+        "required": [
+          "type",
+          "min"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -31670,11 +33530,7 @@
             "description": "Minimum number of tools the server must expose",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "min"
-        ]
+        }
       },
       "McpProtocolVersionAssertion": {
         "required": [
@@ -31843,6 +33699,10 @@
         }
       },
       "McpToolCountChangedAssertion": {
+        "required": [
+          "type",
+          "expectedCount"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -31856,11 +33716,7 @@
             "description": "Expected tool count; warns when the live count differs",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "expectedCount"
-        ]
+        }
       },
       "MemberDto": {
         "required": [
@@ -32236,7 +34092,8 @@
           "updatedAt",
           "organizationId",
           "frequencySeconds",
-          "enabled"
+          "enabled",
+          "muted"
         ],
         "type": "object",
         "properties": {
@@ -32388,7 +34245,7 @@
           },
           "currentStatus": {
             "type": "string",
-            "description": "Current operational state — UP, DOWN, DEGRADED, PAUSED, or UNKNOWN if no probe data yet",
+            "description": "Current operational state. One of UP, DOWN, DEGRADED, PAUSED, or UNKNOWN",
             "nullable": true,
             "enum": [
               "up",
@@ -32397,9 +34254,179 @@
               "paused",
               "unknown"
             ]
+          },
+          "definitionId": {
+            "type": "string",
+            "description": "Definition id for a browser or multi-step monitor. Null on probe monitors",
+            "format": "uuid",
+            "nullable": true
+          },
+          "capturePolicy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CapturePolicy"
+              }
+            ]
+          },
+          "fastRetryMaxAttempts": {
+            "type": "integer",
+            "description": "Fast-retry max attempts; null/0 = off",
+            "format": "int32",
+            "nullable": true
+          },
+          "muted": {
+            "type": "boolean",
+            "description": "Whether alert delivery is muted"
+          },
+          "mutedUntil": {
+            "type": "string",
+            "description": "Mute expiry; null means indefinite while muted",
+            "format": "date-time",
+            "nullable": true
+          },
+          "muteReason": {
+            "type": "string",
+            "description": "Optional mute reason",
+            "nullable": true
+          },
+          "pausedAt": {
+            "type": "string",
+            "description": "When the monitor was paused",
+            "format": "date-time",
+            "nullable": true
+          },
+          "pauseReason": {
+            "type": "string",
+            "description": "Optional pause reason",
+            "nullable": true
+          },
+          "pauseExpiresAt": {
+            "type": "string",
+            "description": "Pause expiry",
+            "format": "date-time",
+            "nullable": true
+          },
+          "quarantineOwnerId": {
+            "type": "string",
+            "description": "Quarantine person owner id",
+            "nullable": true
+          },
+          "quarantineUntil": {
+            "type": "string",
+            "description": "Quarantine expiry; non-null means quarantined",
+            "format": "date-time",
+            "nullable": true
+          },
+          "quarantineReason": {
+            "type": "string",
+            "description": "Quarantine reason",
+            "nullable": true
+          },
+          "upload": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PackageUploadDto"
+              }
+            ]
           }
         },
         "description": "Full monitor representation"
+      },
+      "MonitorOverlayRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 280,
+            "minLength": 0,
+            "type": "string",
+            "description": "Optional human-readable reason (max 280)",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When this overlay expires",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "MonitorPackageSpec": {
+        "required": [
+          "digest",
+          "entrypoint",
+          "files"
+        ],
+        "type": "object",
+        "properties": {
+          "digest": {
+            "maxLength": 64,
+            "minLength": 64,
+            "type": "string",
+            "description": "SHA-256 hex digest of the package zip (64 characters)"
+          },
+          "entrypoint": {
+            "maxLength": 512,
+            "minLength": 0,
+            "type": "string",
+            "description": "Entrypoint path inside the zip, e.g. tests/login.spec.ts"
+          },
+          "files": {
+            "maxItems": 256,
+            "minItems": 0,
+            "type": "array",
+            "description": "Relative file paths included in the zip",
+            "items": {
+              "maxLength": 512,
+              "minLength": 0,
+              "type": "string",
+              "description": "Relative file paths included in the zip"
+            }
+          },
+          "keys": {
+            "maxItems": 64,
+            "minItems": 0,
+            "type": "array",
+            "description": "Secret names the zip demanded. PUT: null preserves, [] clears",
+            "nullable": true,
+            "items": {
+              "maxLength": 255,
+              "minLength": 0,
+              "type": "string",
+              "description": "Secret names the zip demanded. PUT: null preserves, [] clears"
+            }
+          },
+          "gitSha": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "Commit SHA from the repo that produced this zip. Client-supplied provenance only",
+            "nullable": true
+          },
+          "gitMessage": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string",
+            "description": "Commit message from the repo that produced this zip",
+            "nullable": true
+          },
+          "gitFile": {
+            "maxLength": 512,
+            "minLength": 0,
+            "type": "string",
+            "description": "Path of the declaring file in that repo",
+            "nullable": true
+          },
+          "authoredBy": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "Author attribution supplied with the package",
+            "nullable": true
+          }
+        },
+        "description": "New package zip metadata for this environment"
       },
       "MonitorReference": {
         "required": [
@@ -32418,7 +34445,97 @@
             "description": "Monitor name"
           }
         },
-        "description": "Monitors that reference this secret; null on create/update responses"
+        "description": "Monitors that reference this secret for authentication"
+      },
+      "MonitorSecretRequestsDto": {
+        "required": [
+          "environment",
+          "requests"
+        ],
+        "type": "object",
+        "properties": {
+          "environment": {
+            "$ref": "#/components/schemas/EnvironmentDto"
+          },
+          "requests": {
+            "type": "array",
+            "description": "Secret keys this monitor requires and their resolve state",
+            "items": {
+              "$ref": "#/components/schemas/SecretRequestDto"
+            }
+          }
+        },
+        "description": "Environment and secret keys this monitor requires"
+      },
+      "MonitorSessionDto": {
+        "required": [
+          "cookieNames",
+          "lifecycle",
+          "reusePolicy",
+          "setupFile",
+          "storageKeys"
+        ],
+        "type": "object",
+        "properties": {
+          "lifecycle": {
+            "type": "string",
+            "description": "Current session cache state",
+            "enum": [
+              "active",
+              "expired",
+              "failed",
+              "revoked"
+            ]
+          },
+          "reusePolicy": {
+            "type": "string",
+            "description": "When the cached session is reused across runs",
+            "enum": [
+              "reuse",
+              "every_run",
+              "on_failure"
+            ]
+          },
+          "setupFile": {
+            "type": "string",
+            "description": "Setup file path inside the package zip"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the cached session expires",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cookieNames": {
+            "type": "array",
+            "description": "Cookie names in the cached session",
+            "items": {
+              "type": "string",
+              "description": "Cookie names in the cached session"
+            }
+          },
+          "storageKeys": {
+            "type": "array",
+            "description": "Storage key names in the cached session",
+            "items": {
+              "type": "string",
+              "description": "Storage key names in the cached session"
+            }
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "description": "Cached session size in bytes",
+            "format": "int32",
+            "nullable": true
+          },
+          "lastRejectedRunId": {
+            "type": "string",
+            "description": "Run that last rejected this cache",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "description": "Cached sign-in session for a monitor"
       },
       "MonitorsSummaryDto": {
         "type": "object",
@@ -33215,6 +35332,35 @@
         },
         "description": "Organization the key belongs to"
       },
+      "PackageUploadDto": {
+        "required": [
+          "expiresAt",
+          "putUrl",
+          "requiredHeaders"
+        ],
+        "type": "object",
+        "properties": {
+          "putUrl": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Presigned PUT URL for the zip bytes"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the signed URL expires",
+            "format": "date-time"
+          },
+          "requiredHeaders": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Must send Content-Type: application/zip and If-None-Match: *"
+            },
+            "description": "Must send Content-Type: application/zip and If-None-Match: *"
+          }
+        },
+        "description": "Signed package upload target"
+      },
       "Pageable": {
         "type": "object",
         "properties": {
@@ -33605,6 +35751,26 @@
           }
         }
       },
+      "QuarantineMonitorRequest": {
+        "required": [
+          "expiresAt",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 280,
+            "minLength": 0,
+            "type": "string",
+            "description": "Reason for this hold (max 280)"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the hold expires",
+            "format": "date-time"
+          }
+        }
+      },
       "RateLimitInfo": {
         "type": "object",
         "properties": {
@@ -33658,6 +35824,10 @@
         ]
       },
       "RedirectCountAssertion": {
+        "required": [
+          "type",
+          "maxCount"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -33671,11 +35841,7 @@
             "description": "Maximum number of HTTP redirects allowed before the check fails",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "maxCount"
-        ]
+        }
       },
       "RedirectTargetAssertion": {
         "required": [
@@ -33789,6 +35955,18 @@
           }
         },
         "description": "Related incidents sharing the same origin within a time window"
+      },
+      "RemapSecretRequest": {
+        "type": "object",
+        "properties": {
+          "secretId": {
+            "type": "string",
+            "description": "Secret to attach; null restores name-match",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "description": "Attach or clear a remapped secret"
       },
       "RemoveMonitorTagsRequest": {
         "required": [
@@ -34562,6 +36740,76 @@
         },
         "description": "All rule evaluations that ran for this check"
       },
+      "RunDto": {
+        "required": [
+          "enqueuedAt",
+          "executionClass",
+          "id",
+          "monitorId",
+          "phase",
+          "source",
+          "organizationId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique run identifier",
+            "format": "uuid"
+          },
+          "monitorId": {
+            "type": "string",
+            "description": "Monitor this run belongs to",
+            "format": "uuid"
+          },
+          "organizationId": {
+            "type": "integer",
+            "description": "Organization this run belongs to",
+            "format": "int32"
+          },
+          "source": {
+            "type": "string",
+            "description": "What triggered this run",
+            "enum": [
+              "schedule",
+              "run_now",
+              "ci",
+              "fast_retry",
+              "remote_validation",
+              "deployment_validation",
+              "session_renew"
+            ]
+          },
+          "phase": {
+            "type": "string",
+            "description": "Current run phase",
+            "enum": [
+              "created",
+              "queued",
+              "starting",
+              "running",
+              "finalizing",
+              "finished"
+            ]
+          },
+          "executionClass": {
+            "type": "string",
+            "description": "Whether this run is scheduled, retry, manual, or candidate",
+            "enum": [
+              "scheduled",
+              "retry",
+              "manual",
+              "candidate"
+            ]
+          },
+          "enqueuedAt": {
+            "type": "string",
+            "description": "When this run was enqueued",
+            "format": "date-time"
+          }
+        },
+        "description": "Identity of a monitor run"
+      },
       "ScheduledMaintenanceDto": {
         "required": [
           "affectedComponents",
@@ -34642,16 +36890,16 @@
         "description": "A scheduled maintenance window from a vendor status page"
       },
       "ScriptMonitorConfig": {
-        "required": [
-          "script"
-        ],
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "script": {
             "maxLength": 65536,
-            "minLength": 1,
+            "minLength": 0,
             "type": "string",
-            "description": "Playwright test script source code"
+            "description": "Legacy inline script on existing rows",
+            "nullable": true,
+            "readOnly": true
           },
           "timeoutSeconds": {
             "maximum": 120,
@@ -34662,6 +36910,26 @@
             "nullable": true
           }
         }
+      },
+      "SecretAuditDto": {
+        "type": "object",
+        "properties": {
+          "updatedAt": {
+            "type": "string",
+            "description": "When this secret was last updated",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedBy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserDto"
+              }
+            ]
+          }
+        },
+        "description": "Last update time and author for a secret"
       },
       "SecretDto": {
         "required": [
@@ -34704,14 +36972,69 @@
           },
           "usedByMonitors": {
             "type": "array",
-            "description": "Monitors that reference this secret; null on create/update responses",
+            "description": "Monitors that reference this secret for authentication",
             "nullable": true,
             "items": {
               "$ref": "#/components/schemas/MonitorReference"
             }
           }
         },
-        "description": "Secret with change-detection hash; plaintext value is never returned"
+        "description": "Organization secret and its change-detection hash"
+      },
+      "SecretRequestDto": {
+        "required": [
+          "key",
+          "readiness"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Secret key this monitor requires"
+          },
+          "secret": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SecretDto"
+              }
+            ]
+          },
+          "readiness": {
+            "type": "string",
+            "description": "Whether this key is resolved or missing",
+            "enum": [
+              "resolved",
+              "missing"
+            ]
+          },
+          "fulfilledBy": {
+            "type": "string",
+            "description": "Fulfilled from environment variables or a secret",
+            "nullable": true,
+            "enum": [
+              "env",
+              "secret"
+            ]
+          }
+        },
+        "description": "Secret key a monitor requires and how it is fulfilled"
+      },
+      "SecretUsageDto": {
+        "required": [
+          "monitors"
+        ],
+        "type": "object",
+        "properties": {
+          "monitors": {
+            "type": "array",
+            "description": "Monitors that reference this secret",
+            "items": {
+              "$ref": "#/components/schemas/MonitorDto"
+            }
+          }
+        },
+        "description": "Monitors that reference this secret"
       },
       "SeoMetadataDto": {
         "type": "object",
@@ -36037,6 +38360,28 @@
           }
         }
       },
+      "SingleValueResponseMonitorSecretRequestsDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MonitorSecretRequestsDto"
+          }
+        }
+      },
+      "SingleValueResponseMonitorSessionDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MonitorSessionDto"
+          }
+        }
+      },
       "SingleValueResponseMonitorTestResultDto": {
         "required": [
           "data"
@@ -36089,6 +38434,17 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/OrganizationDto"
+          }
+        }
+      },
+      "SingleValueResponsePackageUploadDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PackageUploadDto"
           }
         }
       },
@@ -36147,6 +38503,28 @@
           }
         }
       },
+      "SingleValueResponseRunDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RunDto"
+          }
+        }
+      },
+      "SingleValueResponseSecretAuditDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SecretAuditDto"
+          }
+        }
+      },
       "SingleValueResponseSecretDto": {
         "required": [
           "data"
@@ -36155,6 +38533,17 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/SecretDto"
+          }
+        }
+      },
+      "SingleValueResponseSecretUsageDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SecretUsageDto"
           }
         }
       },
@@ -36658,6 +39047,10 @@
         }
       },
       "SslExpiryAssertion": {
+        "required": [
+          "type",
+          "minDaysRemaining"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -36671,11 +39064,7 @@
             "description": "Minimum days before TLS certificate expiry; fails or warns below this threshold",
             "format": "int32"
           }
-        },
-        "required": [
-          "type",
-          "minDaysRemaining"
-        ]
+        }
       },
       "StateTransitionDetails": {
         "required": [
@@ -37822,10 +40211,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -37857,10 +40242,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -37894,10 +40275,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -37929,10 +40306,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -37966,10 +40339,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38001,10 +40370,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38038,10 +40403,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38073,10 +40434,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38110,10 +40467,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38145,10 +40498,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38182,10 +40531,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38217,10 +40562,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38254,10 +40595,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38289,10 +40626,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38326,10 +40659,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38361,10 +40690,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38398,10 +40723,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38433,10 +40754,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38470,10 +40787,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38505,10 +40818,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38542,10 +40851,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38577,10 +40882,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38614,10 +40915,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38649,10 +40946,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38686,10 +40979,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38721,10 +41010,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38758,10 +41043,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38793,10 +41074,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38830,10 +41107,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38865,10 +41138,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38902,10 +41171,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -38937,10 +41202,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -38974,10 +41235,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39009,10 +41266,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -39046,10 +41299,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39081,10 +41330,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -39118,10 +41363,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39154,10 +41395,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -39189,10 +41426,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "nextCursor": {
-            "type": "string",
             "nullable": true
           }
         }
@@ -40474,7 +42707,7 @@
             "maxLength": 255,
             "minLength": 0,
             "type": "string",
-            "description": "New monitor name; null preserves current",
+            "description": "New monitor name. Null preserves current",
             "nullable": true
           },
           "config": {
@@ -40507,27 +42740,27 @@
             "maximum": 86400,
             "minimum": 10,
             "type": "integer",
-            "description": "New check frequency in seconds (10–86400); null preserves current",
+            "description": "New check frequency in seconds (10–86400). Null preserves current",
             "format": "int32",
             "nullable": true
           },
           "enabled": {
             "type": "boolean",
-            "description": "Enable or disable the monitor; null preserves current",
+            "description": "Enable or disable the monitor (pause or resume). Null preserves current",
             "nullable": true
           },
           "regions": {
             "type": "array",
-            "description": "New probe regions; null preserves current. Allowed values are deployment-dependent.",
+            "description": "New probe regions. Null preserves current. Allowed values are deployment-dependent",
             "nullable": true,
             "items": {
               "type": "string",
-              "description": "New probe regions; null preserves current. Allowed values are deployment-dependent."
+              "description": "New probe regions. Null preserves current. Allowed values are deployment-dependent"
             }
           },
           "managedBy": {
             "type": "string",
-            "description": "New ownership source: DASHBOARD, CLI, TERRAFORM, MCP, or API; null preserves current value",
+            "description": "New ownership source: DASHBOARD, CLI, TERRAFORM, MCP, or API. Null preserves current",
             "nullable": true,
             "enum": [
               "DASHBOARD",
@@ -40539,7 +42772,7 @@
           },
           "environmentId": {
             "type": "string",
-            "description": "New environment ID; null preserves current (use clearEnvironmentId to unset)",
+            "description": "New environment; null preserves current",
             "format": "uuid",
             "nullable": true
           },
@@ -40550,7 +42783,7 @@
           },
           "assertions": {
             "type": "array",
-            "description": "Replace all assertions; null preserves current",
+            "description": "Replace all assertions. Null preserves current",
             "nullable": true,
             "items": {
               "$ref": "#/components/schemas/CreateAssertionRequest"
@@ -40579,11 +42812,11 @@
           },
           "alertChannelIds": {
             "type": "array",
-            "description": "Replace alert channel list; null preserves current",
+            "description": "Replace alert channel list. Null preserves current",
             "nullable": true,
             "items": {
               "type": "string",
-              "description": "Replace alert channel list; null preserves current",
+              "description": "Replace alert channel list. Null preserves current",
               "format": "uuid"
             }
           },
@@ -40594,6 +42827,35 @@
                 "$ref": "#/components/schemas/AddMonitorTagsRequest"
               }
             ]
+          },
+          "capturePolicy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CapturePolicy"
+              }
+            ]
+          },
+          "fastRetryMaxAttempts": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer",
+            "description": "Fast-retry attempts after failure. Null preserves current. 0 disables",
+            "format": "int32",
+            "nullable": true
+          },
+          "package": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MonitorPackageSpec"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "Not writable; use pause or resume",
+            "nullable": true
           }
         }
       },
@@ -41508,6 +43770,35 @@
           "channelType"
         ]
       },
+      "UpsertMonitorSessionRequest": {
+        "required": [
+          "reusePolicy",
+          "setupFile"
+        ],
+        "type": "object",
+        "properties": {
+          "reusePolicy": {
+            "type": "string",
+            "description": "When to reuse the cached session across runs",
+            "enum": [
+              "reuse",
+              "every_run",
+              "on_failure"
+            ]
+          },
+          "setupFile": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Setup file path inside the package zip"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the cached session expires",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
       "UptimeBucketDto": {
         "required": [
           "timestamp",
@@ -41593,6 +43884,73 @@
           "passedChecks",
           "incidentCount"
         ]
+      },
+      "UserDto": {
+        "required": [
+          "createdAt",
+          "email",
+          "updatedAt",
+          "userRole",
+          "id",
+          "emailVerified"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique user identifier",
+            "format": "int32"
+          },
+          "email": {
+            "type": "string",
+            "description": "User email address"
+          },
+          "emailVerified": {
+            "type": "boolean",
+            "description": "Whether the email address has been verified"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name; null if not set",
+            "nullable": true
+          },
+          "userRole": {
+            "type": "string",
+            "description": "Platform role: USER or SUPERADMIN",
+            "enum": [
+              "SUPERADMIN",
+              "ADMIN",
+              "USER"
+            ]
+          },
+          "onboardingStage": {
+            "type": "string",
+            "description": "Current onboarding progress stage; null when completed",
+            "nullable": true,
+            "enum": [
+              "WELCOME",
+              "FIRST_MONITOR",
+              "SETUP_COMPLETE",
+              "COMPLETED"
+            ]
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "Profile image URL; null if not set",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Timestamp when the account was created",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Timestamp when the account was last updated",
+            "format": "date-time"
+          }
+        },
+        "description": "User account details"
       },
       "VoiceLanguageDto": {
         "required": [
@@ -41904,6 +44262,19 @@
           }
         },
         "description": "Workspace within an organization"
+      },
+      "WriteSecretEnvironmentValueRequest": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Plaintext value to encrypt for this environment"
+          }
+        }
       },
       "ZapierChannelConfig": {
         "required": [
