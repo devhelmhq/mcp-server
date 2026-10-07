@@ -106,3 +106,19 @@ jobs:
           - Test fixtures depend on a payload shape that changed in the spec"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Alert spec sync failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_DISPATCH_TOKEN }}
+        run: |
+          gh api repos/devhelmhq/mono/dispatches --method POST --input - <<EOF
+          {
+            "event_type": "spec_sync_failed",
+            "client_payload": {
+              "repo": "${{ github.repository }}",
+              "workflow": "${{ github.workflow }}",
+              "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+          }
+          EOF
