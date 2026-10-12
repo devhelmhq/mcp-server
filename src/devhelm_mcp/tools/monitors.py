@@ -33,11 +33,8 @@ class _McpCreateMonitorRequest(CreateMonitorRequest):
     rather than letting the LLM thread an arbitrary value through. This
     subclass:
 
-    1. Re-declares ``managed_by`` as optional (``default=None``) so a body
-       that omits it passes Pydantic validation — the parent class makes the
-       field required, which would force the LLM to set it.
-    2. Marks the field with ``exclude=True`` so any value the LLM does
-       smuggle in via a permissive client never reaches ``model_dump()``.
+    1. Re-declares ``managed_by`` with ``exclude=True`` so any value the LLM
+       smuggles in via a permissive client never reaches ``model_dump()``.
        The server-side ``managedBy`` injection in :func:`create_monitor` is
        the only writer that survives the boundary.
 
@@ -72,8 +69,15 @@ def register(mcp: FastMCP) -> None:
     ) -> ToolResult:
         """Create a new uptime monitor.
 
-        Required fields: name, type (HTTP/DNS/TCP/ICMP/MCP/HEARTBEAT),
-        config (type-specific), frequencySeconds (30-86400).
+        Required: name and type (HTTP, DNS, TCP, ICMP, HEARTBEAT,
+        MCP_SERVER, BROWSER, MULTI_STEP_API).
+
+        ``config`` is required for probe types (HTTP, DNS, TCP, ICMP,
+        HEARTBEAT, MCP_SERVER). Browser and multi-step monitors use a
+        type default when ``config`` is omitted.
+
+        ``frequencySeconds`` is optional (10–86400). Omit it to use the
+        plan minimum.
 
         ``managedBy`` is set automatically to ``MCP`` server-side; callers
         cannot override it. Use the SDK or CLI directly if you need a
