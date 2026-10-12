@@ -52,7 +52,7 @@ class TestTypedBodySchemas:
     @pytest.mark.parametrize(
         ("tool_name", "required_fields"),
         [
-            ("create_monitor", {"name", "type", "config"}),
+            ("create_monitor", {"name", "type"}),
             ("create_alert_channel", {"name", "config"}),
             ("create_environment", {"name", "slug"}),
             ("create_secret", {"key", "value"}),

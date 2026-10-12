@@ -6,15 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- Status-page maintenance tools (`list` / `get` / `create` / `update` /
-  `delete` / `publish` / `dismiss` / `post_status_page_maintenance_update`)
-  via `client.status_pages.maintenance`.
+## [1.8.0] — 2026-10-12
 
 ### Changed
 
-- Bump `devhelm` Python SDK floor to `>=1.7.0`.
+- Pin `devhelm` to `>=1.12.0`. `create_monitor` follows the SDK:
+  `config` is optional on the shared body. Probe types still need a
+  config; browser and multi-step monitors use the type default when
+  it is omitted. `frequencySeconds` is optional (10–86400).
 
 ## [1.0.0] — 2026-05-06
 

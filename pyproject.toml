@@ -19,8 +19,8 @@ classifiers = [
 ]
 
 dependencies = [
-    # Floor bumped to 1.8.0: offset list envelopes accept nextCursor.
-    "devhelm>=1.8.0",
+    # Floor bumped to 1.12.0: CreateMonitorRequest.config is optional.
+    "devhelm>=1.12.0",
     "fastmcp>=3.2.3,<4",
 ]
 
