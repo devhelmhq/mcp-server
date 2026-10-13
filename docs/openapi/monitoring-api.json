@@ -24428,8 +24428,8 @@
         "tags": [
           "Status Data"
         ],
-        "summary": "Batch daily uptime data for all leaf components",
-        "description": "Returns daily uptime for every active non-group component with uptime data, keyed by component ID. Replaces N individual per-component uptime calls with a single request. Supports either a preset ``period`` or an explicit ``from``/``to`` window (ISO yyyy-MM-dd, max 730 days). The explicit window wins when both are supplied — this is what powers the sliding 90-day navigator on the public uptime history page.",
+        "summary": "Batch daily uptime data for leaf components",
+        "description": "Returns daily uptime keyed by component ID. Pass ``componentIds`` to limit the batch to those components (max 100); omit it for every active component with uptime data. Supports either a preset ``period`` or an explicit ``from``/``to`` window (ISO yyyy-MM-dd, max 730 days). The explicit window wins when both are supplied — this is what powers the sliding 90-day navigator on the public uptime history page.",
         "operationId": "getBatchComponentUptime",
         "parameters": [
           {
@@ -24473,6 +24473,19 @@
             "schema": {
               "type": "string",
               "format": "date"
+            }
+          },
+          {
+            "name": "componentIds",
+            "in": "query",
+            "description": "Component ids to include (max 100); omit for every component",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
             }
           }
         ],
