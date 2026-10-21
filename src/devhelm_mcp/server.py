@@ -32,6 +32,7 @@ from devhelm_mcp.tools import (
     api_keys,
     dependencies,
     deploy_lock,
+    email_testing,
     environments,
     forensics,
     incidents,
@@ -44,6 +45,7 @@ from devhelm_mcp.tools import (
     status,
     status_pages,
     tags,
+    webhook_inboxes,
     webhooks,
 )
 
@@ -80,7 +82,9 @@ mcp = FastMCP(
         "notification policies, environments, secrets, tags, resource groups, "
         "webhooks, API keys, service dependencies, the third-party service "
         "catalog (search services, live status, uptime, incidents), deploy "
-        "locks, maintenance windows, status pages, and view dashboard status. "
+        "locks, maintenance windows, status pages, email and webhook testing "
+        "inboxes (create a test address or capture URL, then wait for the "
+        "message or request), and view dashboard status. "
         "Authentication is handled at the transport layer: "
         "`Authorization: Bearer <token>` for the hosted endpoint "
         "(https://mcp.devhelm.io/mcp/), or the `DEVHELM_API_TOKEN` environment "
@@ -107,6 +111,8 @@ ALL_TOOL_MODULES = [
     maintenance_windows,
     status,
     status_pages,
+    email_testing,
+    webhook_inboxes,
 ]
 
 for mod in ALL_TOOL_MODULES:

@@ -68,6 +68,8 @@ Add to your MCP config:
 | **Deploy Lock** | acquire, current, release, force-release |
 | **Status** | overview |
 | **Status Pages** | pages, components, groups, incidents, maintenance, subscribers, domains |
+| **Email Testing** | create address, wait (≤25 s), latest, list/get messages, source, OTP codes, links, inject; domains list, get, create, update, verify, activity |
+| **Webhook Testing** | inboxes list, get, create, update, activity; wait (≤25 s), latest, list/get events |
 
 ## Development
 
