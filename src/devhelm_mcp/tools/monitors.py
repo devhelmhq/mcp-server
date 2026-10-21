@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Annotated, Any
 
-from devhelm import DevhelmError
+from devhelm import DevhelmError, DevhelmMonitorTestQueuedError
 from devhelm.types import CreateMonitorRequest, UpdateMonitorRequest
 from fastmcp import FastMCP
 from pydantic import Field
@@ -136,9 +136,58 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def test_monitor(monitor_id: str, api_token: str | None = None) -> ToolResult:
-        """Trigger an ad-hoc test run for a monitor and return the result."""
+        """Trigger an ad-hoc test run for a monitor and return the result.
+
+        Uptime monitors (HTTP, TCP, DNS, ICMP, MCP) return the probe result.
+        Browser and multi-step API monitors return the queued validation run
+        instead (it does not affect health; poll it by ``id``). Use
+        ``test_monitor_run`` to pick that run's environment or region.
+        """
         try:
             return serialize(get_client(api_token).monitors.test(monitor_id))
+        except DevhelmMonitorTestQueuedError as e:
+            return serialize(e.run)
+        except DevhelmError as e:
+            raise_tool_error(e)
+
+    @mcp.tool()
+    def test_monitor_run(
+        monitor_id: str,
+        environment_id: Annotated[
+            str | None,
+            Field(
+                description=(
+                    "Environment for the validation run "
+                    "(default: the monitor's environment)"
+                )
+            ),
+        ] = None,
+        region: Annotated[
+            str | None,
+            Field(
+                description=(
+                    "Region for the validation run "
+                    "(default: the monitor's first region)"
+                )
+            ),
+        ] = None,
+        api_token: str | None = None,
+    ) -> ToolResult:
+        """Queue a validation run for a browser or multi-step API monitor.
+
+        Returns the queued run. It does not affect health; poll it by ``id``
+        for its outcome. Uptime monitors return a probe result instead; use
+        ``test_monitor`` for those.
+        """
+        target: dict[str, str] = {}
+        if environment_id is not None:
+            target["environmentId"] = environment_id
+        if region is not None:
+            target["region"] = region
+        try:
+            return serialize(
+                get_client(api_token).monitors.test_run(monitor_id, target or None)
+            )
         except DevhelmError as e:
             raise_tool_error(e)
 
