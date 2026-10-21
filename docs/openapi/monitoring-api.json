@@ -12880,7 +12880,7 @@
           "Monitor definitions"
         ],
         "summary": "Run remote validation against a revision without moving Head",
-        "description": "Creates a Run with source=remote_validation. Does not signal.",
+        "description": "Admits a queued Run with source=remote_validation. Does not vote on health. Optional environmentId defaults to the monitor's environment; optional region defaults to the monitor's first region.",
         "operationId": "testRevision",
         "parameters": [
           {
@@ -12902,6 +12902,15 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeTestTargetRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "202": {
             "description": "Accepted",
@@ -15206,7 +15215,7 @@
           "Monitors"
         ],
         "summary": "Test an existing monitor",
-        "description": "Runs the saved config and assertions of an existing monitor once, without persisting any result. Runs synchronously and returns the same shape as the ad-hoc test. MULTI_STEP_API and BROWSER are rejected with MONITOR_CODE_CHECK_TEST_UNAVAILABLE until fleet dry-run is available.",
+        "description": "Uptime monitors run their saved config and assertions once through the probe and return the probe result (200) without persisting it. Browser and multi-step API monitors admit a queued validation run (202) that does not vote on health; poll the run for its outcome. Optional environmentId defaults to the monitor's environment; optional region defaults to the monitor's first region.",
         "operationId": "testExisting",
         "parameters": [
           {
@@ -15219,13 +15228,32 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeTestTargetRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Probe result for an uptime monitor",
             "content": {
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SingleValueResponseMonitorTestResultDto"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Queued validation run for a browser or multi-step API monitor",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseRunDto"
                 }
               }
             }
@@ -15629,6 +15657,128 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SingleValueResponseUptimeDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/{id}/usage-preview": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Project monthly usage for an update payload",
+        "operationId": "previewUsage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMonitorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorUsageProjectionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -17216,7 +17366,7 @@
           "Monitors"
         ],
         "summary": "Ad-hoc monitor test",
-        "description": "Executes a one-off check from an inline config without saving the monitor. Runs synchronously and returns status code, response time, assertion results, body preview, and headers. MULTI_STEP_API and BROWSER are rejected with MONITOR_CODE_CHECK_TEST_UNAVAILABLE until fleet dry-run is available.",
+        "description": "Executes a one-off check from an inline config without saving the monitor. Runs synchronously and returns status code, response time, assertion results, body preview, and headers. Inline browser and multi-step API code is refused with MONITOR_TEST_BUNDLE_UNAVAILABLE until a bundle can be uploaded.",
         "operationId": "testAdHoc",
         "requestBody": {
           "content": {
@@ -17235,6 +17385,117 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SingleValueResponseMonitorTestResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/monitors/usage-preview": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Project monthly usage for a create payload",
+        "operationId": "previewUsage_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMonitorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseMonitorUsageProjectionDto"
                 }
               }
             }
@@ -24428,8 +24689,8 @@
         "tags": [
           "Status Data"
         ],
-        "summary": "Batch daily uptime data for all leaf components",
-        "description": "Returns daily uptime for every active non-group component with uptime data, keyed by component ID. Replaces N individual per-component uptime calls with a single request. Supports either a preset ``period`` or an explicit ``from``/``to`` window (ISO yyyy-MM-dd, max 730 days). The explicit window wins when both are supplied — this is what powers the sliding 90-day navigator on the public uptime history page.",
+        "summary": "Batch daily uptime data for leaf components",
+        "description": "Returns daily uptime keyed by component ID. Pass ``componentIds`` to limit the batch to those components (max 100); omit it for every active component with uptime data. Supports either a preset ``period`` or an explicit ``from``/``to`` window (ISO yyyy-MM-dd, max 730 days). The explicit window wins when both are supplied — this is what powers the sliding 90-day navigator on the public uptime history page.",
         "operationId": "getBatchComponentUptime",
         "parameters": [
           {
@@ -24473,6 +24734,19 @@
             "schema": {
               "type": "string",
               "format": "date"
+            }
+          },
+          {
+            "name": "componentIds",
+            "in": "query",
+            "description": "Component ids to include (max 100); omit for every component",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
             }
           }
         ],
@@ -37172,6 +37446,54 @@
           }
         }
       },
+      "BrowserCapabilityEnvelope": {
+        "type": "object",
+        "properties": {
+          "iframes": {
+            "type": "boolean",
+            "description": "Cross-origin iframes are enabled"
+          },
+          "stripeElements": {
+            "type": "boolean",
+            "description": "Stripe Elements iframes are enabled"
+          },
+          "popups": {
+            "type": "boolean",
+            "description": "Popup windows are enabled"
+          },
+          "downloads": {
+            "type": "boolean",
+            "description": "File downloads are enabled"
+          },
+          "viewport": {
+            "type": "boolean",
+            "description": "Viewport emulation is enabled"
+          },
+          "geolocation": {
+            "type": "boolean",
+            "description": "Geolocation emulation is enabled"
+          },
+          "clipboard": {
+            "type": "boolean",
+            "description": "Clipboard access is enabled"
+          },
+          "upload": {
+            "type": "boolean",
+            "description": "File upload is enabled"
+          }
+        },
+        "description": "Browser capability envelope for this runtime",
+        "required": [
+          "iframes",
+          "stripeElements",
+          "popups",
+          "downloads",
+          "viewport",
+          "geolocation",
+          "clipboard",
+          "upload"
+        ]
+      },
       "BulkMonitorActionRequest": {
         "required": [
           "action",
@@ -37724,6 +38046,22 @@
           }
         },
         "description": "A single named step within a code check execution"
+      },
+      "CodeTestTargetRequest": {
+        "type": "object",
+        "properties": {
+          "environmentId": {
+            "type": "string",
+            "description": "Environment to test against; null uses the monitor's environment",
+            "format": "uuid",
+            "nullable": true
+          },
+          "region": {
+            "type": "string",
+            "description": "Region for this test; null uses the monitor's first region",
+            "nullable": true
+          }
+        }
       },
       "ComponentImpact": {
         "required": [
@@ -41005,6 +41343,25 @@
         },
         "description": "Environment with variable substitutions for monitor configs"
       },
+      "ErrorCategory": {
+        "type": "string",
+        "description": "Machine class clients use to choose the next action",
+        "enum": [
+          "validation",
+          "blocked",
+          "auth",
+          "permission",
+          "ownership",
+          "plan",
+          "quota",
+          "rate_limit",
+          "conflict",
+          "confirmation_required",
+          "not_found",
+          "gone",
+          "platform"
+        ]
+      },
       "ErrorEntry": {
         "required": [
           "code",
@@ -41032,10 +41389,30 @@
         },
         "description": "One structured validation rejection"
       },
+      "ErrorNext": {
+        "type": "object",
+        "description": "Command and documentation that fix this error",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "Command that fixes this error",
+            "nullable": true,
+            "example": "devhelm account usage"
+          },
+          "docs": {
+            "type": "string",
+            "description": "Documentation page for this error",
+            "nullable": true,
+            "example": "https://docs.devhelm.io/errors/SYNTHETICS_USAGE_CAPPED"
+          }
+        }
+      },
       "ErrorResponse": {
         "required": [
+          "category",
           "code",
           "message",
+          "retryable",
           "status",
           "timestamp"
         ],
@@ -41049,8 +41426,16 @@
           },
           "code": {
             "type": "string",
-            "description": "Coarse machine-readable error category (e.g. NOT_FOUND, RATE_LIMITED); stable per status",
+            "description": "Stable machine code for this error, such as NOT_FOUND or SYNTHETICS_USAGE_CAPPED",
             "example": "NOT_FOUND"
+          },
+          "category": {
+            "$ref": "#/components/schemas/ErrorCategory"
+          },
+          "retryable": {
+            "type": "boolean",
+            "description": "Whether a later attempt can succeed without changing the request",
+            "example": false
           },
           "message": {
             "type": "string",
@@ -41081,12 +41466,118 @@
                 }
               ]
             }
+          },
+          "retryAfterSeconds": {
+            "type": "integer",
+            "description": "Seconds to wait before retrying a rate limit",
+            "format": "int64",
+            "nullable": true,
+            "example": 30
+          },
+          "resource": {
+            "type": "string",
+            "description": "Meter or resource this limit applies to",
+            "nullable": true,
+            "example": "browser_runs"
+          },
+          "used": {
+            "type": "integer",
+            "description": "Amount used in the current period",
+            "format": "int64",
+            "nullable": true,
+            "example": 1000
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum allowed for this period or plan",
+            "format": "int64",
+            "nullable": true,
+            "example": 1000
+          },
+          "resetsAt": {
+            "type": "string",
+            "description": "When this quota window resumes (ISO-8601)",
+            "nullable": true,
+            "example": "2026-11-01T00:00:00Z"
+          },
+          "plan": {
+            "type": "string",
+            "description": "Plan this refusal was evaluated against",
+            "nullable": true,
+            "example": "FREE"
+          },
+          "upgradeUrl": {
+            "type": "string",
+            "description": "Page where an admin can change the plan",
+            "nullable": true,
+            "example": "https://app.devhelm.io/settings/billing"
+          },
+          "canRaise": {
+            "type": "string",
+            "description": "Role that can raise this limit",
+            "nullable": true,
+            "example": "org admin"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Who owns the resource when a write is refused",
+            "nullable": true
+          },
+          "required": {
+            "type": "string",
+            "description": "Missing scope, secret key, or other required value",
+            "nullable": true
+          },
+          "have": {
+            "type": "integer",
+            "description": "Current amount compared with the plan limit",
+            "format": "int64",
+            "nullable": true,
+            "example": 10
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why permission was refused: scope or role",
+            "nullable": true,
+            "enum": [
+              "scope",
+              "role"
+            ],
+            "example": "role"
+          },
+          "next": {
+            "description": "Command and docs that fix this error",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ErrorNext"
+              }
+            ]
+          },
+          "details": {
+            "type": "object",
+            "description": "Extra fields for this error, such as a missing secret key and environment",
+            "nullable": true,
+            "additionalProperties": true
+          },
+          "expiredAt": {
+            "type": "string",
+            "description": "When this evidence expired",
+            "format": "date-time",
+            "nullable": true
+          },
+          "policy": {
+            "type": "string",
+            "description": "Retention written when the artifact was saved, such as P7D",
+            "nullable": true
           }
         },
         "description": "Uniform error envelope returned for every non-2xx response",
         "example": {
           "status": 404,
           "code": "NOT_FOUND",
+          "category": "not_found",
+          "retryable": false,
           "message": "Monitor not found",
           "timestamp": 1737302400000,
           "requestId": "5b6f7a8c-1234-4d5e-9f0a-1b2c3d4e5f6a"
@@ -44753,6 +45244,14 @@
                 "$ref": "#/components/schemas/PackageUploadDto"
               }
             ]
+          },
+          "usageProjection": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MonitorUsageProjectionDto"
+              }
+            ]
           }
         },
         "description": "Full monitor representation"
@@ -45263,6 +45762,12 @@
             "items": {
               "$ref": "#/components/schemas/CreateAssertionRequest"
             }
+          },
+          "environmentId": {
+            "type": "string",
+            "description": "Environment to test against; null uses the monitor environment",
+            "format": "uuid",
+            "nullable": true
           }
         }
       },
@@ -45334,6 +45839,64 @@
             }
           }
         }
+      },
+      "MonitorUsageProjectionDto": {
+        "type": "object",
+        "properties": {
+          "meter": {
+            "type": "string",
+            "description": "Usage meter this schedule bills",
+            "nullable": true
+          },
+          "projectedMonthlyRuns": {
+            "type": "integer",
+            "description": "Projected runs this month from interval and locations",
+            "format": "int64"
+          },
+          "includedRunsLeft": {
+            "type": "integer",
+            "description": "Included runs left this period; null when unlimited",
+            "format": "int64",
+            "nullable": true
+          },
+          "reserveRuns": {
+            "type": "integer",
+            "description": "Runs held back for validation and triggers",
+            "format": "int64"
+          },
+          "scheduledUsageEatsReserve": {
+            "type": "boolean",
+            "description": "True when this schedule would use the validation reserve"
+          },
+          "wouldHitHardStop": {
+            "type": "boolean",
+            "description": "True when this schedule would hit the included-run stop"
+          },
+          "wouldHitSpendCap": {
+            "type": "boolean",
+            "description": "True when this schedule would pass the spend cap"
+          },
+          "projectedOverageRuns": {
+            "type": "integer",
+            "description": "Runs past the included pool if this schedule runs all month",
+            "format": "int64"
+          },
+          "projectedOverageCents": {
+            "type": "integer",
+            "description": "Projected overage in cents; null when overage is off",
+            "format": "int64",
+            "nullable": true
+          }
+        },
+        "description": "Projected monthly usage for a browser or multi-step API schedule",
+        "required": [
+          "projectedMonthlyRuns",
+          "reserveRuns",
+          "scheduledUsageEatsReserve",
+          "wouldHitHardStop",
+          "wouldHitSpendCap",
+          "projectedOverageRuns"
+        ]
       },
       "MonitorVersionDto": {
         "required": [
@@ -48383,6 +48946,7 @@
           "source",
           "tabCounts",
           "organizationId",
+          "countsTowardHealth",
           "cancelRequested",
           "stream",
           "attempt",
@@ -48463,6 +49027,10 @@
               "deployment_validation",
               "session_renew"
             ]
+          },
+          "countsTowardHealth": {
+            "type": "boolean",
+            "description": "Whether this run votes on monitor health"
           },
           "enqueuedAt": {
             "type": "string",
@@ -49382,6 +49950,54 @@
             "description": "When runtime support ends",
             "format": "date-time",
             "nullable": true
+          },
+          "availableAt": {
+            "type": "string",
+            "description": "When this runtime became available",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deprecatedAt": {
+            "type": "string",
+            "description": "When this runtime was deprecated; null while current",
+            "format": "date-time",
+            "nullable": true
+          },
+          "packages": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Pinned npm packages available to checks",
+              "nullable": true
+            },
+            "description": "Pinned npm packages available to checks",
+            "nullable": true
+          },
+          "nodeBuiltins": {
+            "type": "array",
+            "description": "Node built-in modules available to checks",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Node built-in modules available to checks"
+            }
+          },
+          "reservedBindings": {
+            "type": "array",
+            "description": "Environment bindings this runtime reads",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Environment bindings this runtime reads"
+            }
+          },
+          "browser": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BrowserCapabilityEnvelope"
+              }
+            ]
           }
         },
         "description": "Default execution environment; null uses the catalog default"
@@ -49490,7 +50106,7 @@
             "minLength": 0,
             "pattern": "^$|^[A-Za-z0-9._-]+$",
             "type": "string",
-            "description": "Runtime pin YYYY.MM; omit uses workspace default then sole available",
+            "description": "Runtime pin such as 2026.11; omit to pin the current runtime at create",
             "nullable": true
           }
         }
@@ -51191,6 +51807,17 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/MonitorTestResultDto"
+          }
+        }
+      },
+      "SingleValueResponseMonitorUsageProjectionDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MonitorUsageProjectionDto"
           }
         }
       },
