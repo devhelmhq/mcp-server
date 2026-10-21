@@ -24,6 +24,7 @@ EXPECTED_TOOLS = [
     "pause_monitor",
     "resume_monitor",
     "test_monitor",
+    "test_monitor_run",
     "list_monitor_results",
     "list_monitor_versions",
     "list_incidents",

@@ -24,6 +24,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deletes, clears and binary downloads for testing inboxes are not offered
   over MCP yet: deletes need the confirmation step, and binaries need
   signed-URL output.
+- `test_monitor_run` queues a validation run for a browser or
+  multi-step API monitor and returns it. Optional `environment_id` and
+  `region` pick where it runs.
+
+### Fixed
+
+- `test_monitor` returns the queued validation run for browser and
+  multi-step API monitors instead of failing. Output for uptime monitors
+  is unchanged (the probe result).
+
+Both need the `devhelm` SDK release with `monitors.test_run()` and
+`DevhelmMonitorTestQueuedError` (devhelmhq/sdk-python#135). Raise the
+`devhelm` floor to that version when cutting this release.
 
 ## [1.8.0] — 2026-10-12
 
