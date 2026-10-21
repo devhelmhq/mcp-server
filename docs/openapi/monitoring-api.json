@@ -24428,8 +24428,8 @@
         "tags": [
           "Status Data"
         ],
-        "summary": "Batch daily uptime data for all leaf components",
-        "description": "Returns daily uptime for every active non-group component with uptime data, keyed by component ID. Replaces N individual per-component uptime calls with a single request. Supports either a preset ``period`` or an explicit ``from``/``to`` window (ISO yyyy-MM-dd, max 730 days). The explicit window wins when both are supplied — this is what powers the sliding 90-day navigator on the public uptime history page.",
+        "summary": "Batch daily uptime data for leaf components",
+        "description": "Returns daily uptime keyed by component ID. Pass ``componentIds`` to limit the batch to those components (max 100); omit it for every active component with uptime data. Supports either a preset ``period`` or an explicit ``from``/``to`` window (ISO yyyy-MM-dd, max 730 days). The explicit window wins when both are supplied — this is what powers the sliding 90-day navigator on the public uptime history page.",
         "operationId": "getBatchComponentUptime",
         "parameters": [
           {
@@ -24473,6 +24473,19 @@
             "schema": {
               "type": "string",
               "format": "date"
+            }
+          },
+          {
+            "name": "componentIds",
+            "in": "query",
+            "description": "Component ids to include (max 100); omit for every component",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
             }
           }
         ],
@@ -41005,6 +41018,25 @@
         },
         "description": "Environment with variable substitutions for monitor configs"
       },
+      "ErrorCategory": {
+        "type": "string",
+        "description": "Machine class clients use to choose the next action",
+        "enum": [
+          "validation",
+          "blocked",
+          "auth",
+          "permission",
+          "ownership",
+          "plan",
+          "quota",
+          "rate_limit",
+          "conflict",
+          "confirmation_required",
+          "not_found",
+          "gone",
+          "platform"
+        ]
+      },
       "ErrorEntry": {
         "required": [
           "code",
@@ -41032,10 +41064,30 @@
         },
         "description": "One structured validation rejection"
       },
+      "ErrorNext": {
+        "type": "object",
+        "description": "Command and documentation that fix this error",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "Command that fixes this error",
+            "nullable": true,
+            "example": "devhelm account usage"
+          },
+          "docs": {
+            "type": "string",
+            "description": "Documentation page for this error",
+            "nullable": true,
+            "example": "https://docs.devhelm.io/errors/SYNTHETICS_USAGE_CAPPED"
+          }
+        }
+      },
       "ErrorResponse": {
         "required": [
+          "category",
           "code",
           "message",
+          "retryable",
           "status",
           "timestamp"
         ],
@@ -41049,8 +41101,16 @@
           },
           "code": {
             "type": "string",
-            "description": "Coarse machine-readable error category (e.g. NOT_FOUND, RATE_LIMITED); stable per status",
+            "description": "Stable machine code for this error, such as NOT_FOUND or SYNTHETICS_USAGE_CAPPED",
             "example": "NOT_FOUND"
+          },
+          "category": {
+            "$ref": "#/components/schemas/ErrorCategory"
+          },
+          "retryable": {
+            "type": "boolean",
+            "description": "Whether a later attempt can succeed without changing the request",
+            "example": false
           },
           "message": {
             "type": "string",
@@ -41081,12 +41141,118 @@
                 }
               ]
             }
+          },
+          "retryAfterSeconds": {
+            "type": "integer",
+            "description": "Seconds to wait before retrying a rate limit",
+            "format": "int64",
+            "nullable": true,
+            "example": 30
+          },
+          "resource": {
+            "type": "string",
+            "description": "Meter or resource this limit applies to",
+            "nullable": true,
+            "example": "browser_runs"
+          },
+          "used": {
+            "type": "integer",
+            "description": "Amount used in the current period",
+            "format": "int64",
+            "nullable": true,
+            "example": 1000
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum allowed for this period or plan",
+            "format": "int64",
+            "nullable": true,
+            "example": 1000
+          },
+          "resetsAt": {
+            "type": "string",
+            "description": "When this quota window resumes (ISO-8601)",
+            "nullable": true,
+            "example": "2026-11-01T00:00:00Z"
+          },
+          "plan": {
+            "type": "string",
+            "description": "Plan this refusal was evaluated against",
+            "nullable": true,
+            "example": "FREE"
+          },
+          "upgradeUrl": {
+            "type": "string",
+            "description": "Page where an admin can change the plan",
+            "nullable": true,
+            "example": "https://app.devhelm.io/settings/billing"
+          },
+          "canRaise": {
+            "type": "string",
+            "description": "Role that can raise this limit",
+            "nullable": true,
+            "example": "org admin"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Who owns the resource when a write is refused",
+            "nullable": true
+          },
+          "required": {
+            "type": "string",
+            "description": "Missing scope, secret key, or other required value",
+            "nullable": true
+          },
+          "have": {
+            "type": "integer",
+            "description": "Current amount compared with the plan limit",
+            "format": "int64",
+            "nullable": true,
+            "example": 10
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why permission was refused: scope or role",
+            "nullable": true,
+            "enum": [
+              "scope",
+              "role"
+            ],
+            "example": "role"
+          },
+          "next": {
+            "description": "Command and docs that fix this error",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ErrorNext"
+              }
+            ]
+          },
+          "details": {
+            "type": "object",
+            "description": "Extra fields for this error, such as a missing secret key and environment",
+            "nullable": true,
+            "additionalProperties": true
+          },
+          "expiredAt": {
+            "type": "string",
+            "description": "When this evidence expired",
+            "format": "date-time",
+            "nullable": true
+          },
+          "policy": {
+            "type": "string",
+            "description": "Retention written when the artifact was saved, such as P7D",
+            "nullable": true
           }
         },
         "description": "Uniform error envelope returned for every non-2xx response",
         "example": {
           "status": 404,
           "code": "NOT_FOUND",
+          "category": "not_found",
+          "retryable": false,
           "message": "Monitor not found",
           "timestamp": 1737302400000,
           "requestId": "5b6f7a8c-1234-4d5e-9f0a-1b2c3d4e5f6a"
