@@ -6,6 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Email Testing tools: `create_email_address`, `wait_for_email`,
+  `get_latest_email`, `list_email_messages`, `get_email_message`,
+  `get_email_message_source`, `list_email_otp_codes`, `list_email_links`,
+  `inject_email_message`, `list_email_domains`, `get_email_domain`,
+  `create_email_domain`, `update_email_domain`, `verify_email_domain`,
+  `list_email_domain_activity`.
+- Webhook Testing tools: `list_webhook_inboxes`, `get_webhook_inbox`,
+  `create_webhook_inbox`, `update_webhook_inbox`,
+  `list_webhook_inbox_activity`, `wait_for_webhook_event`,
+  `list_webhook_events`, `get_latest_webhook_event`, `get_webhook_event`.
+- Every new tool carries MCP annotations (`readOnlyHint`,
+  `destructiveHint`, `idempotentHint`). Waits stop at 25 s, lists at 50
+  rows, and message, source and event bodies at 64 KB with a truncated flag.
+- Deletes, clears and binary downloads for testing inboxes are not offered
+  over MCP yet: deletes need the confirmation step, and binaries need
+  signed-URL output.
+
 ## [1.8.0] — 2026-10-12
 
 ### Changed
