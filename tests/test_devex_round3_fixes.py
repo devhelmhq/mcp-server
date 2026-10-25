@@ -83,7 +83,7 @@ class TestCreateMonitorAlwaysSetsManagedByMcp:
     def test_payload_carries_managed_by_mcp_when_omitted(self) -> None:
         captured: dict[str, Any] = {}
 
-        def fake_create(payload: dict[str, Any]) -> dict[str, Any]:
+        def fake_create(payload: dict[str, Any], **_: object) -> dict[str, Any]:
             captured["payload"] = payload
             return {"id": "mon_x", **payload}
 
@@ -116,7 +116,7 @@ class TestCreateMonitorAlwaysSetsManagedByMcp:
         # the SDK call, so attribution is guaranteed.
         captured: dict[str, Any] = {}
 
-        def fake_create(payload: dict[str, Any]) -> dict[str, Any]:
+        def fake_create(payload: dict[str, Any], **_: object) -> dict[str, Any]:
             captured["payload"] = payload
             return {"id": "mon_x", **payload}
 
@@ -187,9 +187,9 @@ class TestUpstreamErrorsReportIsError:
 
         assert result.is_error is True
         text = result.content[0].text
-        assert "ApiError (404 NOT_FOUND): Monitor not found" in text
+        assert "not_found NOT_FOUND: Monitor not found" in text
         # Request id must survive the wrap so users can quote it for support.
-        assert "request_id=req_abc123" in text
+        assert '"requestId": "req_abc123"' in text
 
     def test_transport_error_returns_is_error_true(self) -> None:
         mock_client = MagicMock()
@@ -201,26 +201,29 @@ class TestUpstreamErrorsReportIsError:
             result = self._run_tool_and_get_result("list_monitors", {})
 
         assert result.is_error is True
-        assert "TransportError: connection refused" in result.content[0].text
+        assert "transport TRANSPORT: connection refused" in result.content[0].text
 
     def test_delete_tool_also_sets_is_error_on_failure(self) -> None:
         # ``delete_monitor`` returns a plain string on success (rather than a
         # serialized dict) — make sure the ``isError`` wrap survives that
         # narrower return-type contract too.
         mock_client = MagicMock()
-        mock_client.monitors.delete.side_effect = DevhelmApiError(
+        mock_client.monitors.get.side_effect = DevhelmApiError(
             "Insufficient permissions",
             status=403,
             code="FORBIDDEN",
         )
 
-        with patch("devhelm_mcp.tools.monitors.get_client", return_value=mock_client):
+        with (
+            patch("devhelm_mcp.tools.monitors.get_client", return_value=mock_client),
+            patch.dict("os.environ", {"DEVHELM_API_TOKEN": "dh_test"}),
+        ):
             result = self._run_tool_and_get_result(
                 "delete_monitor", {"monitor_id": "mon_x"}
             )
 
         assert result.is_error is True
-        assert "ApiError (403 FORBIDDEN)" in result.content[0].text
+        assert "permission FORBIDDEN" in result.content[0].text
 
 
 # --------------------------------------------------------------------------- #
@@ -265,7 +268,7 @@ class TestApiTokenHiddenFromInputSchema:
         # not break the function signature.
         captured: dict[str, Any] = {}
 
-        def fake_list() -> list[dict[str, Any]]:
+        def fake_list(**_: object) -> list[dict[str, Any]]:
             return []
 
         mock_client = MagicMock()

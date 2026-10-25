@@ -8,6 +8,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Synthetics tools (doc 42 §10): `test_monitor_adhoc`, `probe_monitor`,
+  `run_monitor_now`, `trigger_monitor`, `get_run`, `list_runs`,
+  `get_run_steps`, `get_run_console`, `get_run_network`,
+  `list_run_artifacts`, `get_run_artifact`, `get_run_trace_summary`,
+  `diff_run`, `cancel_run`, revision tools, `publish_monitor`,
+  `rollback_monitor`, `preview_rollback_monitor`, `get_monitor_version`,
+  `list_monitor_history`, `get_monitor_drift`, `mute_monitor`,
+  `unmute_monitor`, `quarantine_monitor`, `release_quarantine_monitor`,
+  `restore_monitor`, `list_monitor_trash`, `list_runtimes`, `get_runtime`,
+  `set_secret_value`, `get_account_usage`, `get_account_entitlements`, and
+  incident `update`, `acknowledge`, `updates`, `runs`, `events`, `related`,
+  `trigger` tools.
+- `create_monitor` / `update_monitor` take inline `code: {entrypoint, files,
+  include?}` (1 MB per call).
+- One run envelope for every run tool, with `wait_s` ≤ 25.
+- Confirmation tokens for `delete_monitor`, `publish_monitor`,
+  `rollback_monitor`.
+- `investigate_incident` prompt; `instructions` rewritten as workflows.
+- Every tool carries annotations.
+
+### Changed
+
+- Errors carry every `ErrorResponse` field plus a sentence for the agent.
+- `create_secret` / `update_secret` no longer take `value`: the value comes
+  from the user by elicitation, or the tool returns a dashboard link.
+- `delete_monitor` asks for confirmation first.
+- `test_monitor` on an uptime monitor returns the probe result with a
+  deprecation note until 2027-01-31; use `probe_monitor`.
+
+### Deprecated
+
+- `list_monitor_results` (alias of `list_monitor_history`, removed
+  2027-01-31).
+
+
 - Email Testing tools: `create_email_address`, `wait_for_email`,
   `get_latest_email`, `list_email_messages`, `get_email_message`,
   `get_email_message_source`, `list_email_otp_codes`, `list_email_links`,
