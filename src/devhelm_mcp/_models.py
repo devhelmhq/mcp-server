@@ -12,8 +12,8 @@ from devhelm import (
     MonitorDto,
     MonitorTestResultDto,
     RevisionDto,
-    RollbackPreviewDto,
     RunArtifactDto,
+    RunConsoleDto,
     RunFailureDto,
     RunStepDto,
 )
@@ -111,6 +111,15 @@ class TextFiles(_Out):
     )
 
 
+class ConsoleOut(_Out):
+    """Console output trimmed to fit the 64 KB tool cap."""
+
+    console: RunConsoleDto
+    truncated: bool = False
+    omitted_groups: int = 0
+    omitted_lines: int = 0
+
+
 class ConfirmationRequired(_Out, Generic[T]):
     status: Literal["confirmation_required"] = "confirmation_required"
     changes: list[str]
@@ -148,6 +157,13 @@ class Done(_Out):
     message: str
 
 
+class Declined(_Out):
+    """The human declined to give a value; nothing was written."""
+
+    status: Literal["declined"] = "declined"
+    message: str
+
+
 class SecretValueLink(_Out):
     """No elicitation support: the human sets the value in the dashboard."""
 
@@ -160,7 +176,9 @@ __all__ = [
     "MAX_INLINE_CODE_BYTES",
     "CodeFiles",
     "ConfirmationRequired",
+    "ConsoleOut",
     "CursorPageOut",
+    "Declined",
     "Deleted",
     "Done",
     "PageOut",
@@ -168,7 +186,6 @@ __all__ = [
     "PublishPreview",
     "Published",
     "RolledBack",
-    "RollbackPreviewDto",
     "RunEnvelope",
     "SecretValueLink",
     "TextFiles",

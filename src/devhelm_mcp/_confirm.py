@@ -21,6 +21,7 @@ import secrets
 import time
 from collections.abc import Mapping
 
+from devhelm import DevhelmApiError
 from devhelm._errors import client_error
 from pydantic import JsonValue
 
@@ -96,7 +97,7 @@ def verify(
         raise _invalid("The confirmation token expired (tokens last 15 minutes).")
 
 
-def _invalid(message: str) -> Exception:
+def _invalid(message: str) -> DevhelmApiError:
     return client_error(
         "confirmation_required",
         "CONFIRMATION_TOKEN_INVALID",

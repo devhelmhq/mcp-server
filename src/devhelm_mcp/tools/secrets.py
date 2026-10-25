@@ -8,17 +8,19 @@ sets the value. ``create_secret`` / ``update_secret`` take no ``value``.
 from __future__ import annotations
 
 import os
+from dataclasses import dataclass
+from typing import Literal
 from urllib.parse import urlencode
+from uuid import UUID
 
 import anyio
-from devhelm import SecretDto
-from devhelm.resources.environments import resolve_environment_id
+from devhelm import CreateSecretRequest, Devhelm, SecretDto, UpdateSecretRequest
 from fastmcp import Context, FastMCP
 from fastmcp.server.elicitation import AcceptedElicitation
 from pydantic import BaseModel, Field
 
-from devhelm_mcp._models import Done, SecretValueLink
-from devhelm_mcp._tooling import DESTRUCTIVE, READ, WRITE_IDEMPOTENT, tool
+from devhelm_mcp._models import Declined, Done, SecretValueLink
+from devhelm_mcp._tooling import DESTRUCTIVE, READ, WRITE, WRITE_IDEMPOTENT, tool
 from devhelm_mcp.client import get_client
 
 APP_URL = os.getenv("DEVHELM_APP_URL", "https://app.devhelm.io")
@@ -36,18 +38,24 @@ class SecretValueInput(BaseModel):
 
 
 def _supports_elicitation(ctx: Context) -> bool:
-    try:
-        params = ctx.session.client_params
-    except (AttributeError, RuntimeError):
-        return False
+    if ctx.request_context is None:
+        return False  # no live MCP session (direct calls): nobody to ask
+    params = ctx.session.client_params
     return bool(params and params.capabilities and params.capabilities.elicitation)
 
 
-async def ask_value(ctx: Context, key: str, environment: str | None) -> str | None:
-    """The value from the human; ``None`` when this client can't ask, ``""``
-    when the human declined."""
+@dataclass(frozen=True)
+class Answer:
+    """What asking the human produced."""
+
+    kind: Literal["value", "declined", "unsupported"]
+    value: str = ""
+
+
+async def ask_value(ctx: Context, key: str, environment: str | None) -> Answer:
+    """Ask the human for the value with MCP elicitation, when the client can."""
     if not _supports_elicitation(ctx):
-        return None
+        return Answer("unsupported")
     where = f" in environment {environment}" if environment else ""
     answer = await ctx.elicit(
         f"Enter the value for secret {key}{where}. It goes straight to DevHelm "
@@ -59,8 +67,8 @@ async def ask_value(ctx: Context, key: str, environment: str | None) -> str | No
     if isinstance(answer, AcceptedElicitation):
         data: object = answer.data
         if isinstance(data, SecretValueInput) and data.value:
-            return data.value
-    return ""
+            return Answer("value", data.value)
+    return Answer("declined")
 
 
 def _link(key: str, environment: str | None) -> SecretValueLink:
@@ -70,6 +78,19 @@ def _link(key: str, environment: str | None) -> SecretValueLink:
         "open the link and set the value there; never ask them to paste it in "
         "chat.",
     )
+
+
+def _declined() -> Declined:
+    return Declined(
+        message="The user declined; nothing changed. Don't retry unless they ask."
+    )
+
+
+def _environment_id(client: Devhelm, environment: str) -> UUID:
+    try:
+        return UUID(environment)
+    except ValueError:
+        return client.environments.get(environment).id
 
 
 def register(mcp: FastMCP) -> None:
@@ -87,61 +108,63 @@ def register(mcp: FastMCP) -> None:
         environment: str,
         ctx: Context,
         api_token: str | None = None,
-    ) -> Done | SecretValueLink:
+    ) -> Done | Declined | SecretValueLink:
         """Set a secret's value in one environment (slug or id). The value is
         asked from the user directly (elicitation), or the tool returns the
         dashboard link. Never put a value in the arguments or the chat."""
-        value = await ask_value(ctx, key, environment)
-        if value is None:
+        answer = await ask_value(ctx, key, environment)
+        if answer.kind == "unsupported":
             return _link(key, environment)
-        if not value:
-            return Done(message="The user declined; nothing changed.")
+        if answer.kind == "declined":
+            return _declined()
         client = get_client(api_token)
         await anyio.to_thread.run_sync(
-            lambda: client.secrets.values.set(key, environment=environment, value=value)
+            lambda: client.secrets.values.set(
+                key, environment=environment, value=answer.value
+            )
         )
         return Done(message=f"Value of {key} set in {environment}.")
 
-    @tool(mcp, WRITE_IDEMPOTENT)
+    @tool(mcp, WRITE)
     async def create_secret(
         key: str,
         ctx: Context,
         environment: str | None = None,
         api_token: str | None = None,
-    ) -> SecretDto | Done | SecretValueLink:
+    ) -> SecretDto | Declined | SecretValueLink:
         """Create a secret. Its value is asked from the user directly
         (elicitation), or the tool returns the dashboard link. Code reads it
         as {{secrets.KEY}}."""
-        value = await ask_value(ctx, key, environment)
-        if value is None:
+        answer = await ask_value(ctx, key, environment)
+        if answer.kind == "unsupported":
             return _link(key, environment)
-        if not value:
-            return Done(message="The user declined; nothing created.")
+        if answer.kind == "declined":
+            return _declined()
         client = get_client(api_token)
 
         def create() -> SecretDto:
-            body: dict[str, str] = {"key": key, "value": value}
-            if environment is not None:
-                env_id = resolve_environment_id(client._transport, environment)
-                body["environmentId"] = str(env_id)
+            env_id = _environment_id(client, environment) if environment else None
+            body = CreateSecretRequest(
+                key=key, value=answer.value, environment_id=env_id
+            )
             return client.secrets.create(body)
 
         return await anyio.to_thread.run_sync(create)
 
-    @tool(mcp, WRITE_IDEMPOTENT)
+    @tool(mcp, WRITE)
     async def update_secret(
         key: str, ctx: Context, api_token: str | None = None
-    ) -> SecretDto | Done | SecretValueLink:
+    ) -> SecretDto | Declined | SecretValueLink:
         """Replace a secret's value. Asked from the user directly
         (elicitation), or the tool returns the dashboard link."""
-        value = await ask_value(ctx, key, None)
-        if value is None:
+        answer = await ask_value(ctx, key, None)
+        if answer.kind == "unsupported":
             return _link(key, None)
-        if not value:
-            return Done(message="The user declined; nothing changed.")
+        if answer.kind == "declined":
+            return _declined()
         client = get_client(api_token)
         return await anyio.to_thread.run_sync(
-            lambda: client.secrets.update(key, {"value": value})
+            lambda: client.secrets.update(key, UpdateSecretRequest(value=answer.value))
         )
 
     @tool(mcp, DESTRUCTIVE)

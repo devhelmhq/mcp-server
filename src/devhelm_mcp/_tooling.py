@@ -23,6 +23,7 @@ from typing import ParamSpec, TypeVar, get_type_hints
 
 from devhelm import DevhelmApiError, DevhelmError, DevhelmValidationError
 from devhelm import WaitTimeoutError as _WaitTimeout
+from devhelm._errors import client_error
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from fastmcp.tools import ToolResult
@@ -131,7 +132,20 @@ def _convert(value: object, wrapped: bool, is_blocks: bool) -> ToolResult:
         ]
         return ToolResult(content=blocks)
     data = to_json(value)
-    text = TextContent(type="text", text=capped_text(data))
+    raw = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    if len(raw.encode("utf-8")) > TEXT_CAP_BYTES:
+        # Structured and text output stay identical and valid JSON: too much
+        # is refused with a pointer to narrow the call, never cut mid-way.
+        raise tool_error(
+            client_error(
+                "validation",
+                "OUTPUT_TOO_LARGE",
+                f"The result is {len(raw.encode('utf-8'))} bytes; tool output is "
+                f"capped at {TEXT_CAP_BYTES}. Call again with a smaller limit, a "
+                "cursor, or a filter (for files: path=).",
+            )
+        )
+    text = TextContent(type="text", text=raw)
     if wrapped:
         return ToolResult(
             content=[text],
@@ -186,6 +200,8 @@ _CODE_HINTS: dict[str, str] = {
     "incident. Retry without emergency.",
     "SYNTHETICS_USAGE_CAPPED": "The synthetics run cap is reached. Ask the user "
     "to raise it (get_account_usage shows the numbers).",
+    "OUTPUT_TOO_LARGE": "Narrow the call (smaller limit, cursor, filter or "
+    "path) and call again.",
     "CONFIRMATION_TOKEN_INVALID": "Call the tool again without "
     "confirmation_token to get a fresh one, show the user the changes and ask.",
 }

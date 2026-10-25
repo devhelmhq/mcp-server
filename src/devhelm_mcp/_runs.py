@@ -3,6 +3,8 @@ run-producing tool."""
 
 from __future__ import annotations
 
+import time
+
 from devhelm import Devhelm, RunDto, TriggerRunsResponse, WaitTimeoutError
 
 from devhelm_mcp._models import RunEnvelope, TriggerEnvelope
@@ -73,10 +75,11 @@ def trigger_envelope(
     client: Devhelm, started: TriggerRunsResponse, wait_s: int = 0
 ) -> TriggerEnvelope:
     """One shared ``wait_s`` budget for all of the trigger's runs."""
-    runs = [client.runs.get(ref.id) for ref in started.runs]
-    if wait_s > 0 and runs:
-        first = _wait(client, runs[0], wait_s)
-        runs = [first, *[client.runs.get(r.id) for r in runs[1:]]]
+    deadline = time.monotonic() + min(wait_s, MAX_WAIT_S)
+    runs = []
+    for ref in started.runs:
+        remaining = int(deadline - time.monotonic())
+        runs.append(_wait(client, client.runs.get(ref.id), remaining))
     envs = [envelope(client, r) for r in runs]
     pending = [str(e.run_id) for e in envs if e.phase != "finished"]
     nxt = (

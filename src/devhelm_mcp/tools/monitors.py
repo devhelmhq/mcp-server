@@ -213,9 +213,9 @@ def register(mcp: FastMCP) -> None:
         limit: Limit = 20,
         api_token: str | None = None,
     ) -> CursorPageOut[MonitorHistoryEntryDto]:
-        """Deprecated since 1.9 (removed 2027-01-31): use list_monitor_history.
-        Same result."""
-        deprecated("list_monitor_results", "list_monitor_history")
+        """DEPRECATED since 1.9, removed 2027-01-31: call list_monitor_history
+        instead (same arguments, same result)."""
+        deprecated("list_monitor_results", "list_monitor_history", since="1.9")
         return _history(monitor_id, cursor, limit, api_token)
 
     @tool(mcp, READ)

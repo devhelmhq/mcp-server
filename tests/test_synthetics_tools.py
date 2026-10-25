@@ -60,6 +60,8 @@ from devhelm_mcp import _confirm
 from devhelm_mcp._tooling import TEXT_CAP_BYTES, capped_text
 from devhelm_mcp.server import _strip_internal_schema_fields, mcp
 from devhelm_mcp.tools.revisions import cap_files
+from devhelm_mcp.tools.runs import cap_console
+from devhelm_mcp.tools.secrets import Answer
 from tests._factory import build
 
 MODULES = ["monitors", "revisions", "runs", "account", "secrets", "incidents"]
@@ -599,8 +601,8 @@ def test_set_secret_value_without_elicitation_returns_link(client: MagicMock) ->
 
 
 def test_set_secret_value_with_elicitation(client: MagicMock) -> None:
-    async def answer(*_: object) -> str:
-        return "s3cret"
+    async def answer(*_: object) -> Answer:
+        return Answer("value", "s3cret")
 
     with patch("devhelm_mcp.tools.secrets.ask_value", side_effect=answer):
         out = data(call("set_secret_value", {"key": "K", "environment": "prod"}))
@@ -612,13 +614,42 @@ def test_set_secret_value_with_elicitation(client: MagicMock) -> None:
 
 
 def test_create_secret_with_elicitation(client: MagicMock) -> None:
-    async def answer(*_: object) -> str:
-        return "v"
+    async def answer(*_: object) -> Answer:
+        return Answer("value", "v")
 
     client.secrets.create.return_value = build(SecretDto)
     with patch("devhelm_mcp.tools.secrets.ask_value", side_effect=answer):
         call("create_secret", {"key": "K"})
-    assert client.secrets.create.call_args.args[0] == {"key": "K", "value": "v"}
+    body = client.secrets.create.call_args.args[0]
+    assert (body.key, body.value, body.environment_id) == ("K", "v", None)
+
+
+def test_declined_elicitation_writes_nothing(client: MagicMock) -> None:
+    async def answer(*_: object) -> Answer:
+        return Answer("declined")
+
+    with patch("devhelm_mcp.tools.secrets.ask_value", side_effect=answer):
+        out = data(call("set_secret_value", {"key": "K", "environment": "prod"}))
+    assert out["status"] == "declined"
+    client.secrets.values.set.assert_not_called()
+
+
+def test_console_is_trimmed_to_the_cap() -> None:
+    from devhelm._generated import ConsoleLineDto
+
+    line = build(ConsoleLineDto, text="z" * 2000)
+    console = build(RunConsoleDto, groups=[], lines=[line] * 100)
+    out = cap_console(console)
+    assert out.truncated and out.omitted_lines > 0
+    assert len(json.dumps(out.model_dump(mode="json")).encode()) <= TEXT_CAP_BYTES
+
+
+def test_oversized_result_is_refused_not_cut(client: MagicMock) -> None:
+    client.monitors.list.return_value = [
+        build(MonitorDto, name="n" * 2000) for _ in range(50)
+    ]
+    with pytest.raises(ToolError, match="OUTPUT_TOO_LARGE"):
+        asyncio.run(mcp.call_tool("list_monitors", {}))
 
 
 # -- server-wide rules ---------------------------------------------------------------
