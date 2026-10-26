@@ -21,7 +21,7 @@ classifiers = [
 dependencies = [
     # Synthetics surfaces (doc 42 §9) are on sdk-python main but not on PyPI
     # yet. Swap for the released "devhelm>=1.13.0" before merging.
-    "devhelm @ git+https://github.com/devhelmhq/sdk-python@3653f5065ad0635836240861c180fbf8bc98d5e5",
+    "devhelm @ git+https://github.com/devhelmhq/sdk-python@f5ad98ed6fcc6fffc035019b5732d9da00ba479c",
     "fastmcp>=3.2.3,<4",
 ]
 

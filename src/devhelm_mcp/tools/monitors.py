@@ -22,6 +22,7 @@ from devhelm import (
     QuarantineMonitorRequest,
     RunSessionContext,
     UpdateMonitorRequest,
+    is_run,
 )
 from devhelm._authoring import (
     CodeMonitorType,
@@ -418,6 +419,13 @@ def register(mcp: FastMCP) -> None:
             region=region,
             session=session,
         )
+        if not is_run(run):
+            raise client_error(
+                "validation",
+                "USE_PROBE",
+                "The API returned a probe result for a code monitor.",
+                next_command="probe_monitor",
+            )
         return envelope(client, run, wait_s)
 
     @tool(mcp, READ)

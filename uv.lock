@@ -389,10 +389,11 @@ wheels = [
 [[package]]
 name = "devhelm"
 version = "1.12.0"
-source = { git = "https://github.com/devhelmhq/sdk-python?rev=3653f5065ad0635836240861c180fbf8bc98d5e5#3653f5065ad0635836240861c180fbf8bc98d5e5" }
+source = { git = "https://github.com/devhelmhq/sdk-python?rev=f5ad98ed6fcc6fffc035019b5732d9da00ba479c#f5ad98ed6fcc6fffc035019b5732d9da00ba479c" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic", extra = ["email"] },
+    { name = "typing-extensions" },
 ]
 
 [[package]]
@@ -415,7 +416,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "devhelm", git = "https://github.com/devhelmhq/sdk-python?rev=3653f5065ad0635836240861c180fbf8bc98d5e5" },
+    { name = "devhelm", git = "https://github.com/devhelmhq/sdk-python?rev=f5ad98ed6fcc6fffc035019b5732d9da00ba479c" },
     { name = "fastmcp", specifier = ">=3.2.3,<4" },
 ]
 
