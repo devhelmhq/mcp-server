@@ -488,5 +488,5 @@ class TestMaintenanceWindowErrorsBubbleUp:
 
         assert result.is_error is True
         text = result.content[0].text
-        assert "ApiError (400 VALIDATION_FAILED)" in text
-        assert "request_id=req_abc" in text
+        assert "validation VALIDATION_FAILED" in text
+        assert '"requestId": "req_abc"' in text

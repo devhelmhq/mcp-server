@@ -408,5 +408,5 @@ class TestServiceToolErrorsBubbleUp:
 
         assert result.is_error is True
         text = result.content[0].text
-        assert "ApiError (404 NOT_FOUND)" in text
-        assert "request_id=req_svc" in text
+        assert "not_found NOT_FOUND" in text
+        assert '"requestId": "req_svc"' in text

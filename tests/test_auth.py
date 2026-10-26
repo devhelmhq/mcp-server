@@ -227,7 +227,7 @@ class TestBearerHeaderEndToEnd:
 
         # Replace the registered tool's underlying function so we can
         # introspect resolution without an outbound HTTP call.
-        tools = asyncio.run(mcp.list_tools())
+        tools = asyncio.run(mcp.list_tools(run_middleware=False))
         tool = next(t for t in tools if t.name == "list_monitors")
         original_fn = tool.fn  # type: ignore[attr-defined]
         tool.fn = fake_list_monitors  # type: ignore[attr-defined]
@@ -273,7 +273,7 @@ class TestBearerHeaderEndToEnd:
             captured["arg"] = api_token
             return []
 
-        tools = asyncio.run(mcp.list_tools())
+        tools = asyncio.run(mcp.list_tools(run_middleware=False))
         tool = next(t for t in tools if t.name == "list_monitors")
         original_fn = tool.fn  # type: ignore[attr-defined]
         tool.fn = fake_list_monitors  # type: ignore[attr-defined]

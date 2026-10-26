@@ -19,8 +19,9 @@ classifiers = [
 ]
 
 dependencies = [
-    # Floor bumped to 1.12.0: CreateMonitorRequest.config is optional.
-    "devhelm>=1.12.0",
+    # Synthetics surfaces (doc 42 §9) are on sdk-python main but not on PyPI
+    # yet. Swap for the released "devhelm>=1.13.0" before merging.
+    "devhelm @ git+https://github.com/devhelmhq/sdk-python@f5ad98ed6fcc6fffc035019b5732d9da00ba479c",
     "fastmcp>=3.2.3,<4",
 ]
 
@@ -40,6 +41,9 @@ devhelm-mcp = "devhelm_mcp.server:main"
 # accepts it (pypa/twine#1317, pypi/warehouse#19083).
 requires = ["hatchling>=1.27,<1.30"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/devhelm_mcp"]

@@ -1,122 +1,134 @@
 """Tests for the SDK client wrapper helpers used by every MCP tool.
 
-The MCP server's only contact with the API is through the `devhelm` SDK
-client wrapper in `devhelm_mcp.client`. The most user-visible function is
-`format_error`, which translates SDK exceptions into the strings the LLM
-shows to the user. We pin its output here so that:
-
-  * regressions in the error envelope (e.g. losing `code` or `request_id`)
-    surface as a unit-test failure rather than a degraded UX in the LLM,
-  * downstream MCP clients (Cursor, Claude Desktop) can parse the error
-    string for the `request_id` token when filing support tickets.
+``format_error`` is what the agent reads on ``isError``: a header, one
+sentence on what to do, then every ``ErrorResponse`` field as JSON. One test
+per category pins the sentence (doc 42 §10 "Errors").
 """
 
 from __future__ import annotations
 
+import json
+
+import pytest
 from devhelm import (
     DevhelmApiError,
     DevhelmAuthError,
-    DevhelmNotFoundError,
     DevhelmTransportError,
     DevhelmValidationError,
+    WaitTimeoutError,
 )
+from devhelm._errors import error_from_response
 
 from devhelm_mcp.client import format_error
 
 
-def test_format_validation_error_includes_field_path() -> None:
+def _fields(text: str) -> dict[str, object]:
+    payload = json.loads(text.splitlines()[-1])
+    assert isinstance(payload, dict)
+    err = payload["error"]
+    assert isinstance(err, dict)
+    return err
+
+
+CATEGORY_SENTENCES = {
+    "validation": "Fix the fields named in `errors`",
+    "blocked": "must be set up first",
+    "auth": "check the DevHelm API token",
+    "permission": "lacks a scope or role",
+    "ownership": "Another tool owns this resource",
+    "plan": "whether to upgrade",
+    "quota": "quota for this period is used up",
+    "rate_limit": "Wait `retryAfterSeconds`",
+    "conflict": "Re-read it, then retry",
+    "confirmation_required": "ask before calling again",
+    "not_found": "do not guess",
+    "gone": "expired past retention",
+    "platform": "give the user the `requestId`",
+}
+
+
+@pytest.mark.parametrize(("category", "sentence"), CATEGORY_SENTENCES.items())
+def test_every_category_maps_to_an_agent_sentence(category: str, sentence: str) -> None:
+    body = {
+        "status": 409,
+        "code": "SOME_CODE",
+        "category": category,
+        "retryable": False,
+        "message": "refused",
+        "timestamp": 1,
+        "requestId": "req_1",
+        "owner": "TERRAFORM",
+        "next": {"command": "devhelm doctor"},
+    }
+    err = error_from_response(409, json.dumps(body))
+    text = format_error(err)
+    assert sentence in text
+    assert "Suggested next step: devhelm doctor" in text
+    fields = _fields(text)
+    assert fields["category"] == category
+    assert fields["requestId"] == "req_1"
+    assert fields["owner"] == "TERRAFORM"
+    assert fields["timestamp"] == 1
+
+
+def test_code_hint_wins_over_category() -> None:
+    body = {
+        "status": 409,
+        "code": "LIVE_REVISION_CHANGED",
+        "category": "conflict",
+        "retryable": False,
+        "message": "stale",
+        "timestamp": 1,
+    }
+    text = format_error(error_from_response(409, json.dumps(body)))
+    assert "liveRevisionId" in text
+
+
+def test_validation_error_lists_field_paths() -> None:
     err = DevhelmValidationError(
         "Request body validation failed",
-        errors=[{"loc": ("body", "url"), "msg": "must not be empty"}],
+        errors=[{"loc": ("body", "url"), "msg": "must not be empty"}],  # type: ignore[list-item, typeddict-item]  # partial pydantic ErrorDetails
     )
-    out = format_error(err)
-    assert out.startswith("ValidationError: Request body validation failed")
-    assert "body.url: must not be empty" in out
+    fields = _fields(format_error(err))
+    assert fields["category"] == "validation"
+    assert fields["errors"] == [
+        {"code": "FIELD_INVALID", "field": "body.url", "message": "must not be empty"}
+    ]
 
 
-def test_format_api_error_surfaces_status_code_and_request_id() -> None:
-    err = DevhelmApiError(
-        "Monitor not found",
-        status=404,
-        code="NOT_FOUND",
-        request_id="req_abc123",
-        detail="No monitor with id mon_42",
+def test_non_envelope_error_falls_back_to_status_category() -> None:
+    err = DevhelmApiError("Monitor not found", status=404, request_id="req_abc")
+    text = format_error(err)
+    fields = _fields(text)
+    assert fields["category"] == "not_found"
+    assert fields["requestId"] == "req_abc"
+    assert DevhelmApiError("boom", status=503).status == 503
+    assert _fields(format_error(DevhelmApiError("boom", status=503)))["category"] == (
+        "platform"
     )
-    out = format_error(err)
-    assert "ApiError (404 NOT_FOUND): Monitor not found" in out
-    assert "Detail: No monitor with id mon_42" in out
-    assert "request_id=req_abc123" in out
 
 
-def test_format_api_error_omits_code_when_absent() -> None:
-    err = DevhelmApiError("Server error", status=500)
-    out = format_error(err)
-    assert out.startswith("ApiError (500): Server error")
-    assert "request_id" not in out
+def test_auth_subclass() -> None:
+    err = DevhelmAuthError("bad token", status=401, code="UNAUTHORIZED")
+    assert "check the DevHelm API token" in format_error(err)
 
 
-def test_format_api_error_request_id_present_without_code() -> None:
-    err = DevhelmApiError(
-        "Rate limit exceeded",
-        status=429,
-        request_id="req_xyz",
-    )
-    out = format_error(err)
-    assert "ApiError (429): Rate limit exceeded" in out
-    assert "request_id=req_xyz" in out
-
-
-def test_format_auth_and_not_found_subclasses_use_api_error_shape() -> None:
-    # Subclasses still go through the DevhelmApiError branch, so the
-    # request_id/code surfacing must work for them too.
-    auth = DevhelmAuthError(
-        "Missing or invalid token",
-        status=401,
-        code="UNAUTHORIZED",
-        request_id="req_auth_1",
-    )
-    assert "ApiError (401 UNAUTHORIZED)" in format_error(auth)
-    assert "request_id=req_auth_1" in format_error(auth)
-
-    nf = DevhelmNotFoundError(
-        "Monitor not found",
-        status=404,
-        code="NOT_FOUND",
-        request_id="req_nf_1",
-    )
-    assert "ApiError (404 NOT_FOUND)" in format_error(nf)
-    assert "request_id=req_nf_1" in format_error(nf)
-
-
-def test_format_transport_error_passthrough() -> None:
-    err = DevhelmTransportError("connection refused")
-    out = format_error(err)
-    assert out == "TransportError: connection refused"
-
-
-# ---------- Surface telemetry override ----------
+def test_transport_and_wait_timeout() -> None:
+    text = format_error(DevhelmTransportError("connection refused"))
+    assert _fields(text)["category"] == "transport"
+    assert _fields(text)["retryable"] is True
+    timeout = WaitTimeoutError("run-1", "running", timeout_ms=1000)
+    fields = _fields(format_error(timeout))
+    assert fields["details"] == {"runId": "run-1", "phase": "running"}
 
 
 def test_get_client_overrides_surface_to_mcp() -> None:
-    """The MCP server wraps the SDK; its traffic must be attributed to
-    surface=mcp on the API side, not to the SDK's default sdk-py.
-
-    See https://devhelm.io/telemetry for the wire contract.
-    """
+    """MCP traffic is attributed to surface=mcp, SDK identity preserved."""
     from devhelm_mcp.client import get_client
 
     client = get_client("dummy-token-for-test")
-    # The SDK's underlying httpx.Client lives under several private attributes
-    # depending on the SDK release; reach in via the resources to touch the
-    # one we know exists. Resources hold the same httpx.Client by reference.
-    httpx_client = client.monitors._client  # type: ignore[attr-defined]
-    headers = httpx_client.headers
+    headers = client._http.headers
     assert headers["x-devhelm-surface"] == "mcp"
-    # SDK identity is preserved alongside the wrapper surface so the API can
-    # still see which SDK version this MCP build is on.
     assert headers["x-devhelm-sdk-name"] == "sdk-py"
-    # surface_version comes from importlib.metadata; in source-tree installs
-    # it may be "unknown", in published installs it's the package version.
-    # Either way it must be a non-empty string.
     assert headers["x-devhelm-surface-version"]
-    httpx_client.close()
+    client.close()

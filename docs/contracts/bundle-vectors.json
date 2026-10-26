@@ -1,0 +1,209 @@
+{
+  "version" : 1,
+  "digest" : "sha256: + lowercase hex of SHA-256 over the files sorted by unsigned UTF-8 path bytes; each file is int32 BE path byte length, path bytes, int64 BE content length, content. Text extensions (.ts .tsx .js .jsx .mjs .cjs .json .yml .yaml .md .txt .html .css) have CRLF replaced by LF; other bytes are hashed as sent. Paths are NFC, forward-slash, relative.",
+  "closure" : "From the entrypoint (or the only source file when none is given; the whole set when there are several): relative imports, tsconfig.json paths/baseUrl imports (with the config chain), JSON imports and the sibling auth.setup.ts. 'digest' covers the closure, 'uploadDigest' every file sent.",
+  "format" : "include: paths kept in the closure even when no import reaches them (their own imports follow). files: path to UTF-8 text; binaryFiles: path to base64 bytes; symlinks: path to link target. expect is {entrypoint, digest, uploadDigest, files (sorted by UTF-8 bytes)} or {refusal: {code, field?}}.",
+  "vectors" : [ {
+    "name" : "crlf-text",
+    "description" : "CRLF in a text file hashes as LF",
+    "request" : {
+      "entrypoint" : "checks/home.spec.ts",
+      "files" : {
+        "checks/home.spec.ts" : "import { test, expect } from '@playwright/test';\r\ntest('home', async () => {});\r\n"
+      }
+    },
+    "expect" : {
+      "entrypoint" : "checks/home.spec.ts",
+      "digest" : "sha256:4e5e15672f50d24c08a07208f2fbbf43ad4608a8dd339610759039c5a1ae2f01",
+      "uploadDigest" : "sha256:4e5e15672f50d24c08a07208f2fbbf43ad4608a8dd339610759039c5a1ae2f01",
+      "files" : [ "checks/home.spec.ts" ]
+    }
+  }, {
+    "name" : "binary-file",
+    "description" : "A binary file hashes byte for byte, CRLF bytes included; two sources and no entrypoint keep the set",
+    "request" : {
+      "files" : {
+        "checks/a.spec.ts" : "import { test, expect } from '@playwright/test';\ntest('a', async () => {});\n",
+        "checks/b.spec.ts" : "import { test, expect } from '@playwright/test';\ntest('b', async () => {});\n"
+      },
+      "binaryFiles" : {
+        "checks/fixtures/logo.png" : "iVBORw0KGgoAAQ=="
+      }
+    },
+    "expect" : {
+      "entrypoint" : null,
+      "digest" : "sha256:5232dd0ac6537cfb275f9b0902c7502562f12b18fb439d68d3382aef27d1ee10",
+      "uploadDigest" : "sha256:5232dd0ac6537cfb275f9b0902c7502562f12b18fb439d68d3382aef27d1ee10",
+      "files" : [ "checks/a.spec.ts", "checks/b.spec.ts", "checks/fixtures/logo.png" ]
+    }
+  }, {
+    "name" : "non-ascii-path",
+    "description" : "NFC non-ASCII paths sort by unsigned UTF-8 bytes",
+    "request" : {
+      "entrypoint" : "checks/café.spec.ts",
+      "files" : {
+        "checks/café.spec.ts" : "import { test, expect } from '@playwright/test';\nimport { zone } from './zürich';\ntest('c', async () => {});\n",
+        "checks/zürich.ts" : "export const zone = 'Europe/Zurich';\n"
+      }
+    },
+    "expect" : {
+      "entrypoint" : "checks/café.spec.ts",
+      "digest" : "sha256:d358feb1703f413cc868703ba628e93649c8eb28be7c2b4fb545033553742611",
+      "uploadDigest" : "sha256:d358feb1703f413cc868703ba628e93649c8eb28be7c2b4fb545033553742611",
+      "files" : [ "checks/café.spec.ts", "checks/zürich.ts" ]
+    }
+  }, {
+    "name" : "tsconfig-paths",
+    "description" : "A tsconfig paths alias pulls its target and the tsconfig into the closure",
+    "request" : {
+      "entrypoint" : "checks/login.spec.ts",
+      "files" : {
+        "checks/login.spec.ts" : "import { test, expect } from '@playwright/test';\nimport { login } from '@lib/login';\ntest('login', async ({ page }) => login(page));\n",
+        "lib/login.ts" : "export async function login(page: unknown) { return page; }\n",
+        "lib/unused.ts" : "export const unused = true;\n",
+        "tsconfig.json" : "{\n  // project config\n  \"compilerOptions\": {\n    \"baseUrl\": \".\",\n    \"paths\": { \"@lib/*\": [\"lib/*\"] },\n  },\n}\n"
+      }
+    },
+    "expect" : {
+      "entrypoint" : "checks/login.spec.ts",
+      "digest" : "sha256:5242eab2421b024668c25259cb771bc431a5c5fb947eafe20832cc309fd283a9",
+      "uploadDigest" : "sha256:535d48a7c888195df2c69709e0dc23ab778f6884bf791025b58097f267235475",
+      "files" : [ "checks/login.spec.ts", "lib/login.ts", "tsconfig.json" ]
+    }
+  }, {
+    "name" : "json-import",
+    "description" : "A JSON import is part of the closure",
+    "request" : {
+      "entrypoint" : "checks/users.spec.ts",
+      "files" : {
+        "checks/data/users.json" : "[{\"name\": \"ada\"}]\n",
+        "checks/users.spec.ts" : "import { test, expect } from '@playwright/test';\nimport users from './data/users.json';\ntest('users', async () => { expect(users).toBeTruthy(); });\n"
+      }
+    },
+    "expect" : {
+      "entrypoint" : "checks/users.spec.ts",
+      "digest" : "sha256:f32f95198bea905fabeeeed4b031e493f791c72693c57915907b3cfc533aa831",
+      "uploadDigest" : "sha256:f32f95198bea905fabeeeed4b031e493f791c72693c57915907b3cfc533aa831",
+      "files" : [ "checks/data/users.json", "checks/users.spec.ts" ]
+    }
+  }, {
+    "name" : "setup-file",
+    "description" : "The sibling auth.setup.ts joins the closure without an import",
+    "request" : {
+      "entrypoint" : "checks/account.spec.ts",
+      "files" : {
+        "checks/account.spec.ts" : "import { test, expect } from '@playwright/test';\ntest('account', async () => {});\n",
+        "checks/auth.setup.ts" : "import { test, expect } from '@playwright/test';\ntest('setup', async () => {});\n"
+      }
+    },
+    "expect" : {
+      "entrypoint" : "checks/account.spec.ts",
+      "digest" : "sha256:7a8ced7405f3de7f6bd70c5fba7df066a5bc9a80dec1ae006929ad906eedab68",
+      "uploadDigest" : "sha256:7a8ced7405f3de7f6bd70c5fba7df066a5bc9a80dec1ae006929ad906eedab68",
+      "files" : [ "checks/account.spec.ts", "checks/auth.setup.ts" ]
+    }
+  }, {
+    "name" : "symlink-refused",
+    "description" : "A symlink anywhere in the set is refused",
+    "request" : {
+      "files" : {
+        "checks/a.spec.ts" : "import { test, expect } from '@playwright/test';\ntest('a', async () => {});\n"
+      },
+      "symlinks" : {
+        "checks/link.ts" : "a.spec.ts"
+      }
+    },
+    "expect" : {
+      "refusal" : {
+        "code" : "MONITOR_PACKAGE_PATH_INVALID",
+        "field" : "checks/link.ts"
+      }
+    }
+  }, {
+    "name" : "import-outside-set-refused",
+    "description" : "A relative import that resolves outside the set is refused",
+    "request" : {
+      "entrypoint" : "checks/a.spec.ts",
+      "files" : {
+        "checks/a.spec.ts" : "import { test, expect } from '@playwright/test';\nimport { x } from '../shared/missing';\ntest('a', async () => {});\n"
+      }
+    },
+    "expect" : {
+      "refusal" : {
+        "code" : "IMPORT_NOT_IN_BUNDLE",
+        "field" : "checks/a.spec.ts"
+      }
+    }
+  }, {
+    "name" : "include-set",
+    "description" : "Include-set clients send the directory; the server closes it from the entrypoint",
+    "request" : {
+      "entrypoint" : "checks/checkout.spec.ts",
+      "files" : {
+        "checks/README.md" : "# Checks\r\n",
+        "checks/checkout.spec.ts" : "import { test, expect } from '@playwright/test';\nimport { cart } from './helpers/cart';\ntest('checkout', async () => { cart(); });\n",
+        "checks/helpers/cart.ts" : "import { price } from './price';\nexport const cart = () => price;\n",
+        "checks/helpers/price.ts" : "export const price = 42;\n",
+        "checks/other.spec.ts" : "import { test, expect } from '@playwright/test';\ntest('other', async () => {});\n"
+      }
+    },
+    "expect" : {
+      "entrypoint" : "checks/checkout.spec.ts",
+      "digest" : "sha256:b2add65f3cd16b8acca6e6191996ebf186d1ebc741bf6aa836b1218c79e2e139",
+      "uploadDigest" : "sha256:df206a284251626ff4db4e12c56db1662fa278b24eac26503fea252973895ae8",
+      "files" : [ "checks/checkout.spec.ts", "checks/helpers/cart.ts", "checks/helpers/price.ts" ]
+    }
+  }, {
+    "name" : "include-kept",
+    "description" : "An include path joins the closure although no import reaches it (a fixture read at runtime)",
+    "request" : {
+      "entrypoint" : "checks/a.spec.ts",
+      "include" : [ "checks/fixtures/order.json" ],
+      "files" : {
+        "checks/a.spec.ts" : "import { test, expect } from '@playwright/test';\ntest('order', async () => {});\n",
+        "checks/fixtures/order.json" : "{\"id\": 1}\n"
+      }
+    },
+    "expect" : {
+      "entrypoint" : "checks/a.spec.ts",
+      "digest" : "sha256:9fb1db0845c14f5610fa063c35c76ed8ef42e91b4431faa63f82f1efc949face",
+      "uploadDigest" : "sha256:9fb1db0845c14f5610fa063c35c76ed8ef42e91b4431faa63f82f1efc949face",
+      "files" : [ "checks/a.spec.ts", "checks/fixtures/order.json" ]
+    }
+  }, {
+    "name" : "include-set-with-include",
+    "description" : "Include-set request: the directory, the entrypoint and an include; unrelated files stay out",
+    "request" : {
+      "entrypoint" : "checks/checkout.spec.ts",
+      "include" : [ "checks/fixtures/order.json" ],
+      "files" : {
+        "checks/checkout.spec.ts" : "import { test, expect } from '@playwright/test';\nimport { cart } from './helpers/cart';\ntest('checkout', async () => { cart(); });\n",
+        "checks/fixtures/order.json" : "{\"id\": 1}\n",
+        "checks/helpers/cart.ts" : "export const cart = () => 1;\n",
+        "checks/other.spec.ts" : "import { test, expect } from '@playwright/test';\ntest('other', async () => {});\n"
+      }
+    },
+    "expect" : {
+      "entrypoint" : "checks/checkout.spec.ts",
+      "digest" : "sha256:ffb63814c6a125e5206a490874eab4de2cc7b7a0d97e113f13178201280172ee",
+      "uploadDigest" : "sha256:406a9dba733b405679804fe319e35025c99e6a88b0274f00006ea3547879fa00",
+      "files" : [ "checks/checkout.spec.ts", "checks/fixtures/order.json", "checks/helpers/cart.ts" ]
+    }
+  }, {
+    "name" : "include-missing-refused",
+    "description" : "An include path that is not in the files is refused",
+    "request" : {
+      "entrypoint" : "checks/a.spec.ts",
+      "include" : [ "checks/fixtures/missing.json" ],
+      "files" : {
+        "checks/a.spec.ts" : "import { test, expect } from '@playwright/test';\ntest('a', async () => {});\n"
+      }
+    },
+    "expect" : {
+      "refusal" : {
+        "code" : "MONITOR_PACKAGE_PATH_INVALID",
+        "field" : "include[0]"
+      }
+    }
+  } ]
+}

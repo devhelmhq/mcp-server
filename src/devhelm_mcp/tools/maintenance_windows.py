@@ -27,7 +27,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import httpx
 from devhelm import DevhelmError
 
 # The maintenance-window models live in ``devhelm._generated`` — they
@@ -42,6 +41,7 @@ from devhelm._generated import (
     UpdateMaintenanceWindowRequest,
 )
 from devhelm._http import api_delete, api_get, api_post, api_put, path_param
+from devhelm._sync.transport import Transport
 from devhelm._validation import parse_list, parse_single
 from fastmcp import FastMCP
 
@@ -55,7 +55,7 @@ from devhelm_mcp.client import (
 _BASE_PATH = "/api/v1/maintenance-windows"
 
 
-def _http_client(api_token: str | None) -> httpx.Client:
+def _http_client(api_token: str | None) -> Transport:
     """Resolve the SDK's configured ``httpx.Client``.
 
     ``Devhelm.__init__`` builds exactly one ``httpx.Client`` (auth
