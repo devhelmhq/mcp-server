@@ -64337,9 +64337,9 @@
         "type": "object",
         "properties": {
           "id": {
+            "minLength": 1,
             "type": "string",
-            "description": "Message id",
-            "format": "uuid"
+            "description": "Message id"
           },
           "domainId": {
             "type": "string",
@@ -65248,6 +65248,9 @@
               "RUNTIME_RETIRED",
               "RUNTIME_NOT_AVAILABLE",
               "RUNTIME_UNAVAILABLE",
+              "RUNTIME_NO_CAPACITY",
+              "RUNTIME_NO_ROUTE",
+              "ROLLOUT_CANARY_MISSING",
               "RUNTIME_EOL",
               "RUNTIME_AMBIGUOUS",
               "RUNTIME_DIGEST_IMMUTABLE",
@@ -74576,7 +74579,14 @@
               "testing_quota_exhausted",
               "no_seat",
               "lease_lost",
-              "target_unreachable"
+              "target_unreachable",
+              "no_capacity",
+              "placement_failed",
+              "heartbeat_lost",
+              "lease_cap",
+              "open_expired",
+              "session_failed",
+              "log_unavailable"
             ]
           },
           "billable": {
@@ -74857,7 +74867,12 @@
               "target_blocked",
               "script_error",
               "wait_timeout",
-              "setup"
+              "setup",
+              "dns",
+              "connect",
+              "tls",
+              "http_status",
+              "navigation_timeout"
             ]
           },
           "step": {
