@@ -64337,9 +64337,9 @@
         "type": "object",
         "properties": {
           "id": {
+            "minLength": 1,
             "type": "string",
-            "description": "Message id",
-            "format": "uuid"
+            "description": "Message id"
           },
           "domainId": {
             "type": "string",
