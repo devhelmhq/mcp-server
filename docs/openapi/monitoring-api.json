@@ -59946,6 +59946,32 @@
           "type"
         ]
       },
+      "BindingVersionSnapshot": {
+        "required": [
+          "attachedKeys",
+          "keys"
+        ],
+        "type": "object",
+        "properties": {
+          "keys": {
+            "type": "array",
+            "description": "Secret key names resolved for this run",
+            "items": {
+              "type": "string",
+              "description": "Secret key names resolved for this run"
+            }
+          },
+          "attachedKeys": {
+            "type": "array",
+            "description": "Secret key names attached to this run",
+            "items": {
+              "type": "string",
+              "description": "Secret key names attached to this run"
+            }
+          }
+        },
+        "description": "Secret key names frozen when the run was created"
+      },
       "BodyContainsAssertion": {
         "required": [
           "type",
@@ -64337,9 +64363,9 @@
         "type": "object",
         "properties": {
           "id": {
+            "minLength": 1,
             "type": "string",
-            "description": "Message id",
-            "format": "uuid"
+            "description": "Message id"
           },
           "domainId": {
             "type": "string",
@@ -65248,6 +65274,9 @@
               "RUNTIME_RETIRED",
               "RUNTIME_NOT_AVAILABLE",
               "RUNTIME_UNAVAILABLE",
+              "RUNTIME_NO_CAPACITY",
+              "RUNTIME_NO_ROUTE",
+              "ROLLOUT_CANARY_MISSING",
               "RUNTIME_EOL",
               "RUNTIME_AMBIGUOUS",
               "RUNTIME_DIGEST_IMMUTABLE",
@@ -74434,20 +74463,10 @@
             "nullable": true
           },
           "capturePolicySnapshot": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object",
-              "description": "Capture settings frozen at create"
-            },
-            "description": "Capture settings frozen at create"
+            "$ref": "#/components/schemas/CapturePolicy"
           },
           "bindingVersionSnapshot": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object",
-              "description": "Resolved secret key names frozen at create"
-            },
-            "description": "Resolved secret key names frozen at create"
+            "$ref": "#/components/schemas/BindingVersionSnapshot"
           },
           "durationMs": {
             "type": "integer",
@@ -74576,7 +74595,14 @@
               "testing_quota_exhausted",
               "no_seat",
               "lease_lost",
-              "target_unreachable"
+              "target_unreachable",
+              "no_capacity",
+              "placement_failed",
+              "heartbeat_lost",
+              "lease_cap",
+              "open_expired",
+              "session_failed",
+              "log_unavailable"
             ]
           },
           "billable": {
@@ -74857,7 +74883,12 @@
               "target_blocked",
               "script_error",
               "wait_timeout",
-              "setup"
+              "setup",
+              "dns",
+              "connect",
+              "tls",
+              "http_status",
+              "navigation_timeout"
             ]
           },
           "step": {
@@ -75531,11 +75562,32 @@
           "diff"
         ]
       },
+      "RuntimeRegionAvailability": {
+        "required": [
+          "available",
+          "region"
+        ],
+        "type": "object",
+        "properties": {
+          "region": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Check region, such as us-east"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Whether this runtime can run checks in the region"
+          }
+        },
+        "description": "Whether a runtime can accept new runs in one probe region"
+      },
       "RuntimeProfileDto": {
         "required": [
           "id",
           "nodeVersion",
+          "platformDefault",
           "playwrightVersion",
+          "regions",
           "status"
         ],
         "type": "object",
@@ -75618,9 +75670,20 @@
                 "$ref": "#/components/schemas/BrowserCapabilityEnvelope"
               }
             ]
+          },
+          "platformDefault": {
+            "type": "boolean",
+            "description": "Whether new checks use this runtime when none is pinned"
+          },
+          "regions": {
+            "type": "array",
+            "description": "Whether each region can run this runtime",
+            "items": {
+              "$ref": "#/components/schemas/RuntimeRegionAvailability"
+            }
           }
         },
-        "description": "Default execution environment; null uses the catalog default"
+        "description": "Customer-selectable runtime profile"
       },
       "RunTraceSummaryDto": {
         "required": [
