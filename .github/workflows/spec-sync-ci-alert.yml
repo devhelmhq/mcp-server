@@ -1,0 +1,38 @@
+name: Spec sync CI alert
+
+# CI on the standing spec-sync pull request is the gate. A red run on that
+# branch is the failure a person has to fix. repository_dispatch back to
+# devhelmhq/mono pages Telegram, Nighthawk, and #ci-surfaces.
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  alert:
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_branch == 'spec-sync'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Alert spec sync failure
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_DISPATCH_TOKEN }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          gh api repos/devhelmhq/mono/dispatches --method POST --input - <<EOF
+          {
+            "event_type": "spec_sync_failed",
+            "client_payload": {
+              "repo": "${{ github.repository }}",
+              "workflow": "CI",
+              "run_url": "${RUN_URL}",
+              "detail": "spec-sync CI failed at ${HEAD_SHA}"
+            }
+          }
+          EOF

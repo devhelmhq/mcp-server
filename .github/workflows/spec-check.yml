@@ -1,43 +1,35 @@
 name: Spec Check
 
-# Triggered by ``spec_updated`` repository_dispatch from devhelmhq/mono whenever
-# the canonical OpenAPI spec changes.
-#
-# Unlike sibling surfaces (cli, sdk-js, sdk-python, terraform-provider) the MCP
-# server does NOT consume the spec directly — every API call is delegated to the
-# vendored ``devhelm`` Python SDK. The server only ships a copy of the spec for
-# documentation/reference purposes.
-#
-# What this workflow checks:
-#   1. The freshest spec from the monorepo is committed (so the documentation
-#      copy doesn't go stale relative to other surfaces).
-#   2. The latest published ``devhelm`` SDK still satisfies our resolver
-#      (we pull it via ``uv lock --upgrade-package devhelm``).
-#   3. Tests pass against the upgraded SDK — this is the real contract check
-#      because the SDK regenerates its own typed surface against the spec.
-#   4. If the resolved SDK version or the bundled spec changed, open a PR so a
-#      human can ship the bump. If anything broke, file an issue.
+# spec_updated from devhelmhq/mono. The MCP server calls the published Python
+# SDK, so this job refreshes the reference spec and the locked SDK onto the
+# standing spec-sync branch, then enables auto-merge. Repository CI is the gate.
 
 on:
   repository_dispatch:
     types: [spec_updated]
 
+concurrency:
+  group: spec-sync
+  cancel-in-progress: true
+
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
+  contents: read
 
 jobs:
-  check-compatibility:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.SPEC_SYNC_TOKEN }}
       - uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Download latest OpenAPI spec from monorepo
         run: |
@@ -49,63 +41,45 @@ jobs:
           GH_TOKEN: ${{ secrets.MONOREPO_DISPATCH_TOKEN }}
 
       - name: Refresh devhelm SDK to latest
-        run: |
-          uv lock --upgrade-package devhelm
-          uv sync --locked
+        run: uv lock --upgrade-package devhelm
 
-      - name: Run tests against refreshed SDK
-        run: uv run pytest -v
-
-      - name: Lint and type-check
-        run: |
-          uv run ruff check src tests
-          uv run mypy src
-
-      - name: Check for changes
-        id: diff
+      - name: Commit spec-sync branch
+        id: commit
         run: |
           if git diff --quiet docs/openapi/monitoring-api.json uv.lock; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
-
-      - name: Open PR with refreshed spec + SDK
-        if: steps.diff.outputs.changed == 'true'
-        run: |
+          echo "changed=true" >> "$GITHUB_OUTPUT"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          branch="chore/spec-sync-$(date +%Y%m%d%H%M%S)"
-          git checkout -b "$branch"
+          git checkout -B spec-sync
           git add docs/openapi/monitoring-api.json uv.lock
           git commit -m "chore: sync OpenAPI spec and refresh devhelm SDK"
-          git push -u origin "$branch"
-          gh pr create \
-            --title "chore: sync OpenAPI spec and refresh devhelm SDK" \
-            --body "Auto-generated after a spec_updated event from the monorepo.
+          if git fetch origin spec-sync; then
+            git push --force-with-lease=refs/heads/spec-sync:refs/remotes/origin/spec-sync origin HEAD:spec-sync
+          else
+            git push -u origin HEAD:spec-sync
+          fi
 
-          - Re-downloaded \`docs/openapi/monitoring-api.json\` (reference copy)
-          - Bumped vendored \`devhelm\` SDK to latest published version
-          - Tests + lint + mypy passed against the new SDK" \
-            --base main
+      - name: Open or update the spec-sync pull request
+        if: steps.commit.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Report failure
-        if: failure()
+          GH_TOKEN: ${{ secrets.SPEC_SYNC_TOKEN }}
         run: |
-          gh issue create \
-            --title "API spec change broke MCP server build" \
-            --body "The monorepo pushed a spec update that caused CI failures in the MCP server compatibility job.
-
-          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-          Likely causes:
-          - The latest \`devhelm\` SDK release is incompatible with how MCP tools call it
-          - Tool definitions reference an SDK method that was removed/renamed
-          - Test fixtures depend on a payload shape that changed in the spec"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          existing="$(gh pr list --head spec-sync --base main --state open --json number --jq '.[0].number')"
+          if [ -z "$existing" ]; then
+            gh pr create \
+              --head spec-sync \
+              --base main \
+              --title "chore: sync OpenAPI spec and refresh devhelm SDK" \
+              --body "Standing spec sync. CI on this pull request is the gate. GitHub auto-merges it when the required checks pass."
+            existing="$(gh pr list --head spec-sync --base main --state open --json number --jq '.[0].number')"
+          fi
+          if ! gh pr merge "$existing" --auto --squash; then
+            enabled="$(gh pr view "$existing" --json autoMergeRequest --jq '.autoMergeRequest != null')"
+            [ "$enabled" = "true" ]
+          fi
 
       - name: Alert spec sync failure
         if: failure()
@@ -118,7 +92,8 @@ jobs:
             "client_payload": {
               "repo": "${{ github.repository }}",
               "workflow": "${{ github.workflow }}",
-              "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+              "detail": "Spec Check could not update the standing spec-sync pull request."
             }
           }
           EOF
