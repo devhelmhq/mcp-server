@@ -78739,6 +78739,20 @@
               "API",
               "GIT"
             ]
+          },
+          "unresolvedReminderMinutes": {
+            "type": "integer",
+            "description": "Minutes without an update before the team is reminded (15–1440), 0 turns off (default: 60)",
+            "format": "int32",
+            "nullable": true
+          },
+          "emailSender": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StatusPageEmailSenderRequest"
+              }
+            ]
           }
         }
       },
