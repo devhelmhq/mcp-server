@@ -2,7 +2,7 @@ name: Spec sync CI alert
 
 # CI on the standing spec-sync pull request is the gate. A red run on that
 # branch is the failure a person has to fix. repository_dispatch back to
-# devhelmhq/mono pages Telegram, Nighthawk, and #ci-surfaces.
+# devhelmhq/mono pages Telegram and #ci-surfaces.
 
 on:
   workflow_run:
