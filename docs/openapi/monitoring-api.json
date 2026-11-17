@@ -99017,6 +99017,7 @@
           "kind": {
             "type": "string",
             "description": "INCIDENT or MAINTENANCE; ignored when replacing a template",
+            "example": "INCIDENT",
             "enum": [
               "INCIDENT",
               "MAINTENANCE"
