@@ -35015,176 +35015,6 @@
         }
       }
     },
-    "/api/v1/orgs/{orgId}/sso/role-mappings/preview": {
-      "post": {
-        "tags": [
-          "org-sso-role-mapping-controller"
-        ],
-        "summary": "Count the members whose role a mapping change or removal would change",
-        "operationId": "previewOrgSsoRoleMapping",
-        "parameters": [
-          {
-            "name": "orgId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "description": "Replays the stored response for 24h when the same key is sent again (1–255 visible ASCII)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PreviewOrgSsoRoleMappingRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SingleValueResponseOrgSsoRoleMappingPreviewDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/orgs/{orgId}/sso/role-mappings/{mappingId}": {
       "delete": {
         "tags": [
@@ -35389,6 +35219,176 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SingleValueResponseOrgSsoRoleMappingDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orgs/{orgId}/sso/role-mappings/preview": {
+      "post": {
+        "tags": [
+          "org-sso-role-mapping-controller"
+        ],
+        "summary": "Count the members whose role a mapping change or removal would change",
+        "operationId": "previewOrgSsoRoleMapping",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Replays the stored response for 24h when the same key is sent again (1–255 visible ASCII)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewOrgSsoRoleMappingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseOrgSsoRoleMappingPreviewDto"
                 }
               }
             }
@@ -51848,6 +51848,973 @@
         }
       }
     },
+    "/api/v1/status-pages/{id}/audiences": {
+      "get": {
+        "tags": [
+          "Status Pages"
+        ],
+        "summary": "List audiences of a status page",
+        "operationId": "listStatusPageAudiences",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "endUserId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableValueResultStatusPageAudienceDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Status Pages"
+        ],
+        "summary": "Create an audience",
+        "operationId": "createStatusPageAudience",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Replays the stored response for 24h when the same key is sent again (1–255 visible ASCII)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStatusPageAudienceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseStatusPageAudienceDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/status-pages/{id}/audiences/{audienceId}": {
+      "get": {
+        "tags": [
+          "Status Pages"
+        ],
+        "summary": "Get an audience",
+        "operationId": "getStatusPageAudience",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "audienceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseStatusPageAudienceDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Status Pages"
+        ],
+        "summary": "Change an audience",
+        "operationId": "updateStatusPageAudience",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "audienceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStatusPageAudienceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseStatusPageAudienceDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Status Pages"
+        ],
+        "summary": "Delete an audience",
+        "operationId": "deleteStatusPageAudience",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "audienceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/status-pages/{id}/audiences/{audienceId}/delete-preview": {
+      "get": {
+        "tags": [
+          "Status Pages"
+        ],
+        "summary": "Preview who loses access when an audience is deleted",
+        "operationId": "previewStatusPageAudienceDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "audienceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseStatusPageAudienceDeletePreviewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/status-pages/{id}/components": {
       "get": {
         "tags": [
@@ -52374,6 +53341,176 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/status-pages/{id}/components/{componentId}/audiences": {
+      "put": {
+        "tags": [
+          "Status Pages"
+        ],
+        "summary": "Set which audiences see a component",
+        "operationId": "setStatusPageComponentAudiences",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "componentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetStatusPageAudiencesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableValueResultStatusPageAudienceDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request — the payload failed validation",
@@ -56001,229 +57138,6 @@
         }
       }
     },
-    "/api/v1/status-pages/{id}/export/reports": {
-      "get": {
-        "tags": [
-          "status-page-export-controller"
-        ],
-        "summary": "Download a status page report as CSV or JSON",
-        "description": "One row per component or component group, as in GET /reports. Each page allows 6 report exports an hour; more get 429 RATE_LIMITED. Every export is audited.",
-        "operationId": "exportStatusPageReport",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "description": "First day of the range (UTC), e.g. 2026-10-01; set with to",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "description": "Last day of the range (UTC), e.g. 2026-10-31; set with from",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          },
-          {
-            "name": "groupBy",
-            "in": "query",
-            "description": "Rows per component or componentGroup (default: component)",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "component"
-            }
-          },
-          {
-            "name": "format",
-            "in": "query",
-            "description": "File format: csv or json (default: csv)",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "csv"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "groupId",
-            "in": "query",
-            "description": "Component group to export; repeat for more (default: every row)",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
-          },
-          {
-            "name": "componentId",
-            "in": "query",
-            "description": "Component to export; repeat for more (default: every row)",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/csv": {
-                "schema": {
-                  "$ref": "#/components/schemas/StreamingResponseBody"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StreamingResponseBody"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/status-pages/{id}/end-users/sessions": {
       "delete": {
         "tags": [
@@ -56368,13 +57282,189 @@
         }
       }
     },
+    "/api/v1/status-pages/{id}/export/{kind}": {
+      "get": {
+        "tags": [
+          "status-page-export-controller"
+        ],
+        "summary": "Download status page data (subscribers) as CSV or JSON",
+        "description": "Needs the status_pages:notify scope. Each page allows 60 exports an hour; more get 429 RATE_LIMITED. Every export is audited when it starts and again when it finishes.",
+        "operationId": "exportStatusPageData",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "path",
+            "description": "What to export: subscribers",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "File format: csv or json (default: csv)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "csv"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/status-pages/{id}/export/end-users": {
       "get": {
         "tags": [
           "status-page-export-controller"
         ],
         "summary": "Download a private status page's viewers as CSV or JSON",
-        "description": "Needs an org admin or the status_pages:access_admin scope. Each page allows 6 viewer exports an hour; more get 429 RATE_LIMITED. Every export is audited.",
+        "description": "Needs an org admin or the status_pages:access_admin scope. Each page allows 60 viewer exports an hour; more get 429 RATE_LIMITED. Every export is audited.",
         "operationId": "exportStatusPageEndUsers",
         "parameters": [
           {
@@ -56541,7 +57631,7 @@
           "status-page-export-controller"
         ],
         "summary": "Download a status page's incidents and their updates as CSV or JSON",
-        "description": "One row per update, with the incident's fields on every row. Each page allows 6 incident exports an hour; more get 429 RATE_LIMITED. Every export is audited.",
+        "description": "One row per update, with the incident's fields on every row. Each page allows 60 incident exports an hour; more get 429 RATE_LIMITED. Every export is audited.",
         "operationId": "exportStatusPageIncidents",
         "parameters": [
           {
@@ -56708,7 +57798,7 @@
           "status-page-export-controller"
         ],
         "summary": "Download a status page's maintenance windows and their updates as CSV or JSON",
-        "description": "One row per update, with the window's fields on every row. Each page allows 6 maintenance exports an hour; more get 429 RATE_LIMITED. Every export is audited.",
+        "description": "One row per update, with the window's fields on every row. Each page allows 60 maintenance exports an hour; more get 429 RATE_LIMITED. Every export is audited.",
         "operationId": "exportStatusPageMaintenance",
         "parameters": [
           {
@@ -56869,14 +57959,14 @@
         }
       }
     },
-    "/api/v1/status-pages/{id}/export/{kind}": {
+    "/api/v1/status-pages/{id}/export/reports": {
       "get": {
         "tags": [
           "status-page-export-controller"
         ],
-        "summary": "Download status page data (subscribers) as CSV or JSON",
-        "description": "Needs the status_pages:notify scope. Each page allows 6 exports an hour; more get 429 RATE_LIMITED. Every export is audited when it starts and again when it finishes.",
-        "operationId": "exportStatusPageData",
+        "summary": "Download a status page report as CSV or JSON",
+        "description": "One row per checked group or component, in page order, as in GET /reports; nothing checked exports every row. Each page allows 60 report exports an hour; more get 429 RATE_LIMITED. Every export is audited.",
+        "operationId": "exportStatusPageReport",
         "parameters": [
           {
             "name": "id",
@@ -56888,12 +57978,49 @@
             }
           },
           {
-            "name": "kind",
-            "in": "path",
-            "description": "What to export: subscribers",
-            "required": true,
+            "name": "from",
+            "in": "query",
+            "description": "First day of the range (UTC), e.g. 2026-10-01; set with to",
+            "required": false,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "Last day of the range (UTC), e.g. 2026-10-31; set with from",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Component group to export; repeat for more (default: every row)",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "componentId",
+            "in": "query",
+            "description": "Component to export; repeat for more (default: every row)",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
             }
           },
           {
@@ -57571,6 +58698,176 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/status-pages/{id}/groups/{groupId}/audiences": {
+      "put": {
+        "tags": [
+          "Status Pages"
+        ],
+        "summary": "Set which audiences see a component group",
+        "operationId": "setStatusPageGroupAudiences",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetStatusPageAudiencesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableValueResultStatusPageAudienceDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request — the payload failed validation",
@@ -61769,8 +63066,8 @@
         "tags": [
           "status-page-report-controller"
         ],
-        "summary": "Uptime, downtime and incidents per component or component group over a date range",
-        "description": "The range is in UTC days, at most 366 days long, and defaults to the last 30 days. The same report downloads as CSV or JSON from /export/reports.",
+        "summary": "Uptime, downtime and incidents per component group and component over a date range",
+        "description": "Groups and components come in page order. The range is in UTC days, at most 366 days long, within the last 730 days and not in the future; it defaults to the last 30 days. The same report downloads as CSV or JSON from /export/reports.",
         "operationId": "getStatusPageReport",
         "parameters": [
           {
@@ -61800,16 +63097,6 @@
             "schema": {
               "type": "string",
               "format": "date"
-            }
-          },
-          {
-            "name": "groupBy",
-            "in": "query",
-            "description": "Rows per component or componentGroup (default: component)",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "component"
             }
           },
           {
@@ -73329,1313 +74616,6 @@
           }
         }
       }
-    },
-    "/api/v1/status-pages/{id}/audiences": {
-      "get": {
-        "tags": [
-          "Status Pages"
-        ],
-        "summary": "List audiences of a status page",
-        "operationId": "listStatusPageAudiences",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "endUserId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/TableValueResultStatusPageAudienceDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Status Pages"
-        ],
-        "summary": "Create an audience",
-        "operationId": "createStatusPageAudience",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "description": "Replays the stored response for 24h when the same key is sent again (1–255 visible ASCII)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateStatusPageAudienceRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SingleValueResponseStatusPageAudienceDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/status-pages/{id}/audiences/{audienceId}": {
-      "get": {
-        "tags": [
-          "Status Pages"
-        ],
-        "summary": "Get an audience",
-        "operationId": "getStatusPageAudience",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "audienceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SingleValueResponseStatusPageAudienceDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Status Pages"
-        ],
-        "summary": "Change an audience",
-        "operationId": "updateStatusPageAudience",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "audienceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateStatusPageAudienceRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SingleValueResponseStatusPageAudienceDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Status Pages"
-        ],
-        "summary": "Delete an audience",
-        "operationId": "deleteStatusPageAudience",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "audienceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/status-pages/{id}/audiences/{audienceId}/delete-preview": {
-      "get": {
-        "tags": [
-          "Status Pages"
-        ],
-        "summary": "Preview who loses access when an audience is deleted",
-        "operationId": "previewStatusPageAudienceDelete",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "audienceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SingleValueResponseStatusPageAudienceDeletePreviewDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/status-pages/{id}/components/{componentId}/audiences": {
-      "put": {
-        "tags": [
-          "Status Pages"
-        ],
-        "summary": "Set which audiences see a component",
-        "operationId": "setStatusPageComponentAudiences",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "componentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SetStatusPageAudiencesRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/TableValueResultStatusPageAudienceDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/status-pages/{id}/groups/{groupId}/audiences": {
-      "put": {
-        "tags": [
-          "Status Pages"
-        ],
-        "summary": "Set which audiences see a component group",
-        "operationId": "setStatusPageGroupAudiences",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "groupId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SetStatusPageAudiencesRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/TableValueResultStatusPageAudienceDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -75990,26 +75970,6 @@
           }
         }
       },
-      "BulkSignOutEndUsersRequest": {
-        "required": [
-          "emails"
-        ],
-        "type": "object",
-        "properties": {
-          "emails": {
-            "maxItems": 1000,
-            "minItems": 0,
-            "type": "array",
-            "description": "Emails to sign out everywhere (1–1000)",
-            "items": {
-              "maxLength": 320,
-              "minLength": 0,
-              "type": "string",
-              "description": "Emails to sign out everywhere (1–1000)"
-            }
-          }
-        }
-      },
       "BulkDeleteSubscribersRequest": {
         "required": [
           "subscriberIds"
@@ -76125,6 +76085,26 @@
           }
         },
         "description": "Result of a bulk monitor action, including partial-success details"
+      },
+      "BulkSignOutEndUsersRequest": {
+        "required": [
+          "emails"
+        ],
+        "type": "object",
+        "properties": {
+          "emails": {
+            "maxItems": 1000,
+            "minItems": 0,
+            "type": "array",
+            "description": "Emails to sign out everywhere (1–1000)",
+            "items": {
+              "maxLength": 320,
+              "minLength": 0,
+              "type": "string",
+              "description": "Emails to sign out everywhere (1–1000)"
+            }
+          }
+        }
       },
       "BulkUpdateSubscriberScopeRequest": {
         "required": [
@@ -78281,6 +78261,57 @@
             ]
           }
         }
+      },
+      "CreateStatusPageAudienceRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Audience name, unique on the page (1–100 characters)"
+          },
+          "componentIds": {
+            "type": "array",
+            "description": "Components of this page only the audience sees",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Components of this page only the audience sees",
+              "format": "uuid"
+            }
+          },
+          "componentGroupIds": {
+            "type": "array",
+            "description": "Component groups of this page only the audience sees",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Component groups of this page only the audience sees",
+              "format": "uuid"
+            }
+          },
+          "emails": {
+            "type": "array",
+            "description": "Viewer emails in the audience, matched ignoring case",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Viewer emails in the audience, matched ignoring case"
+            }
+          },
+          "domains": {
+            "type": "array",
+            "description": "Email domains whose viewers are in the audience, e.g. acme.com",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Email domains whose viewers are in the audience, e.g. acme.com"
+            }
+          }
+        },
+        "description": "Create an audience on a private status page"
       },
       "CreateStatusPageComponentGroupRequest": {
         "required": [
@@ -81656,7 +81687,7 @@
               "ORG_SSO_ROLE_MAPPING_DUPLICATE",
               "AUDIT_LOG_PLAN_REQUIRED",
               "STATUS_PAGE_UNRESOLVED_REMINDER_MINUTES_INVALID",
-              "STATUS_PAGE_REPORT_GROUP_BY_INVALID",
+              "STATUS_PAGE_REPORT_RANGE_INVALID",
               "SENDER_DOMAIN_INVALID",
               "SENDER_DOMAIN_RESERVED",
               "SENDER_DOMAIN_TAKEN",
@@ -81677,7 +81708,8 @@
               "STATUS_PAGE_AUDIENCE_LIMIT_REACHED",
               "STATUS_PAGE_AUDIENCE_MEMBER_LIMIT_REACHED",
               "STATUS_PAGE_GROUP_AUDIENCE_CONFLICT",
-              "STATUS_PAGE_REPORT_RANGE_INVALID"
+              "SP_INCIDENT_AUDIENCE_NOT_FOUND",
+              "SP_INCIDENT_AUDIENCE_CANNOT_SEE_COMPONENT"
             ]
           },
           "file": {
@@ -84779,7 +84811,7 @@
           },
           "source": {
             "type": "string",
-            "description": "SSO when the identity provider's groups set the role; null for a manual change",
+            "description": "SSO when the IdP set the role; MANUAL for an admin change or a released mapping",
             "nullable": true,
             "enum": [
               "MANUAL",
@@ -88004,20 +88036,6 @@
           }
         }
       },
-      "OrgSsoRoleMappingPreviewDto": {
-        "type": "object",
-        "properties": {
-          "changedMemberCount": {
-            "type": "integer",
-            "description": "Members whose role would change",
-            "format": "int32"
-          }
-        },
-        "required": [
-          "changedMemberCount"
-        ],
-        "description": "What a role mapping change would do"
-      },
       "OrganizationDto": {
         "required": [
           "email",
@@ -88170,6 +88188,20 @@
           }
         },
         "description": "An identity provider group that grants an organization role at SSO sign-in"
+      },
+      "OrgSsoRoleMappingPreviewDto": {
+        "type": "object",
+        "properties": {
+          "changedMemberCount": {
+            "type": "integer",
+            "description": "Members whose role would change",
+            "format": "int32"
+          }
+        },
+        "description": "What a role mapping change would do",
+        "required": [
+          "changedMemberCount"
+        ]
       },
       "OrgSsoSettingsDto": {
         "required": [
@@ -93817,6 +93849,25 @@
           }
         }
       },
+      "SetStatusPageAudiencesRequest": {
+        "required": [
+          "audienceIds"
+        ],
+        "type": "object",
+        "properties": {
+          "audienceIds": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "description": "Audiences that see it; an empty list makes it visible to every viewer",
+            "items": {
+              "type": "string",
+              "description": "Audiences that see it; an empty list makes it visible to every viewer",
+              "format": "uuid"
+            }
+          }
+        }
+      },
       "SetStatusPageComponentOverrideRequest": {
         "required": [
           "status"
@@ -94596,17 +94647,6 @@
           }
         }
       },
-      "SingleValueResponseOrgSsoRoleMappingPreviewDto": {
-        "required": [
-          "data"
-        ],
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/OrgSsoRoleMappingPreviewDto"
-          }
-        }
-      },
       "SingleValueResponseOrganizationDto": {
         "required": [
           "data"
@@ -94626,6 +94666,17 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/OrgSsoRoleMappingDto"
+          }
+        }
+      },
+      "SingleValueResponseOrgSsoRoleMappingPreviewDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/OrgSsoRoleMappingPreviewDto"
           }
         }
       },
@@ -95044,6 +95095,28 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/StatusPageAccessPolicyDto"
+          }
+        }
+      },
+      "SingleValueResponseStatusPageAudienceDeletePreviewDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/StatusPageAudienceDeletePreviewDto"
+          }
+        }
+      },
+      "SingleValueResponseStatusPageAudienceDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/StatusPageAudienceDto"
           }
         }
       },
@@ -96222,6 +96295,121 @@
           "explicit"
         ]
       },
+      "StatusPageAudienceDeletePreviewDto": {
+        "required": [
+          "componentGroupIds",
+          "componentIds",
+          "losingAccessCount"
+        ],
+        "type": "object",
+        "properties": {
+          "losingAccessCount": {
+            "type": "integer",
+            "description": "Active end users in the audience who lose at least one component",
+            "format": "int32"
+          },
+          "componentIds": {
+            "type": "array",
+            "description": "Components of the audience that someone loses, in page order",
+            "items": {
+              "type": "string",
+              "description": "Components of the audience that someone loses, in page order",
+              "format": "uuid"
+            }
+          },
+          "componentGroupIds": {
+            "type": "array",
+            "description": "Component groups of the audience that someone loses, in page order",
+            "items": {
+              "type": "string",
+              "description": "Component groups of the audience that someone loses, in page order",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Who loses access to what when an audience is deleted"
+      },
+      "StatusPageAudienceDto": {
+        "required": [
+          "componentGroupIds",
+          "componentIds",
+          "createdAt",
+          "domains",
+          "emails",
+          "id",
+          "name",
+          "statusPageId",
+          "updatedAt",
+          "endUserCount"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Audience identifier",
+            "format": "uuid"
+          },
+          "statusPageId": {
+            "type": "string",
+            "description": "Status page this audience belongs to",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "Audience name, unique on the page"
+          },
+          "componentIds": {
+            "type": "array",
+            "description": "Components visible only to this page's audiences that hold them",
+            "items": {
+              "type": "string",
+              "description": "Components visible only to this page's audiences that hold them",
+              "format": "uuid"
+            }
+          },
+          "componentGroupIds": {
+            "type": "array",
+            "description": "Component groups visible only to this page's audiences that hold them",
+            "items": {
+              "type": "string",
+              "description": "Component groups visible only to this page's audiences that hold them",
+              "format": "uuid"
+            }
+          },
+          "emails": {
+            "type": "array",
+            "description": "Viewer emails in the audience; masked for viewers below incident author",
+            "items": {
+              "type": "string",
+              "description": "Viewer emails in the audience; masked for viewers below incident author"
+            }
+          },
+          "domains": {
+            "type": "array",
+            "description": "Email domains whose viewers are in the audience, e.g. acme.com",
+            "items": {
+              "type": "string",
+              "description": "Email domains whose viewers are in the audience, e.g. acme.com"
+            }
+          },
+          "endUserCount": {
+            "type": "integer",
+            "description": "Active end users of the page the audience's emails and domains match now",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the audience was created",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the audience last changed",
+            "format": "date-time"
+          }
+        },
+        "description": "A named group of viewers of a private status page and the components only they see"
+      },
       "StatusPageBindingSnapshot": {
         "required": [
           "name",
@@ -96547,6 +96735,11 @@
           "excludeFromOverall": {
             "type": "boolean"
           },
+          "audienceRestricted": {
+            "type": "boolean",
+            "description": "Visible only to the audiences that hold it, and to no viewer when none does (default: false)",
+            "default": false
+          },
           "startDate": {
             "type": "string",
             "format": "date-time",
@@ -96559,11 +96752,6 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
-          },
-          "audienceRestricted": {
-            "type": "boolean",
-            "description": "Visible only to the audiences that hold it, and to no viewer when none does (default: false)",
-            "default": false
           }
         }
       },
@@ -96606,6 +96794,11 @@
           "defaultOpen": {
             "type": "boolean"
           },
+          "audienceRestricted": {
+            "type": "boolean",
+            "description": "Visible only to the audiences that hold it, and to no viewer when none does (default: false)",
+            "default": false
+          },
           "components": {
             "type": "array",
             "nullable": true,
@@ -96638,11 +96831,6 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
-          },
-          "audienceRestricted": {
-            "type": "boolean",
-            "description": "Visible only to the audiences that hold it, and to no viewer when none does (default: false)",
-            "default": false
           }
         }
       },
@@ -97284,6 +97472,7 @@
       },
       "StatusPageIncidentDto": {
         "required": [
+          "audienceIds",
           "createdAt",
           "id",
           "impact",
@@ -97293,8 +97482,7 @@
           "title",
           "updatedAt",
           "scheduled",
-          "autoResolve",
-          "audienceIds"
+          "autoResolve"
         ],
         "type": "object",
         "properties": {
@@ -97423,14 +97611,6 @@
               "$ref": "#/components/schemas/StatusPageIncidentUpdateDto"
             }
           },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
           "audienceIds": {
             "type": "array",
             "description": "Audiences that see it; empty for everyone who sees its components",
@@ -97439,6 +97619,14 @@
               "description": "Audiences that see it; empty for everyone who sees its components",
               "format": "uuid"
             }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -97756,15 +97944,85 @@
         },
         "description": "Newest open status-page incident; omitted from JSON when none"
       },
+      "StatusPageReportComponentDto": {
+        "required": [
+          "id",
+          "incidentIds",
+          "name",
+          "trackedDays",
+          "downtimeMinutes",
+          "majorOutageMinutes",
+          "partialOutageMinutes",
+          "incidentCount"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Component id",
+            "format": "uuid"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Component name"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Group the component belongs to; null when ungrouped",
+            "format": "uuid",
+            "nullable": true
+          },
+          "uptimePercentage": {
+            "type": "number",
+            "description": "Mean daily uptime percentage over the tracked days; null when no day was tracked",
+            "format": "double",
+            "nullable": true
+          },
+          "trackedDays": {
+            "type": "integer",
+            "description": "Days in the range the component was tracked, including today's partial day",
+            "format": "int32"
+          },
+          "downtimeMinutes": {
+            "type": "integer",
+            "description": "Outage minutes weighted like uptime: major outage in full, partial outage at 30%",
+            "format": "int64"
+          },
+          "majorOutageMinutes": {
+            "type": "integer",
+            "description": "Minutes of major outage in the range",
+            "format": "int64"
+          },
+          "partialOutageMinutes": {
+            "type": "integer",
+            "description": "Minutes of partial outage in the range",
+            "format": "int64"
+          },
+          "incidentCount": {
+            "type": "integer",
+            "description": "Published incidents in the range that affected the component",
+            "format": "int32"
+          },
+          "incidentIds": {
+            "type": "array",
+            "description": "Ids of those incidents, oldest first, as listed in the report's incidents",
+            "items": {
+              "type": "string",
+              "description": "Ids of those incidents, oldest first, as listed in the report's incidents",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Uptime, downtime and incidents of one component over the report's range"
+      },
       "StatusPageReportDto": {
         "required": [
-          "from",
-          "groupBy",
-          "incidents",
-          "rows",
-          "to",
           "components",
-          "groups"
+          "from",
+          "groups",
+          "incidents",
+          "to"
         ],
         "type": "object",
         "properties": {
@@ -97775,30 +98033,8 @@
           },
           "to": {
             "type": "string",
-            "description": "Last day of the range (UTC), capped at today",
+            "description": "Last day of the range (UTC)",
             "format": "date"
-          },
-          "groupBy": {
-            "type": "string",
-            "description": "What the rows are grouped by",
-            "enum": [
-              "COMPONENT",
-              "COMPONENT_GROUP"
-            ]
-          },
-          "rows": {
-            "type": "array",
-            "description": "One row per component, or per component group plus each ungrouped component",
-            "items": {
-              "$ref": "#/components/schemas/StatusPageReportRowDto"
-            }
-          },
-          "incidents": {
-            "type": "array",
-            "description": "Published incidents (not maintenance) that overlap the range, oldest first",
-            "items": {
-              "$ref": "#/components/schemas/StatusPageReportIncidentDto"
-            }
           },
           "groups": {
             "type": "array",
@@ -97813,9 +98049,92 @@
             "items": {
               "$ref": "#/components/schemas/StatusPageReportComponentDto"
             }
+          },
+          "incidents": {
+            "type": "array",
+            "description": "Published incidents (not maintenance) that overlap the range, oldest first",
+            "items": {
+              "$ref": "#/components/schemas/StatusPageReportIncidentDto"
+            }
           }
         },
-        "description": "Uptime and incidents per component or component group over a date range (UTC days)"
+        "description": "Uptime and incidents per component group and component over a date range (UTC days)"
+      },
+      "StatusPageReportGroupDto": {
+        "required": [
+          "componentIds",
+          "id",
+          "incidentIds",
+          "name",
+          "trackedDays",
+          "downtimeMinutes",
+          "majorOutageMinutes",
+          "partialOutageMinutes",
+          "incidentCount"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Component group id",
+            "format": "uuid"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Component group name"
+          },
+          "componentIds": {
+            "type": "array",
+            "description": "Ids of the group's components, in page order",
+            "items": {
+              "type": "string",
+              "description": "Ids of the group's components, in page order",
+              "format": "uuid"
+            }
+          },
+          "uptimePercentage": {
+            "type": "number",
+            "description": "Group uptime percentage, as the public page shows it; null when no day was tracked",
+            "format": "double",
+            "nullable": true
+          },
+          "trackedDays": {
+            "type": "integer",
+            "description": "Days in the range the group was tracked, including today's partial day",
+            "format": "int32"
+          },
+          "downtimeMinutes": {
+            "type": "integer",
+            "description": "Outage minutes weighted like uptime: major outage in full, partial outage at 30%",
+            "format": "int64"
+          },
+          "majorOutageMinutes": {
+            "type": "integer",
+            "description": "Minutes of major outage in the range",
+            "format": "int64"
+          },
+          "partialOutageMinutes": {
+            "type": "integer",
+            "description": "Minutes of partial outage in the range",
+            "format": "int64"
+          },
+          "incidentCount": {
+            "type": "integer",
+            "description": "Published incidents in the range that affected the group's components",
+            "format": "int32"
+          },
+          "incidentIds": {
+            "type": "array",
+            "description": "Ids of those incidents, oldest first, as listed in the report's incidents",
+            "items": {
+              "type": "string",
+              "description": "Ids of those incidents, oldest first, as listed in the report's incidents",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Uptime, downtime and incidents of one component group over the report's range"
       },
       "StatusPageReportIncidentDto": {
         "required": [
@@ -97880,81 +98199,6 @@
           }
         },
         "description": "A published incident that overlaps the report's range"
-      },
-      "StatusPageReportRowDto": {
-        "required": [
-          "id",
-          "incidentIds",
-          "kind",
-          "name",
-          "trackedDays",
-          "downtimeMinutes",
-          "majorOutageMinutes",
-          "partialOutageMinutes",
-          "incidentCount"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Component or component group id",
-            "format": "uuid"
-          },
-          "kind": {
-            "type": "string",
-            "description": "Whether the row is a component or a component group",
-            "enum": [
-              "COMPONENT",
-              "COMPONENT_GROUP"
-            ]
-          },
-          "name": {
-            "minLength": 1,
-            "type": "string",
-            "description": "Component or component group name"
-          },
-          "uptimePercentage": {
-            "type": "number",
-            "description": "Mean daily uptime percentage over the tracked days; null when no day was tracked",
-            "format": "double",
-            "nullable": true
-          },
-          "trackedDays": {
-            "type": "integer",
-            "description": "Days in the range the item was tracked, including today's partial day",
-            "format": "int32"
-          },
-          "downtimeMinutes": {
-            "type": "integer",
-            "description": "Outage minutes weighted like uptime: major outage in full, partial outage at 30%",
-            "format": "int64"
-          },
-          "majorOutageMinutes": {
-            "type": "integer",
-            "description": "Minutes of major outage in the range",
-            "format": "int64"
-          },
-          "partialOutageMinutes": {
-            "type": "integer",
-            "description": "Minutes of partial outage in the range",
-            "format": "int64"
-          },
-          "incidentCount": {
-            "type": "integer",
-            "description": "Published incidents in the range that affected the item",
-            "format": "int32"
-          },
-          "incidentIds": {
-            "type": "array",
-            "description": "Ids of those incidents, oldest first; details are in the report's incidents",
-            "items": {
-              "type": "string",
-              "description": "Ids of those incidents, oldest first; details are in the report's incidents",
-              "format": "uuid"
-            }
-          }
-        },
-        "description": "Uptime, downtime and incidents of one component or component group over the report's range"
       },
       "StatusPageSenderTestDto": {
         "required": [
@@ -98533,7 +98777,7 @@
               "ORG_SSO_ROLE_MAPPING_DUPLICATE",
               "AUDIT_LOG_PLAN_REQUIRED",
               "STATUS_PAGE_UNRESOLVED_REMINDER_MINUTES_INVALID",
-              "STATUS_PAGE_REPORT_GROUP_BY_INVALID",
+              "STATUS_PAGE_REPORT_RANGE_INVALID",
               "SENDER_DOMAIN_INVALID",
               "SENDER_DOMAIN_RESERVED",
               "SENDER_DOMAIN_TAKEN",
@@ -98554,7 +98798,8 @@
               "STATUS_PAGE_AUDIENCE_LIMIT_REACHED",
               "STATUS_PAGE_AUDIENCE_MEMBER_LIMIT_REACHED",
               "STATUS_PAGE_GROUP_AUDIENCE_CONFLICT",
-              "STATUS_PAGE_REPORT_RANGE_INVALID"
+              "SP_INCIDENT_AUDIENCE_NOT_FOUND",
+              "SP_INCIDENT_AUDIENCE_CANNOT_SEE_COMPONENT"
             ]
           },
           "field": {
@@ -100244,6 +100489,38 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SsoConnectionDto"
+            }
+          },
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrev": {
+            "type": "boolean"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "TableValueResultStatusPageAudienceDto": {
+        "required": [
+          "data",
+          "hasNext",
+          "hasPrev"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusPageAudienceDto"
             }
           },
           "hasNext": {
@@ -103169,6 +103446,55 @@
           }
         }
       },
+      "UpdateStatusPageAudienceRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New audience name; null preserves current",
+            "nullable": true
+          },
+          "componentIds": {
+            "type": "array",
+            "description": "New component list; null preserves current",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "New component list; null preserves current",
+              "format": "uuid"
+            }
+          },
+          "componentGroupIds": {
+            "type": "array",
+            "description": "New component group list; null preserves current",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "New component group list; null preserves current",
+              "format": "uuid"
+            }
+          },
+          "emails": {
+            "type": "array",
+            "description": "New viewer email list; null preserves current",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "New viewer email list; null preserves current"
+            }
+          },
+          "domains": {
+            "type": "array",
+            "description": "New email domain list; null preserves current",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "New email domain list; null preserves current"
+            }
+          }
+        },
+        "description": "Change an audience of a private status page"
+      },
       "UpdateStatusPageComponentGroupRequest": {
         "type": "object",
         "properties": {
@@ -104732,443 +105058,6 @@
             "description": "Zapier/n8n/Make catch webhook URL"
           }
         }
-      },
-      "CreateStatusPageAudienceRequest": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Audience name, unique on the page (1–100 characters)"
-          },
-          "componentIds": {
-            "type": "array",
-            "description": "Components of this page only the audience sees",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "description": "Components of this page only the audience sees",
-              "format": "uuid"
-            }
-          },
-          "componentGroupIds": {
-            "type": "array",
-            "description": "Component groups of this page only the audience sees",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "description": "Component groups of this page only the audience sees",
-              "format": "uuid"
-            }
-          },
-          "emails": {
-            "type": "array",
-            "description": "Viewer emails in the audience, matched ignoring case",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "description": "Viewer emails in the audience, matched ignoring case"
-            }
-          },
-          "domains": {
-            "type": "array",
-            "description": "Email domains whose viewers are in the audience, e.g. acme.com",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "description": "Email domains whose viewers are in the audience, e.g. acme.com"
-            }
-          }
-        },
-        "description": "Create an audience on a private status page"
-      },
-      "SingleValueResponseStatusPageAudienceDto": {
-        "required": [
-          "data"
-        ],
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/StatusPageAudienceDto"
-          }
-        }
-      },
-      "StatusPageAudienceDto": {
-        "required": [
-          "componentGroupIds",
-          "componentIds",
-          "createdAt",
-          "domains",
-          "emails",
-          "id",
-          "name",
-          "statusPageId",
-          "updatedAt",
-          "endUserCount"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Audience identifier",
-            "format": "uuid"
-          },
-          "statusPageId": {
-            "type": "string",
-            "description": "Status page this audience belongs to",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string",
-            "description": "Audience name, unique on the page"
-          },
-          "componentIds": {
-            "type": "array",
-            "description": "Components visible only to this page's audiences that hold them",
-            "items": {
-              "type": "string",
-              "description": "Components visible only to this page's audiences that hold them",
-              "format": "uuid"
-            }
-          },
-          "componentGroupIds": {
-            "type": "array",
-            "description": "Component groups visible only to this page's audiences that hold them",
-            "items": {
-              "type": "string",
-              "description": "Component groups visible only to this page's audiences that hold them",
-              "format": "uuid"
-            }
-          },
-          "emails": {
-            "type": "array",
-            "description": "Viewer emails in the audience; masked for viewers below incident author",
-            "items": {
-              "type": "string",
-              "description": "Viewer emails in the audience; masked for viewers below incident author"
-            }
-          },
-          "domains": {
-            "type": "array",
-            "description": "Email domains whose viewers are in the audience, e.g. acme.com",
-            "items": {
-              "type": "string",
-              "description": "Email domains whose viewers are in the audience, e.g. acme.com"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "When the audience was created",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "description": "When the audience last changed",
-            "format": "date-time"
-          },
-          "endUserCount": {
-            "type": "integer",
-            "description": "Active end users of the page the audience's emails and domains match now",
-            "format": "int32"
-          }
-        },
-        "description": "A named group of viewers of a private status page and the components only they see"
-      },
-      "TableValueResultStatusPageAudienceDto": {
-        "required": [
-          "data",
-          "hasNext",
-          "hasPrev"
-        ],
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StatusPageAudienceDto"
-            }
-          },
-          "hasNext": {
-            "type": "boolean"
-          },
-          "hasPrev": {
-            "type": "boolean"
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          }
-        }
-      },
-      "UpdateStatusPageAudienceRequest": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "New audience name; null preserves current",
-            "nullable": true
-          },
-          "componentIds": {
-            "type": "array",
-            "description": "New component list; null preserves current",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "description": "New component list; null preserves current",
-              "format": "uuid"
-            }
-          },
-          "componentGroupIds": {
-            "type": "array",
-            "description": "New component group list; null preserves current",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "description": "New component group list; null preserves current",
-              "format": "uuid"
-            }
-          },
-          "emails": {
-            "type": "array",
-            "description": "New viewer email list; null preserves current",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "description": "New viewer email list; null preserves current"
-            }
-          },
-          "domains": {
-            "type": "array",
-            "description": "New email domain list; null preserves current",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "description": "New email domain list; null preserves current"
-            }
-          }
-        },
-        "description": "Change an audience of a private status page"
-      },
-      "StatusPageReportComponentDto": {
-        "required": [
-          "id",
-          "incidentIds",
-          "name",
-          "trackedDays",
-          "downtimeMinutes",
-          "majorOutageMinutes",
-          "partialOutageMinutes",
-          "incidentCount"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Component id",
-            "format": "uuid"
-          },
-          "name": {
-            "minLength": 1,
-            "type": "string",
-            "description": "Component name"
-          },
-          "groupId": {
-            "type": "string",
-            "description": "Group the component belongs to; null when ungrouped",
-            "format": "uuid",
-            "nullable": true
-          },
-          "uptimePercentage": {
-            "type": "number",
-            "description": "Mean daily uptime percentage over the tracked days; null when no day was tracked",
-            "format": "double",
-            "nullable": true
-          },
-          "trackedDays": {
-            "type": "integer",
-            "description": "Days in the range the component was tracked, including today's partial day",
-            "format": "int32"
-          },
-          "downtimeMinutes": {
-            "type": "integer",
-            "description": "Outage minutes weighted like uptime: major outage in full, partial outage at 30%",
-            "format": "int64"
-          },
-          "majorOutageMinutes": {
-            "type": "integer",
-            "description": "Minutes of major outage in the range",
-            "format": "int64"
-          },
-          "partialOutageMinutes": {
-            "type": "integer",
-            "description": "Minutes of partial outage in the range",
-            "format": "int64"
-          },
-          "incidentCount": {
-            "type": "integer",
-            "description": "Published incidents in the range that affected the component",
-            "format": "int32"
-          },
-          "incidentIds": {
-            "type": "array",
-            "description": "Ids of those incidents, oldest first, as listed in the report's incidents",
-            "items": {
-              "type": "string",
-              "description": "Ids of those incidents, oldest first, as listed in the report's incidents",
-              "format": "uuid"
-            }
-          }
-        },
-        "description": "Uptime, downtime and incidents of one component over the report's range"
-      },
-      "StatusPageReportGroupDto": {
-        "required": [
-          "componentIds",
-          "id",
-          "incidentIds",
-          "name",
-          "trackedDays",
-          "downtimeMinutes",
-          "majorOutageMinutes",
-          "partialOutageMinutes",
-          "incidentCount"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Component group id",
-            "format": "uuid"
-          },
-          "name": {
-            "minLength": 1,
-            "type": "string",
-            "description": "Component group name"
-          },
-          "componentIds": {
-            "type": "array",
-            "description": "Ids of the group's components, in page order",
-            "items": {
-              "type": "string",
-              "description": "Ids of the group's components, in page order",
-              "format": "uuid"
-            }
-          },
-          "uptimePercentage": {
-            "type": "number",
-            "description": "Group uptime percentage, as the public page shows it; null when no day was tracked",
-            "format": "double",
-            "nullable": true
-          },
-          "trackedDays": {
-            "type": "integer",
-            "description": "Days in the range the group was tracked, including today's partial day",
-            "format": "int32"
-          },
-          "downtimeMinutes": {
-            "type": "integer",
-            "description": "Outage minutes weighted like uptime: major outage in full, partial outage at 30%",
-            "format": "int64"
-          },
-          "majorOutageMinutes": {
-            "type": "integer",
-            "description": "Minutes of major outage in the range",
-            "format": "int64"
-          },
-          "partialOutageMinutes": {
-            "type": "integer",
-            "description": "Minutes of partial outage in the range",
-            "format": "int64"
-          },
-          "incidentCount": {
-            "type": "integer",
-            "description": "Published incidents in the range that affected the group's components",
-            "format": "int32"
-          },
-          "incidentIds": {
-            "type": "array",
-            "description": "Ids of those incidents, oldest first, as listed in the report's incidents",
-            "items": {
-              "type": "string",
-              "description": "Ids of those incidents, oldest first, as listed in the report's incidents",
-              "format": "uuid"
-            }
-          }
-        },
-        "description": "Uptime, downtime and incidents of one component group over the report's range"
-      },
-      "StatusPageAudienceDeletePreviewDto": {
-        "required": [
-          "componentGroupIds",
-          "componentIds",
-          "losingAccessCount"
-        ],
-        "type": "object",
-        "properties": {
-          "losingAccessCount": {
-            "type": "integer",
-            "description": "Active end users in the audience who lose at least one component",
-            "format": "int32"
-          },
-          "componentIds": {
-            "type": "array",
-            "description": "Components of the audience that someone loses, in page order",
-            "items": {
-              "type": "string",
-              "description": "Components of the audience that someone loses, in page order",
-              "format": "uuid"
-            }
-          },
-          "componentGroupIds": {
-            "type": "array",
-            "description": "Component groups of the audience that someone loses, in page order",
-            "items": {
-              "type": "string",
-              "description": "Component groups of the audience that someone loses, in page order",
-              "format": "uuid"
-            }
-          }
-        },
-        "description": "Who loses access to what when an audience is deleted"
-      },
-      "SingleValueResponseStatusPageAudienceDeletePreviewDto": {
-        "required": [
-          "data"
-        ],
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/StatusPageAudienceDeletePreviewDto"
-          }
-        }
-      },
-      "SetStatusPageAudiencesRequest": {
-        "required": [
-          "audienceIds"
-        ],
-        "type": "object",
-        "properties": {
-          "audienceIds": {
-            "maxItems": 50,
-            "minItems": 0,
-            "type": "array",
-            "description": "Audiences that see it; an empty list makes it visible to every viewer",
-            "items": {
-              "type": "string",
-              "description": "Audiences that see it; an empty list makes it visible to every viewer",
-              "format": "uuid"
-            }
-          }
-        },
-        "description": "Who sees one component or component group, set in one call"
       }
     },
     "securitySchemes": {
