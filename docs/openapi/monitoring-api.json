@@ -95994,6 +95994,7 @@
               "UNSOLICITED_OR_EXPIRED",
               "BROWSER_MISMATCH",
               "MALFORMED_RESPONSE",
+              "IDP_REFUSED",
               "INVALID_SIGNATURE",
               "ENCRYPTED_ASSERTION_REFUSED",
               "ISSUER_MISMATCH",
@@ -96018,6 +96019,16 @@
           "correlationId": {
             "type": "string",
             "description": "Identifier that finds the failure in the logs; null unless it failed",
+            "nullable": true
+          },
+          "idpStatusCode": {
+            "type": "string",
+            "description": "Status codes the IdP refused the sign-in with, e.g. Responder/InvalidNameIDPolicy",
+            "nullable": true
+          },
+          "idpStatusMessage": {
+            "type": "string",
+            "description": "Message the IdP sent with its refusal",
             "nullable": true
           },
           "assertedIssuer": {
