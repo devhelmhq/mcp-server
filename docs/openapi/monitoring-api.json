@@ -96657,6 +96657,16 @@
             "description": "Why a sign-in failed; null for other events",
             "nullable": true
           },
+          "correlationId": {
+            "type": "string",
+            "description": "Reference the person saw when their sign-in failed; null for other events",
+            "nullable": true
+          },
+          "idpStatusCode": {
+            "type": "string",
+            "description": "Status codes the IdP refused the sign-in with, e.g. Responder/InvalidNameIDPolicy",
+            "nullable": true
+          },
           "clientIp": {
             "type": "string",
             "description": "Address the viewer connected from; null when an admin acted",
