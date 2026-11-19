@@ -55657,157 +55657,6 @@
         }
       }
     },
-    "/api/v1/status-pages/{id}/end-users/stats": {
-      "get": {
-        "tags": [
-          "status-page-end-user-controller"
-        ],
-        "summary": "Count end users by status and sign-ins over the last 7 days",
-        "operationId": "getStatusPageEndUserStats",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SingleValueResponseStatusPageEndUserStatsDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/status-pages/{id}/end-users/{endUserId}": {
       "delete": {
         "tags": [
@@ -57497,6 +57346,157 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/status-pages/{id}/end-users/stats": {
+      "get": {
+        "tags": [
+          "status-page-end-user-controller"
+        ],
+        "summary": "Count end users by status and sign-ins over the last 7 days",
+        "operationId": "getStatusPageEndUserStats",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseStatusPageEndUserStatsDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request — the payload failed validation",
@@ -95517,66 +95517,6 @@
           }
         }
       },
-      "StatusPageEndUserStatsDto": {
-        "required": [
-          "active",
-          "activeSso",
-          "invited",
-          "expiredInvites",
-          "deactivated",
-          "signIns",
-          "failedSignIns"
-        ],
-        "type": "object",
-        "properties": {
-          "active": {
-            "type": "integer",
-            "description": "End users who may sign in",
-            "format": "int64"
-          },
-          "activeSso": {
-            "type": "integer",
-            "description": "Active end users who sign in through SSO",
-            "format": "int64"
-          },
-          "invited": {
-            "type": "integer",
-            "description": "End users invited who have not signed in yet",
-            "format": "int64"
-          },
-          "expiredInvites": {
-            "type": "integer",
-            "description": "Invites whose link has expired",
-            "format": "int64"
-          },
-          "deactivated": {
-            "type": "integer",
-            "description": "End users who may not sign in",
-            "format": "int64"
-          },
-          "signIns": {
-            "type": "integer",
-            "description": "Successful sign-ins in the last 7 days",
-            "format": "int64"
-          },
-          "failedSignIns": {
-            "type": "integer",
-            "description": "Failed sign-ins in the last 7 days",
-            "format": "int64"
-          }
-        }
-      },
-      "SingleValueResponseStatusPageEndUserStatsDto": {
-        "required": [
-          "data"
-        ],
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/StatusPageEndUserStatsDto"
-          }
-        }
-      },
       "SingleValueResponseStatusPageEndUserDto": {
         "required": [
           "data"
@@ -95607,6 +95547,17 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/StatusPageEndUserInviteResultDto"
+          }
+        }
+      },
+      "SingleValueResponseStatusPageEndUserStatsDto": {
+        "required": [
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/StatusPageEndUserStatsDto"
           }
         }
       },
@@ -97739,6 +97690,55 @@
           }
         },
         "description": "Emails that got no invite, and why"
+      },
+      "StatusPageEndUserStatsDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "integer",
+            "description": "End users who may sign in",
+            "format": "int64"
+          },
+          "activeSso": {
+            "type": "integer",
+            "description": "Active end users who sign in through SSO",
+            "format": "int64"
+          },
+          "invited": {
+            "type": "integer",
+            "description": "End users invited who have not signed in yet",
+            "format": "int64"
+          },
+          "expiredInvites": {
+            "type": "integer",
+            "description": "Invites whose link has expired",
+            "format": "int64"
+          },
+          "deactivated": {
+            "type": "integer",
+            "description": "End users who may not sign in",
+            "format": "int64"
+          },
+          "signIns": {
+            "type": "integer",
+            "description": "Successful sign-ins in the last 7 days",
+            "format": "int64"
+          },
+          "failedSignIns": {
+            "type": "integer",
+            "description": "Failed sign-ins in the last 7 days",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "active",
+          "activeSso",
+          "invited",
+          "expiredInvites",
+          "deactivated",
+          "signIns",
+          "failedSignIns"
+        ]
       },
       "StatusPageGroupDto": {
         "required": [
