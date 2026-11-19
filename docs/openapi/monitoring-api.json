@@ -82039,7 +82039,8 @@
               "STATUS_PAGE_AUDIENCE_MEMBER_LIMIT_REACHED",
               "STATUS_PAGE_GROUP_AUDIENCE_CONFLICT",
               "SP_INCIDENT_AUDIENCE_NOT_FOUND",
-              "SP_INCIDENT_AUDIENCE_CANNOT_SEE_COMPONENT"
+              "SP_INCIDENT_AUDIENCE_CANNOT_SEE_COMPONENT",
+              "STATUS_PAGE_SIGN_IN_METHOD_REQUIRED"
             ]
           },
           "file": {
@@ -97335,6 +97336,7 @@
           "incidentMode",
           "name",
           "slug",
+          "ssoRoutingMode",
           "subscriberChannels",
           "updatedAt",
           "visibility",
@@ -97390,6 +97392,14 @@
             "enum": [
               "PASSWORD",
               "MAGIC_LINK"
+            ]
+          },
+          "ssoRoutingMode": {
+            "type": "string",
+            "description": "How sign-in reaches SSO connections: EMAIL_DOMAIN or BUTTONS",
+            "enum": [
+              "EMAIL_DOMAIN",
+              "BUTTONS"
             ]
           },
           "incidentMode": {
@@ -99211,7 +99221,8 @@
               "STATUS_PAGE_AUDIENCE_MEMBER_LIMIT_REACHED",
               "STATUS_PAGE_GROUP_AUDIENCE_CONFLICT",
               "SP_INCIDENT_AUDIENCE_NOT_FOUND",
-              "SP_INCIDENT_AUDIENCE_CANNOT_SEE_COMPONENT"
+              "SP_INCIDENT_AUDIENCE_CANNOT_SEE_COMPONENT",
+              "STATUS_PAGE_SIGN_IN_METHOD_REQUIRED"
             ]
           },
           "field": {
@@ -104275,6 +104286,15 @@
               {
                 "$ref": "#/components/schemas/StatusPageEmailSenderRequest"
               }
+            ]
+          },
+          "ssoRoutingMode": {
+            "type": "string",
+            "description": "How sign-in reaches SSO connections: EMAIL_DOMAIN or BUTTONS; null preserves current",
+            "nullable": true,
+            "enum": [
+              "EMAIL_DOMAIN",
+              "BUTTONS"
             ]
           }
         }
