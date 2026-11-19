@@ -97336,7 +97336,6 @@
           "incidentMode",
           "name",
           "slug",
-          "ssoRoutingMode",
           "subscriberChannels",
           "updatedAt",
           "visibility",
@@ -97397,6 +97396,7 @@
           "ssoRoutingMode": {
             "type": "string",
             "description": "How sign-in reaches SSO connections: EMAIL_DOMAIN or BUTTONS",
+            "nullable": true,
             "enum": [
               "EMAIL_DOMAIN",
               "BUTTONS"
