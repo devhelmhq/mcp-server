@@ -81384,7 +81384,7 @@
             "type": "string",
             "description": "Page where an admin can change the plan",
             "nullable": true,
-            "example": "https://app.devhelm.io/settings/billing"
+            "example": "https://app.devhelm.io/dashboard/settings/billing"
           },
           "canRaise": {
             "type": "string",
