@@ -19,9 +19,9 @@ classifiers = [
 ]
 
 dependencies = [
-    # Synthetics surfaces (doc 42 §9) are on sdk-python main but not on PyPI
-    # yet. Swap for the released "devhelm>=1.13.0" before merging.
-    "devhelm @ git+https://github.com/devhelmhq/sdk-python@f5ad98ed6fcc6fffc035019b5732d9da00ba479c",
+    # 1.13.0 stops defaulting x-phelm-workspace-id / x-phelm-org-id to "1"
+    # (API keys from real orgs got 403).
+    "devhelm>=1.13.0",
     "fastmcp>=3.2.3,<4",
 ]
 
