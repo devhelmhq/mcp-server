@@ -215,10 +215,6 @@
       "description": "Org-scoped tag management for monitors"
     },
     {
-      "name": "Vault",
-      "description": "Organization vault management (admin-only)"
-    },
-    {
       "name": "Webhook Testing",
       "description": "Inboxes that capture inbound HTTP and wait for events"
     },
@@ -2484,7 +2480,7 @@
           "API Keys"
         ],
         "summary": "Update API key",
-        "operationId": "update_17",
+        "operationId": "update_18",
         "parameters": [
           {
             "name": "id",
@@ -12101,7 +12097,7 @@
         ],
         "summary": "Get incident details including update timeline",
         "description": "Shell payload: incident row, updates, and linked status-page incidents. Trigger enrichment (forensics / check_results) is GET /{id}/trigger so first paint is not blocked on hypertable reads.",
-        "operationId": "get_9",
+        "operationId": "get_10",
         "parameters": [
           {
             "name": "id",
@@ -12250,7 +12246,7 @@
           "Incidents"
         ],
         "summary": "Update incident title and/or severity",
-        "operationId": "update_16",
+        "operationId": "update_17",
         "parameters": [
           {
             "name": "id",
@@ -12449,6 +12445,158 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SingleValueResponseAcknowledgeAllIncidentsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/incidents/{id}/alert-deliveries": {
+      "get": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "List alert deliveries of an incident",
+        "description": "Every delivery of the incident on both routes (DIRECT channels and notification policies), oldest first.",
+        "operationId": "listAlertDeliveries",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableValueResultAlertDeliveryDto"
                 }
               }
             }
@@ -45156,7 +45304,7 @@
           "Service Subscriptions"
         ],
         "summary": "Get a subscription by its ID",
-        "operationId": "get_12",
+        "operationId": "get_9",
         "parameters": [
           {
             "name": "id",
@@ -45442,6 +45590,166 @@
             }
           }
         }
+      },
+      "patch": {
+        "tags": [
+          "Service Subscriptions"
+        ],
+        "summary": "Update a subscription",
+        "description": "Sets the alert sensitivity and the channels notified for this dependency's incidents. Omitted fields keep their value; an empty alertChannelIds list clears the channels.",
+        "operationId": "update_16",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-DevHelm-Client",
+            "in": "header",
+            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServiceSubscriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleValueResponseServiceSubscriptionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — the payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — the plan or quota does not allow this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — the actor lacks permission for this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found — the requested resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict — the request collides with current resource state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone — the resource is no longer available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests — retry after the window resets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error — see the message field for details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — an upstream provider returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable — try again shortly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/service-subscriptions/{id}/alert-sensitivity": {
@@ -45612,7 +45920,7 @@
           "Service Subscriptions"
         ],
         "summary": "Subscribe to a service or a component of a service",
-        "description": "Idempotent — returns the existing subscription if an identical one exists. Omit the request body or set componentId to null for a whole-service subscription. When alertSensitivity is omitted, new subscriptions default to AWARENESS (silent tracking — the incident appears on the dashboard but no alert channels fire). PATCH /alert-sensitivity to opt in to paging. Free tier: max 10 subscriptions. Paid tier: unlimited.",
+        "description": "Idempotent — returns the existing subscription if an identical one exists, applying the alertSensitivity and alertChannelIds of the request when given. Omit the request body or set componentId to null for a whole-service subscription. When alertSensitivity is omitted, new subscriptions default to AWARENESS (silent tracking — the incident appears on the dashboard but no alert channels fire). PATCH the subscription to opt in to paging. Free tier: max 10 subscriptions. Paid tier: unlimited.",
         "operationId": "subscribe_1",
         "parameters": [
           {
@@ -69273,7 +69581,7 @@
         "tags": [
           "synthetics-runtime-profile-controller"
         ],
-        "operationId": "get_11",
+        "operationId": "get_12",
         "parameters": [
           {
             "name": "id",
@@ -70235,158 +70543,6 @@
         "responses": {
           "204": {
             "description": "No Content"
-          },
-          "400": {
-            "description": "Bad request — the payload failed validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required — the plan or quota does not allow this",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden — the actor lacks permission for this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found — the requested resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict — the request collides with current resource state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone — the resource is no longer available",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests — retry after the window resets",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error — see the message field for details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — an upstream provider returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable — try again shortly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/vaults/rotate": {
-      "post": {
-        "tags": [
-          "Vault"
-        ],
-        "summary": "Rotate DEK",
-        "description": "Generates a new Data Encryption Key, re-encrypts all secrets and alert-channel configs, and bumps the vault version. Admin-only. Pipeline DEK caches expire within ~10 minutes.",
-        "operationId": "rotateDek",
-        "parameters": [
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "description": "Replays the stored response for 24h when the same key is sent again (1–255 visible ASCII)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "X-DevHelm-Client",
-            "in": "header",
-            "description": "Calling surface and version, e.g. cli/1.4.0 or sdk-js/2.0.0",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SingleValueResponseDekRotationResultDto"
-                }
-              }
-            }
           },
           "400": {
             "description": "Bad request — the payload failed validation",
@@ -75531,9 +75687,18 @@
               "INCIDENT_REOPENED"
             ]
           },
+          "route": {
+            "type": "string",
+            "description": "Route that queued this delivery: DIRECT or POLICY",
+            "nullable": true,
+            "enum": [
+              "DIRECT",
+              "POLICY"
+            ]
+          },
           "stepNumber": {
             "type": "integer",
-            "description": "1-based escalation step this delivery belongs to",
+            "description": "Escalation step (1-based); 0 for direct-channel deliveries",
             "format": "int32"
           },
           "fireCount": {
@@ -78416,9 +78581,19 @@
           },
           "alertPolicyId": {
             "type": "string",
-            "description": "Optional notification policy to apply for this group",
+            "description": "Notification policy that runs for this group's incidents",
             "format": "uuid",
             "nullable": true
+          },
+          "alertChannelIds": {
+            "type": "array",
+            "description": "Channels notified for this group's incidents",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Channels notified for this group's incidents",
+              "format": "uuid"
+            }
           },
           "defaultFrequency": {
             "maximum": 86400,
@@ -78447,12 +78622,19 @@
           },
           "defaultAlertChannels": {
             "type": "array",
-            "description": "Default alert channel IDs applied to member monitors",
+            "description": "Deprecated alias of alertChannelIds",
             "nullable": true,
+            "deprecated": true,
+            "x-devhelm-deprecation": {
+              "added": "2026-11-26",
+              "removeAfter": "2027-03-01",
+              "replacement": "alertChannelIds"
+            },
             "items": {
               "type": "string",
-              "description": "Default alert channel IDs applied to member monitors",
-              "format": "uuid"
+              "description": "Deprecated alias of alertChannelIds",
+              "format": "uuid",
+              "deprecated": true
             }
           },
           "defaultEnvironmentId": {
@@ -79688,7 +79870,7 @@
           },
           "site": {
             "type": "string",
-            "description": "Datadog site region (e.g. datadoghq.com, datadoghq.eu, us3.datadoghq.com)",
+            "description": "Datadog site: datadoghq.com (default), us3, us5, eu, ap1, ap2 or gov",
             "nullable": true
           },
           "tags": {
@@ -79902,44 +80084,6 @@
           }
         },
         "description": "Active Head for a definition in one environment"
-      },
-      "DekRotationResultDto": {
-        "required": [
-          "rotatedAt",
-          "previousDekVersion",
-          "newDekVersion",
-          "secretsReEncrypted",
-          "channelsReEncrypted"
-        ],
-        "type": "object",
-        "properties": {
-          "previousDekVersion": {
-            "type": "integer",
-            "description": "DEK version before rotation",
-            "format": "int32"
-          },
-          "newDekVersion": {
-            "type": "integer",
-            "description": "DEK version after rotation",
-            "format": "int32"
-          },
-          "secretsReEncrypted": {
-            "type": "integer",
-            "description": "Number of secrets re-encrypted with the new DEK",
-            "format": "int32"
-          },
-          "channelsReEncrypted": {
-            "type": "integer",
-            "description": "Number of alert channels re-encrypted with the new DEK",
-            "format": "int32"
-          },
-          "rotatedAt": {
-            "type": "string",
-            "description": "Timestamp when the rotation was performed",
-            "format": "date-time"
-          }
-        },
-        "description": "Result of a data encryption key rotation operation"
       },
       "DeleteChannelResult": {
         "type": "object",
@@ -81642,6 +81786,8 @@
               "MONITOR_AUTH_ALREADY_EXISTS",
               "MONITOR_AUTH_NOT_SUPPORTED_FOR_TYPE",
               "MONITOR_AUTH_VAULT_FOREIGN_ORG",
+              "MONITOR_SECRET_REFERENCE_INVALID_FIELD",
+              "MONITOR_URL_TEMPLATE_INVALID",
               "ALERT_CHANNEL_DISABLED",
               "ALERT_CHANNEL_PLAN_REQUIRED",
               "ALERT_CHANNEL_TYPE_IMMUTABLE",
@@ -81656,6 +81802,8 @@
               "ALERT_CHANNEL_OPSGENIE_REGION_INVALID",
               "ALERT_CHANNEL_PAGERDUTY_SEVERITY_INVALID",
               "ALERT_CHANNEL_GOOGLE_CHAT_WEBHOOK_INVALID",
+              "ALERT_CHANNEL_JIRA_DOMAIN_INVALID",
+              "ALERT_CHANNEL_DATADOG_SITE_INVALID",
               "ALERT_CHANNEL_PHONE_NUMBER_INVALID",
               "ALERT_CHANNEL_PHONE_NUMBER_UNVERIFIED",
               "ALERT_CHANNEL_PHONE_NUMBERS_COUNT_INVALID",
@@ -81708,6 +81856,9 @@
               "RESOURCE_GROUP_MEMBER_LIMIT_REACHED",
               "RESOURCE_GROUP_MEMBER_ALREADY_PRESENT",
               "RESOURCE_GROUP_MEMBER_TYPE_INVALID",
+              "RESOURCE_GROUP_ALERT_CHANNELS_CONFLICT",
+              "RESOURCE_GROUP_ALERT_CHANNEL_NOT_FOUND",
+              "RESOURCE_GROUP_ALERT_POLICY_NOT_FOUND",
               "RESOURCE_GROUP_THRESHOLD_VALUE_REQUIRED",
               "RESOURCE_GROUP_THRESHOLD_TYPE_REQUIRED",
               "RESOURCE_GROUP_THRESHOLD_OUT_OF_RANGE",
@@ -81775,6 +81926,7 @@
               "BILLING_OVERAGE_NOT_ACTIVE",
               "SERVICE_SUBSCRIPTION_FREE_TIER_LIMIT",
               "SERVICE_SUBSCRIPTION_SERVICE_UNAVAILABLE",
+              "SERVICE_SUBSCRIPTION_ALERT_CHANNEL_NOT_FOUND",
               "ACTOR_BAD_REQUEST",
               "ORGANIZATION_ID_REQUIRED",
               "WORKSPACE_REQUIRED",
@@ -81822,6 +81974,7 @@
               "SAVED_VIEW_FILTERS_TOO_LARGE",
               "SECRET_KEY_TAKEN",
               "SECRET_ENVIRONMENT_VALUE_BLANK",
+              "SECRET_DELETE_BLOCKED",
               "SECRET_REQUEST_ENVIRONMENT_QUERY",
               "SECRET_REQUEST_HEAD_REQUIRED",
               "SECRET_REQUEST_REMAP_SECRET_ID",
@@ -84247,7 +84400,7 @@
           "domain": {
             "minLength": 1,
             "type": "string",
-            "description": "Atlassian instance domain (e.g. yourteam.atlassian.net)"
+            "description": "Atlassian Cloud domain, e.g. yourteam.atlassian.net"
           },
           "email": {
             "minLength": 1,
@@ -89845,9 +89998,19 @@
           },
           "alertPolicyId": {
             "type": "string",
-            "description": "Notification policy applied to this group",
+            "description": "Notification policy that runs for this group's incidents",
             "format": "uuid",
             "nullable": true
+          },
+          "alertChannelIds": {
+            "type": "array",
+            "description": "Channels notified for this group's incidents",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Channels notified for this group's incidents",
+              "format": "uuid"
+            }
           },
           "defaultFrequency": {
             "type": "integer",
@@ -89874,12 +90037,19 @@
           },
           "defaultAlertChannels": {
             "type": "array",
-            "description": "Default alert channel IDs for member monitors",
+            "description": "Deprecated alias of alertChannelIds",
             "nullable": true,
+            "deprecated": true,
+            "x-devhelm-deprecation": {
+              "added": "2026-11-26",
+              "removeAfter": "2027-03-01",
+              "replacement": "alertChannelIds"
+            },
             "items": {
               "type": "string",
-              "description": "Default alert channel IDs for member monitors",
-              "format": "uuid"
+              "description": "Deprecated alias of alertChannelIds",
+              "format": "uuid",
+              "deprecated": true
             }
           },
           "defaultEnvironmentId": {
@@ -93963,6 +94133,16 @@
             "type": "string",
             "description": "Alert sensitivity: ALL (any status change), INCIDENTS_ONLY (real vendor incidents, page on every one), MAJOR_ONLY (only DOWN-level incidents), AWARENESS (track silently — show on dashboard, never send alerts). Defaults to AWARENESS when not provided — silent tracking is the friendliest first-run choice; switch to one of the paging modes to opt in to alert-channel fan-out.",
             "nullable": true
+          },
+          "alertChannelIds": {
+            "type": "array",
+            "description": "Channels notified for this dependency's incidents",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Channels notified for this dependency's incidents",
+              "format": "uuid"
+            }
           }
         },
         "description": "Optional body for subscribing to a specific component of a service"
@@ -94052,6 +94232,16 @@
               "INCIDENTS_ONLY",
               "MAJOR_ONLY"
             ]
+          },
+          "alertChannelIds": {
+            "type": "array",
+            "description": "Channels notified for this dependency's incidents",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Channels notified for this dependency's incidents",
+              "format": "uuid"
+            }
           },
           "subscribedAt": {
             "type": "string",
@@ -94468,17 +94658,6 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/DefinitionHeadDto"
-          }
-        }
-      },
-      "SingleValueResponseDekRotationResultDto": {
-        "required": [
-          "data"
-        ],
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/DekRotationResultDto"
           }
         }
       },
@@ -98826,6 +99005,8 @@
               "MONITOR_AUTH_ALREADY_EXISTS",
               "MONITOR_AUTH_NOT_SUPPORTED_FOR_TYPE",
               "MONITOR_AUTH_VAULT_FOREIGN_ORG",
+              "MONITOR_SECRET_REFERENCE_INVALID_FIELD",
+              "MONITOR_URL_TEMPLATE_INVALID",
               "ALERT_CHANNEL_DISABLED",
               "ALERT_CHANNEL_PLAN_REQUIRED",
               "ALERT_CHANNEL_TYPE_IMMUTABLE",
@@ -98840,6 +99021,8 @@
               "ALERT_CHANNEL_OPSGENIE_REGION_INVALID",
               "ALERT_CHANNEL_PAGERDUTY_SEVERITY_INVALID",
               "ALERT_CHANNEL_GOOGLE_CHAT_WEBHOOK_INVALID",
+              "ALERT_CHANNEL_JIRA_DOMAIN_INVALID",
+              "ALERT_CHANNEL_DATADOG_SITE_INVALID",
               "ALERT_CHANNEL_PHONE_NUMBER_INVALID",
               "ALERT_CHANNEL_PHONE_NUMBER_UNVERIFIED",
               "ALERT_CHANNEL_PHONE_NUMBERS_COUNT_INVALID",
@@ -98892,6 +99075,9 @@
               "RESOURCE_GROUP_MEMBER_LIMIT_REACHED",
               "RESOURCE_GROUP_MEMBER_ALREADY_PRESENT",
               "RESOURCE_GROUP_MEMBER_TYPE_INVALID",
+              "RESOURCE_GROUP_ALERT_CHANNELS_CONFLICT",
+              "RESOURCE_GROUP_ALERT_CHANNEL_NOT_FOUND",
+              "RESOURCE_GROUP_ALERT_POLICY_NOT_FOUND",
               "RESOURCE_GROUP_THRESHOLD_VALUE_REQUIRED",
               "RESOURCE_GROUP_THRESHOLD_TYPE_REQUIRED",
               "RESOURCE_GROUP_THRESHOLD_OUT_OF_RANGE",
@@ -98959,6 +99145,7 @@
               "BILLING_OVERAGE_NOT_ACTIVE",
               "SERVICE_SUBSCRIPTION_FREE_TIER_LIMIT",
               "SERVICE_SUBSCRIPTION_SERVICE_UNAVAILABLE",
+              "SERVICE_SUBSCRIPTION_ALERT_CHANNEL_NOT_FOUND",
               "ACTOR_BAD_REQUEST",
               "ORGANIZATION_ID_REQUIRED",
               "WORKSPACE_REQUIRED",
@@ -99006,6 +99193,7 @@
               "SAVED_VIEW_FILTERS_TOO_LARGE",
               "SECRET_KEY_TAKEN",
               "SECRET_ENVIRONMENT_VALUE_BLANK",
+              "SECRET_DELETE_BLOCKED",
               "SECRET_REQUEST_ENVIRONMENT_QUERY",
               "SECRET_REQUEST_HEAD_REQUIRED",
               "SECRET_REQUEST_REMAP_SECRET_ID",
@@ -101853,6 +102041,26 @@
           },
           "message": {
             "type": "string"
+          },
+          "channelId": {
+            "type": "string",
+            "description": "Channel that was tested",
+            "format": "uuid",
+            "nullable": true
+          },
+          "route": {
+            "type": "string",
+            "description": "Route that reaches the channel: DIRECT or POLICY",
+            "nullable": true,
+            "enum": [
+              "DIRECT",
+              "POLICY"
+            ]
+          },
+          "noRoute": {
+            "type": "boolean",
+            "description": "True when the monitor has no route, so an incident would alert nobody",
+            "nullable": true
           }
         }
       },
@@ -102661,7 +102869,7 @@
           },
           "site": {
             "type": "string",
-            "description": "Datadog site region (e.g. datadoghq.com, datadoghq.eu, us3.datadoghq.com)",
+            "description": "Datadog site: datadoghq.com (default), us3, us5, eu, ap1, ap2 or gov",
             "nullable": true
           },
           "tags": {
@@ -102905,7 +103113,7 @@
           "domain": {
             "minLength": 1,
             "type": "string",
-            "description": "Atlassian instance domain (e.g. yourteam.atlassian.net)"
+            "description": "Atlassian Cloud domain, e.g. yourteam.atlassian.net"
           },
           "email": {
             "minLength": 1,
@@ -103577,9 +103785,19 @@
           },
           "alertPolicyId": {
             "type": "string",
-            "description": "Optional notification policy to apply for this group; null clears the existing value",
+            "description": "Notification policy that runs for this group's incidents; null clears the existing value",
             "format": "uuid",
             "nullable": true
+          },
+          "alertChannelIds": {
+            "type": "array",
+            "description": "Channels notified for this group's incidents; null clears the existing value",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Channels notified for this group's incidents; null clears the existing value",
+              "format": "uuid"
+            }
           },
           "defaultFrequency": {
             "maximum": 86400,
@@ -103608,12 +103826,19 @@
           },
           "defaultAlertChannels": {
             "type": "array",
-            "description": "Default alert channel IDs for member monitors; null clears",
+            "description": "Deprecated alias of alertChannelIds; null clears the existing value",
             "nullable": true,
+            "deprecated": true,
+            "x-devhelm-deprecation": {
+              "added": "2026-11-26",
+              "removeAfter": "2027-03-01",
+              "replacement": "alertChannelIds"
+            },
             "items": {
               "type": "string",
-              "description": "Default alert channel IDs for member monitors; null clears",
-              "format": "uuid"
+              "description": "Deprecated alias of alertChannelIds; null clears the existing value",
+              "format": "uuid",
+              "deprecated": true
             }
           },
           "defaultEnvironmentId": {
@@ -103714,6 +103939,28 @@
             "description": "New secret value, stored encrypted (max 32KB)"
           }
         }
+      },
+      "UpdateServiceSubscriptionRequest": {
+        "type": "object",
+        "properties": {
+          "alertSensitivity": {
+            "pattern": "ALL|AWARENESS|INCIDENTS_ONLY|MAJOR_ONLY",
+            "type": "string",
+            "description": "New sensitivity; null preserves current",
+            "nullable": true
+          },
+          "alertChannelIds": {
+            "type": "array",
+            "description": "Channels notified for this dependency's incidents; null preserves current",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Channels notified for this dependency's incidents; null preserves current",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Request body for updating a service subscription"
       },
       "UpdateSlackChannelConfig": {
         "type": "object",
